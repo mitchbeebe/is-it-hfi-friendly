@@ -91,8 +91,8 @@ A measured ingredient's amount is per 100 g of that ingredient, so it's the most
 amounts setting weighs those amounts like any other measured food.
 
 When a USDA branded product's label lists 0 g total sugars per serving, which US labels allow for anything under 0.5 g,
-its fructose and sucrose sources are Caution rather than Avoid. Sorbitol and other sugar alcohols aren't counted in
-total sugars, so they still count in full.
+its fructose and sucrose sources are Caution rather than Avoid, unless the Small amounts limit is 0 (flag any amount).
+Sorbitol and other sugar alcohols aren't counted in total sugars, so they still count in full.
 
 **Small amounts**: a food whose only flags are measured amounts is weighed by its fructose load (fructose + half of
 sucrose + sorbitol, per 100 g, the formula HFI studies use). Under 0.5 g it's OK, the lowest tier in Spanish HFI

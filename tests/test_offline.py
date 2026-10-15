@@ -480,7 +480,9 @@ def test_label_with_zero_sugar_makes_fructose_and_sucrose_sources_caution():
         analyze._decide("SALT"),
         *analyze.measured_sugars({"Total Sugars": 0.0}, None)[0],
     ]
-    out = analyze.label_zero_sugar([i for i in items if i], sausage)
+    marked = analyze.label_zero_sugar([i for i in items if i], sausage)
+    assert prefs.apply(analyze.summarize(marked), trace_limit=0).verdict == "avoid"  # 0 flags any amount
+    out = prefs.apply_label_cap(marked)
     by_name = {i.name: i for i in out}
     assert by_name["RED PEPPER"].status == by_name["sugar"].status == "caution"
     assert by_name["sugar"].reason.startswith(

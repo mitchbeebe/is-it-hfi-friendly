@@ -492,8 +492,9 @@ UNITS = {"GRM": "g", "MLT": "ml"}
 
 
 def label_zero_sugar(items: list[Item], food: dict[str, Any]) -> list[Item]:
-    """For a product whose label lists 0 g total sugars per serving, which means under 0.5 g: fructose and
-    sucrose sources in its ingredient list are at most a trace, so Caution rather than Avoid.
+    """For a product whose label lists 0 g total sugars per serving, which means under 0.5 g: marks the
+    fructose and sucrose sources in its ingredient list as capped at a trace. `prefs.apply_label_cap` makes
+    them Caution unless the person flags any amount.
 
     Sorbitol and other sugar alcohols aren't counted in total sugars, so they still count in full.
     """
@@ -510,7 +511,7 @@ def label_zero_sugar(items: list[Item], food: dict[str, Any]) -> list[Item]:
                 }
             )
         elif i.status == "not_tolerated" and i.sugars and set(i.sugars) <= {"fructose", "sucrose"}:
-            i = i.model_copy(update={"status": "caution", "trace": True, "reason": f"{label} {i.reason}"})
+            i = i.model_copy(update={"label_cap": label})
         out.append(i)
     return out
 

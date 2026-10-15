@@ -81,6 +81,18 @@ def apply_trace(items: list[Item], limit: float) -> list[Item]:
     ]
 
 
+def apply_label_cap(items: list[Item]) -> list[Item]:
+    """Fructose and sucrose sources in a product whose label lists 0 g sugars become Caution: at most a trace."""
+    if not any(i.label_cap and i.status == "not_tolerated" for i in items):
+        return items
+    return [
+        i.model_copy(update={"status": "caution", "trace": True, "reason": f"{i.label_cap} {i.reason}"})
+        if i.label_cap and i.status == "not_tolerated"
+        else i
+        for i in items
+    ]
+
+
 def apply(
     result: Result,
     allow: Sequence[str] = (),
@@ -89,7 +101,8 @@ def apply(
     trace_limit: float = 0,
 ) -> Result:
     allow_terms, avoid_terms = terms(allow), terms(avoid)
-    traced = apply_trace(result.items, trace_limit) if trace_limit > 0 else result.items
+    # A limit of 0 means flag any amount, including the traces a label allows.
+    traced = apply_label_cap(apply_trace(result.items, trace_limit)) if trace_limit > 0 else result.items
     if not allow_terms and not avoid_terms and traced is result.items:
         return result
 

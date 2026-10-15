@@ -21,6 +21,9 @@ class Item(BaseModel):
     avoided_by: str | None = None  # the Settings term that flagged it; wins over allowed_by
     grams: float | None = None  # measured amount per 100 g (top of the range), for the trace rule
     trace: bool = False  # measured, but under the person's fructose-load limit
+    # Why a product label caps this item at a trace ("The label lists 0 g total sugars per serving...").
+    # Settings decide whether that makes it Caution.
+    label_cap: str | None = None
 
 
 class Food(BaseModel):
