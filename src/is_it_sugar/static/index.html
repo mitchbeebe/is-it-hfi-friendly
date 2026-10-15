@@ -1,0 +1,937 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#151514" media="(prefers-color-scheme: dark)">
+<title>Is it HFI-friendly?</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍬</text></svg>">
+<style>
+  :root {
+    --bg: #f6f5f2; --card: #ffffff; --text: #1c1b19; --muted: #6b6862; --line: #e4e1db;
+    --accent: #2f5d50; --accent-text: #ffffff;
+    --avoid: #b3261e; --avoid-bg: #fbe9e7; --caution: #8a5a00; --caution-bg: #fdf1d8; --ok: #1e6b3a; --ok-bg: #e3f3e8;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #151514; --card: #201f1d; --text: #ecebe8; --muted: #a29f98; --line: #34322f;
+      --accent: #7fb8a6; --accent-text: #10201b;
+      --avoid: #ff8a80; --avoid-bg: #3a1d1b; --caution: #f2c060; --caution-bg: #352a14; --ok: #7ed39a; --ok-bg: #16301f;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  main { max-width: 560px; margin: 0 auto; padding: 20px 16px 40px; }
+  header h1 { font-size: 1.6rem; margin: 4px 0 2px; letter-spacing: -0.01em; }
+  header p { margin: 0 0 18px; color: var(--muted); }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border-radius: 10px; padding: 3px; margin-bottom: 14px; }
+  .tabs button {
+    border: 0; background: transparent; color: var(--muted); font: inherit; font-weight: 600;
+    padding: 9px; border-radius: 8px; cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--card); color: var(--text); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+  textarea {
+    width: 100%; min-height: 96px; resize: vertical; font: inherit; color: var(--text); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px;
+  }
+  textarea:focus-visible, button:focus-visible, .photo-drop:focus-within { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+  .hint { color: var(--muted); font-size: .85rem; margin: 8px 2px 0; }
+  .primary {
+    width: 100%; margin-top: 12px; border: 0; border-radius: 10px; padding: 14px;
+    background: var(--accent); color: var(--accent-text); font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .primary:disabled { opacity: .6; cursor: progress; }
+  .actions { display: flex; gap: 8px; margin-top: 12px; }
+  .actions .primary { margin-top: 0; flex: 1; }
+  .secondary {
+    flex: none; border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px;
+    background: var(--card); color: var(--text); font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .photo-drop {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+    min-height: 150px; border: 2px dashed var(--line); border-radius: 12px; padding: 16px; cursor: pointer; color: var(--muted);
+  }
+  .photo-drop strong { color: var(--text); }
+  .photo-drop input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .photo-drop img { max-width: 100%; max-height: 220px; border-radius: 8px; }
+  .scanner {
+    position: relative; aspect-ratio: 2 / 1; max-height: 200px; border-radius: 12px; overflow: hidden;
+    background: #111; color: #c9c6c0; display: grid; place-items: center; font-size: .95rem;
+  }
+  .scanner video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .scanner .aim {
+    position: absolute; inset: 22% 12%; border: 2px solid rgb(255 255 255 / .9); border-radius: 10px;
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / .3);
+  }
+  [hidden] { display: none !important; }
+
+  #out { margin-top: 16px; }
+  .verdict { border-radius: var(--radius); padding: 18px 16px; }
+  .verdict .label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+  .verdict h2 { margin: 2px 0 0; font-size: 1.35rem; line-height: 1.25; }
+  .v-avoid { background: var(--avoid-bg); color: var(--avoid); }
+  .v-caution { background: var(--caution-bg); color: var(--caution); }
+  .v-ok { background: var(--ok-bg); color: var(--ok); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, currentColor 14%, transparent); }
+
+  .section { margin-top: 12px; }
+  .section h3, .prefs h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+  .match { padding: 12px 16px; }
+  .match summary {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    list-style: none; color: var(--text); font-size: 1rem;
+  }
+  .match summary::-webkit-details-marker { display: none; }
+  .match .muted-label { color: var(--muted); font-size: .85rem; margin-right: 4px; }
+  .match .more { color: var(--accent); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+  .match .more::after { content: " ▾"; }
+  .match[open] .more::after { content: " ▴"; }
+  .match[open] summary { margin-bottom: 10px; }
+  .sources { margin: 0; display: grid; gap: 8px; font-size: .88rem; }
+  .sources dt { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; }
+  .sources dd { margin: 0; overflow-wrap: anywhere; }
+  .sources a { color: var(--accent); }
+  .match h3 { margin-top: 14px; }
+  .linkish { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .alts { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+  .alts button {
+    width: 100%; text-align: left; font: inherit; font-size: .92rem; color: var(--text); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer;
+  }
+  .items { list-style: none; margin: 0; padding: 0; }
+  .items li { display: grid; grid-template-columns: 12px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+  .items li:first-child { border-top: 0; padding-top: 2px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; }
+  .s-not_tolerated .dot { background: var(--avoid); }
+  .s-caution .dot { background: var(--caution); }
+  .s-tolerated .dot { background: var(--ok); }
+  .items .name { font-weight: 600; overflow-wrap: anywhere; }
+  .items .tag { font-size: .75rem; font-weight: 700; margin-left: 6px; white-space: nowrap; }
+  .s-not_tolerated .tag { color: var(--avoid); }
+  .s-caution .tag { color: var(--caution); }
+  .s-tolerated .tag { color: var(--ok); }
+  .items .why { color: var(--muted); font-size: .85rem; }
+  details summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
+  details p { font-size: .88rem; overflow-wrap: anywhere; }
+  .notes { margin: 0; padding-left: 18px; color: var(--muted); font-size: .88rem; }
+  .items + .notes { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .error { background: var(--caution-bg); color: var(--caution); border-radius: var(--radius); padding: 14px 16px; }
+  .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  header { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 12px; }
+  header p { grid-column: 1 / -1; }
+  .nav-btn {
+    padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--card); color: var(--text); font-size: .9rem; font-weight: 600; text-decoration: none; white-space: nowrap;
+  }
+  .nav-btn .count { color: var(--muted); font-weight: 500; }
+  .s-allowed .dot { border: 2px solid var(--accent); }
+  .s-allowed .tag { color: var(--accent); }
+  .s-allowed .name { color: var(--muted); }
+
+  .card h2 { font-size: 1.15rem; margin: 0 0 6px; }
+  .muted { color: var(--muted); margin: 0 0 14px; font-size: .95rem; }
+  .add-row { display: flex; gap: 8px; }
+  .add-row input {
+    flex: 1; min-width: 0; font: inherit; color: var(--text); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px;
+  }
+  .add-row input:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); outline-offset: 2px; }
+  .add-row button {
+    flex: none; border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: var(--accent-text);
+    font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .warn { margin-top: 10px; background: var(--caution-bg); color: var(--caution); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+  .allow-list { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 14px 0 0; }
+  .prefs[data-kind="avoid"] .allow-list li { background: color-mix(in srgb, var(--avoid) 14%, transparent); }
+  .prefs h3 { margin-top: 18px; }
+  .prefs .clear { margin-top: 14px; }
+  .s-avoided .dot { background: var(--avoid); }
+  .s-avoided .tag { color: var(--avoid); }
+  .allow-list li {
+    display: inline-flex; align-items: center; gap: 2px; padding: 4px 4px 4px 12px; border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent); font-weight: 600; font-size: .95rem;
+  }
+  .allow-list .remove {
+    width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; color: var(--muted);
+    font-size: 1.15rem; line-height: 1; cursor: pointer;
+  }
+  .empty { color: var(--muted); font-size: .9rem; margin: 14px 0 0; }
+  .trace-row input { flex: none; width: 96px; }
+  .trace-row span { align-self: center; color: var(--muted); }
+  .suggest { display: flex; flex-wrap: wrap; gap: 8px; }
+  .suggest button {
+    border: 1px dashed var(--line); background: transparent; border-radius: 999px; padding: 6px 12px;
+    font: inherit; font-size: .9rem; color: var(--text); cursor: pointer;
+  }
+  .notes + .linkish { margin-top: 12px; }
+  .recent-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .recent-head .linkish { font-size: .85rem; }
+  .recent-list { list-style: none; margin: 0; padding: 0; }
+  .recent-list button {
+    display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: baseline; width: 100%;
+    padding: 10px 0; border: 0; border-top: 1px solid var(--line); background: none; color: var(--text);
+    font: inherit; text-align: left; cursor: pointer;
+  }
+  .recent-list li:first-child button { border-top: 0; padding-top: 2px; }
+  .recent-list .dot { margin-top: 0; align-self: center; }
+  .recent-list .avoid .dot { background: var(--avoid); }
+  .recent-list .caution .dot { background: var(--caution); }
+  .recent-list .ok .dot { background: var(--ok); }
+  .recent-list .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .recent-list .when { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+  footer { margin-top: 28px; color: var(--muted); font-size: .8rem; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Is it HFI-friendly?</h1>
+    <a class="nav-btn" id="nav" href="#settings">Settings</a>
+    <p>Check a food for fructose, sucrose, and sorbitol (FSS) on a hereditary fructose intolerance (HFI) diet.</p>
+  </header>
+
+  <div id="view-check">
+  <section class="card">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-text" aria-selected="true" aria-controls="pane-text">Type</button>
+      <button role="tab" id="tab-scan" aria-selected="false" aria-controls="pane-scan">Scan</button>
+      <button role="tab" id="tab-photo" aria-selected="false" aria-controls="pane-photo">Photo</button>
+    </div>
+
+    <form id="pane-text" role="tabpanel" aria-labelledby="tab-text">
+      <textarea id="text" name="text" aria-label="Food name or ingredient list" rows="3" autocomplete="off" enterkeyhint="search"
+        placeholder="A food, like “ketchup” or “Cheerios”, or paste an ingredient list"></textarea>
+      <div class="actions">
+        <button class="secondary" type="button" id="text-clear" hidden>Clear</button>
+        <button class="primary" type="submit" id="text-go">Check</button>
+      </div>
+    </form>
+
+    <form id="pane-scan" role="tabpanel" aria-labelledby="tab-scan" hidden>
+      <div class="scanner">
+        <span id="scan-idle">Camera is off</span>
+        <video id="scan-video" playsinline muted hidden></video>
+        <div class="aim" id="scan-aim" aria-hidden="true" hidden></div>
+      </div>
+      <p class="hint" id="scan-status">Point the camera at the barcode on the package.</p>
+      <div class="actions">
+        <button class="primary" type="submit" id="scan-go">Scan barcode</button>
+      </div>
+    </form>
+
+    <form id="pane-photo" role="tabpanel" aria-labelledby="tab-photo" hidden>
+      <label class="photo-drop" id="drop">
+        <input type="file" id="photo" accept="image/*">
+        <img id="preview" alt="Selected label photo" hidden>
+        <span id="drop-text"><strong>Take or choose a photo</strong><br>of the ingredient list on the package</span>
+      </label>
+      <p class="hint">Fill the frame with the ingredients and keep the text sharp.</p>
+      <div class="actions">
+        <button class="secondary" type="button" id="photo-clear" hidden>Clear</button>
+        <button class="primary" type="submit" id="photo-go" disabled>Check photo</button>
+      </div>
+    </form>
+  </section>
+
+  <div id="out" aria-live="polite"></div>
+
+  <section class="card section" id="recent" aria-label="Recent checks" hidden>
+    <div class="recent-head">
+      <h3>Recent</h3>
+      <button class="linkish" type="button" id="recent-clear">Clear</button>
+    </div>
+    <ul class="recent-list"></ul>
+  </section>
+  </div>
+
+  <section id="view-settings" aria-label="Settings" hidden>
+    <div class="card prefs" data-kind="allow">
+      <h2>Foods you tolerate</h2>
+      <p class="muted">People with HFI tolerate some vegetables and ingredients differently. Anything you add still
+        shows up in results, marked “Allowed by you”, but doesn't count toward the verdict.</p>
+      <form class="add-row">
+        <input type="text" maxlength="80" autocomplete="off" enterkeyhint="done"
+          aria-label="Food or ingredient you tolerate" placeholder="e.g. onion, tomato, sucralose">
+        <button type="submit">Add</button>
+      </form>
+      <div class="warn" role="status" hidden></div>
+      <ul class="allow-list" aria-label="Foods you tolerate"></ul>
+      <p class="empty none-yet">Nothing added yet.</p>
+      <h3>Common choices</h3>
+      <div class="suggest"></div>
+      <button class="linkish clear" type="button">Clear list</button>
+    </div>
+
+    <div class="card section prefs" data-kind="avoid">
+      <h2>Ingredients you avoid</h2>
+      <p class="muted">Anything you add here makes a result “Avoid” wherever it shows up, even when the BU table rates it
+        as tolerated.</p>
+      <form class="add-row">
+        <input type="text" maxlength="80" autocomplete="off" enterkeyhint="done"
+          aria-label="Ingredient you avoid" placeholder="e.g. natural flavors, caramel color">
+        <button type="submit">Add</button>
+      </form>
+      <div class="warn" role="status" hidden></div>
+      <ul class="allow-list" aria-label="Ingredients you avoid"></ul>
+      <p class="empty none-yet">Nothing added yet.</p>
+      <h3>Common choices</h3>
+      <div class="suggest"></div>
+      <button class="linkish clear" type="button">Clear list</button>
+    </div>
+
+    <div class="card section">
+      <h2>Small amounts</h2>
+      <p class="muted">When a food's measured fructose load is under this limit, it shows Caution instead of Avoid.
+        Fructose load is fructose + half of sucrose + sorbitol, per 100 g. Set 0 to flag any amount.</p>
+      <div class="add-row trace-row">
+        <input id="trace-limit" type="number" inputmode="decimal" min="0" max="20" step="0.1"
+          aria-label="Fructose load limit, grams per 100 g">
+        <span>g per 100 g</span>
+      </div>
+      <p class="empty">Only measured amounts count. Ingredient lists and AI estimates are never downgraded.</p>
+    </div>
+
+    <div class="card section">
+      <h3>How matching works</h3>
+      <ul class="notes">
+        <li>An ingredient matches when its name contains what you added: “onion” covers “onion powder”.</li>
+        <li>A whole food is allowed only by its own name: “broccoli” covers “Broccoli, raw”, but “tomato” doesn't cover “tomato soup”.</li>
+        <li>Sugars from the BU table are allowed only by name: “corn” never allows “corn syrup”. Avoiding “corn” does flag “corn syrup”.</li>
+        <li>If something is on both lists, avoiding wins.</li>
+        <li>Your lists and recent checks are saved in this browser, on this device.</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Sugars are judged using the
+    <a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>,
+    foods are looked up in <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>,
+    packaged foods also in <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>
+    (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL</a>),
+    and, for whole foods, the <a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>
+    (Food Standards Australia New Zealand, Release 3, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>),
+    and anything else is classified by an AI model, which can make mistakes.
+    Always read the label, and check with your doctor or dietitian before relying on a result.
+  </footer>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const out = $("#out");
+const SUGAR_LABEL = { fructose: "Fructose", sucrose: "Sucrose", sorbitol: "Sorbitol" };
+const STATUS = {
+  not_tolerated: "Not tolerated",
+  caution: "Caution",
+  tolerated: "Tolerated",
+};
+const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
+const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA data", label: "From photo", settings: "Your settings", afcd: "Australian data" };
+let lastQuery = "";
+let lastRun = null; // re-runs the last check after Settings change
+let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
+
+// ---- your lists: foods you tolerate (allow) and ingredients you avoid. Kept in this browser only.
+const LISTS = {
+  allow: {
+    storage: "is-it-sugar.allow",
+    label: "your tolerated foods",
+    suggestions: ["Onion", "Garlic", "Peas", "Broccoli", "Spinach", "Lettuce", "Celery",
+      "Potato", "Natural flavor", "Spice", "Sucralose", "Glucose syrup"],
+  },
+  avoid: {
+    storage: "is-it-sugar.avoid",
+    label: "your avoid list",
+    suggestions: ["Natural flavor", "Artificial flavor", "Spice", "Caramel color", "Fruit pectin", "Vegetable juice",
+      "Yeast extract", "Malt"],
+  },
+};
+const OTHER = { allow: "avoid", avoid: "allow" };
+// Same singular form the server matches on (prefs.key): "Tomatoes" -> "tomato".
+const stem = (w) =>
+  w.endsWith("ies") && w.length > 4 ? w.slice(0, -3) + "y"
+  : /(oes|ches|shes|xes)$/.test(w) ? w.slice(0, -2)
+  : w.endsWith("s") && !w.endsWith("ss") && w.length > 3 ? w.slice(0, -1)
+  : w;
+const keyOf = (t) => t.toLowerCase().replace(/’/g, "'").replace(/[^a-z0-9' ]+/g, " ").trim().split(/\s+/).map(stem).join(" ");
+const cardOf = (kind) => document.querySelector(`.prefs[data-kind="${kind}"]`);
+
+function loadList(kind) {
+  try {
+    const v = JSON.parse(localStorage.getItem(LISTS[kind].storage));
+    return Array.isArray(v) ? v.filter((t) => typeof t === "string") : [];
+  } catch { return []; }
+}
+function saveList(kind) {
+  try { localStorage.setItem(LISTS[kind].storage, JSON.stringify(lists[kind])); } catch {}
+  prefsChanged = true;
+}
+const lists = { allow: loadList("allow"), avoid: loadList("avoid") };
+
+// Fructose load (g per 100 g) under which measured amounts show Caution, not Avoid.
+const TRACE_KEY = "is-it-sugar.trace";
+let traceLimit = 1;
+try {
+  const v = parseFloat(localStorage.getItem(TRACE_KEY));
+  if (Number.isFinite(v) && v >= 0 && v <= 20) traceLimit = v;
+} catch {}
+const traceInput = $("#trace-limit");
+traceInput.value = traceLimit;
+traceInput.addEventListener("change", () => {
+  const v = parseFloat(traceInput.value);
+  traceLimit = Number.isFinite(v) ? Math.min(20, Math.max(0, v)) : 1;
+  traceInput.value = traceLimit;
+  try { localStorage.setItem(TRACE_KEY, String(traceLimit)); } catch {}
+  prefsChanged = true;
+});
+let prefsChanged = false;
+let sugarTable = null;
+
+async function notTolerated(term) {
+  try {
+    sugarTable ??= await (await fetch("/api/sugars")).json();
+  } catch { return null; }
+  const k = keyOf(term);
+  return sugarTable.find((e) => e.status === "not_tolerated" && e.names.some((n) => keyOf(n) === k)) || null;
+}
+
+async function addTerm(kind, term) {
+  term = term.trim().replace(/\s+/g, " ");
+  const k = keyOf(term);
+  const warn = cardOf(kind).querySelector(".warn");
+  for (const w of document.querySelectorAll(".prefs .warn")) w.hidden = true;
+  if (!k) return;
+  const messages = [];
+  const other = OTHER[kind];
+  if (lists[other].some((t) => keyOf(t) === k)) {
+    lists[other] = lists[other].filter((t) => keyOf(t) !== k);
+    saveList(other);
+    messages.push(`Removed “${term}” from ${LISTS[other].label}.`);
+  }
+  if (!lists[kind].some((t) => keyOf(t) === k)) {
+    lists[kind] = [...lists[kind], term];
+    saveList(kind);
+  }
+  renderSettings();
+  const bu = kind === "allow" && (await notTolerated(term));
+  if (bu) messages.push(`The BU table lists ${bu.name} as not tolerated with HFI. It's on your list, but check with your doctor or dietitian.`);
+  if (messages.length) {
+    warn.textContent = messages.join(" ");
+    warn.hidden = false;
+  }
+}
+
+function renderSettings() {
+  const have = new Set([...lists.allow, ...lists.avoid].map(keyOf));
+  for (const kind of Object.keys(LISTS)) {
+    const card = cardOf(kind);
+    const list = lists[kind];
+    card.querySelector(".allow-list").innerHTML = list
+      .map((t, i) => `<li>${esc(t)}<button class="remove" data-i="${i}" aria-label="Remove ${esc(t)}">×</button></li>`).join("");
+    card.querySelector(".none-yet").hidden = list.length > 0;
+    card.querySelector(".clear").hidden = list.length === 0;
+    card.querySelector(".suggest").innerHTML = LISTS[kind].suggestions.filter((t) => !have.has(keyOf(t)))
+      .map((t) => `<button type="button" data-add="${esc(t)}">+ ${esc(t)}</button>`).join("") || '<span class="empty">All added.</span>';
+  }
+  route(false);
+}
+
+for (const kind of Object.keys(LISTS)) {
+  const card = cardOf(kind);
+  const input = card.querySelector("input");
+  card.querySelector("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    addTerm(kind, input.value);
+    input.value = "";
+  });
+  card.querySelector(".allow-list").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-i]");
+    if (!b) return;
+    lists[kind] = lists[kind].filter((_, i) => i !== Number(b.dataset.i));
+    card.querySelector(".warn").hidden = true;
+    saveList(kind);
+    renderSettings();
+  });
+  card.querySelector(".suggest").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-add]");
+    if (b) addTerm(kind, b.dataset.add);
+  });
+  card.querySelector(".clear").addEventListener("click", () => {
+    if (confirm(`Remove everything from ${LISTS[kind].label}?`)) {
+      lists[kind] = [];
+      card.querySelector(".warn").hidden = true;
+      saveList(kind);
+      renderSettings();
+    }
+  });
+}
+
+// ---- views: #settings or the checker
+function route(navigated = true) {
+  const settings = location.hash === "#settings";
+  $("#view-check").hidden = settings;
+  $("#view-settings").hidden = !settings;
+  if (settings) stopScan();
+  const nav = $("#nav");
+  const n = lists.allow.length + lists.avoid.length;
+  nav.innerHTML = settings ? "Done" : `Settings${n ? ` <span class="count">· ${n}</span>` : ""}`;
+  nav.href = settings ? "#" : "#settings";
+  nav.setAttribute("aria-label", settings ? "Done, back to checker" : `Settings, ${n} saved food${n === 1 ? "" : "s"}`);
+  if (!navigated) return;
+  window.scrollTo(0, 0);
+  if (!settings && prefsChanged && lastRun) {
+    prefsChanged = false;
+    lastRun();
+  }
+}
+addEventListener("hashchange", () => route());
+
+// ---- tabs
+for (const tab of document.querySelectorAll('[role="tab"]')) {
+  tab.addEventListener("click", () => {
+    for (const t of document.querySelectorAll('[role="tab"]')) {
+      const on = t === tab;
+      t.setAttribute("aria-selected", on);
+      document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+    }
+    if (tab.id === "tab-scan") startScan();
+    else stopScan();
+    showRecent();
+  });
+}
+
+// ---- helpers
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const titleCase = (s) => (s === s.toUpperCase() ? s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) : s);
+
+function setBusy(button, busy, label) {
+  if (busy) out.innerHTML = ""; // don't leave the previous answer showing under a new question
+  button.disabled = busy;
+  button.innerHTML = busy ? '<span class="spinner"></span>Checking…' : label;
+}
+
+async function post(url, init) {
+  const res = await fetch(url, init);
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = typeof body.detail === "string" ? body.detail : "Something went wrong. Please try again.";
+    throw new Error(detail);
+  }
+  return body;
+}
+
+function showError(msg) {
+  out.innerHTML = `<div class="error">${esc(msg)}</div>`;
+}
+
+// ---- rendering
+function render(r) {
+  const chips = r.sugars.map((s) => `<span class="chip">${SUGAR_LABEL[s]}</span>`).join("");
+  let html = `
+    <div class="verdict v-${r.verdict}">
+      <div class="label">${VERDICT[r.verdict]}</div>
+      <h2>${esc(r.headline)}</h2>
+      ${chips ? `<div class="chips">${chips}</div>` : ""}
+    </div>`;
+
+  if (r.food || r.afcd_food || r.off_product) {
+    // One line, "Matched: Apple, raw", with sources, the ingredient list and other matches behind it.
+    const f = r.food;
+    const au = r.afcd_food;
+    const p = r.off_product;
+    const brandOf = (name, brand) => brand && !name.toLowerCase().includes(brand.toLowerCase()) ? ` (${titleCase(brand)})` : "";
+    const name = f ? titleCase(f.description) + brandOf(f.description, f.brand)
+      : p ? titleCase(p.name) + brandOf(p.name, p.brand)
+      : au.name;
+    const sources = [
+      f && ["USDA", `${titleCase(f.description)} · ${f.data_type}`],
+      p && ["Open Food Facts",
+        `${titleCase(p.name)} · barcode ${p.code}${p.countries.length ? ` · sold in ${p.countries.join(", ")}` : ""}`, p.url],
+      au && [f ? "Sugar values" : "Australian data",
+        `${au.name} · Australian Food Composition Database, ${au.derivation.toLowerCase()}${au.kinds > 1 ? ` · ${au.kinds} kinds` : ""}`],
+    ].filter(Boolean);
+    html += `
+      <details class="card section match">
+        <summary><span><span class="muted-label">Matched</span> ${esc(name)}</span><span class="more">Details</span></summary>
+        <dl class="sources">
+          ${sources.map(([k, v, url]) => `<div><dt>${k}</dt><dd>${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v)}</a>` : esc(v)}</dd></div>`).join("")}
+          ${r.ingredients_text ? `<div><dt>Ingredients</dt><dd>${esc(r.ingredients_text)}</dd></div>` : ""}
+        </dl>
+        ${r.alternatives.length ? `
+        <h3>Not the right food?</h3>
+        <ul class="alts">
+          ${r.alternatives.map((a) => `<li><button ${a.fdc_id != null ? `data-fdc="${a.fdc_id}"` : `data-barcode="${esc(a.barcode)}"`}>${esc(a.label.split(" | ").map(titleCase).join(" · "))}</button></li>`).join("")}
+        </ul>` : ""}
+      </details>`;
+  }
+
+  const notes = r.notes.length ? `<ul class="notes">${r.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "";
+  if (r.items.length) {
+    html += `
+      <div class="card section">
+        <h3>What we found</h3>
+        <ul class="items">
+          ${r.items.map((i) => `
+            <li class="s-${i.avoided_by ? "avoided" : i.allowed_by ? "allowed" : i.status}">
+              <span class="dot" aria-hidden="true"></span>
+              <div>
+                <span class="name">${esc(titleCase(i.name))}</span><span class="tag">${i.avoided_by ? "Avoided by you" : i.allowed_by ? "Allowed by you" : STATUS[i.status]}</span>
+                ${i.parent ? `<div class="why">in ${esc(titleCase(i.parent))}</div>` : ""}
+                ${i.avoided_by ? `<div class="why">You avoid “${esc(i.avoided_by)}”.</div>` : ""}
+                ${i.allowed_by && !i.avoided_by && i.status !== "tolerated" ? `<div class="why">You allowed “${esc(i.allowed_by)}”, so it doesn't count toward the verdict.</div>` : ""}
+                <div class="why">${esc(i.reason)} <em>(${BASIS[i.basis]})</em></div>
+              </div>
+            </li>`).join("")}
+        </ul>
+        ${notes}
+      </div>`;
+  } else if (notes) {
+    html += `<div class="card section">${notes}</div>`;
+  }
+
+  out.innerHTML = html;
+  out.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  for (const b of out.querySelectorAll("[data-fdc]")) {
+    b.addEventListener("click", () => checkText(lastQuery, Number(b.dataset.fdc)));
+  }
+  for (const b of out.querySelectorAll("[data-barcode]")) {
+    b.addEventListener("click", () => checkText(b.dataset.barcode));
+  }
+}
+
+// ---- text
+const textForm = $("#pane-text");
+const textBtn = $("#text-go");
+const textClear = $("#text-clear");
+async function checkText(text, fdcId = null) {
+  const id = ++runId;
+  lastRun = () => checkText(text, fdcId);
+  // Scanned barcodes and their "Not it?" choices show progress on the Scan button.
+  const scan = !$("#pane-scan").hidden;
+  const [button, label] = scan ? [scanBtn, "Scan another"] : [textBtn, "Check"];
+  if (!scan) textClear.hidden = false;
+  prefsChanged = false;
+  setBusy(button, true);
+  try {
+    const result = await post("/api/check/text", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, fdc_id: fdcId, allow: lists.allow, avoid: lists.avoid, trace_limit: traceLimit }),
+    });
+    if (id === runId) {
+      render(result);
+      remember(text, fdcId, result);
+    }
+  } catch (e) {
+    if (id === runId) showError(e.message);
+  } finally {
+    setBusy(button, false, label);
+  }
+}
+function clearText() {
+  runId++;
+  $("#text").value = "";
+  out.innerHTML = "";
+  lastQuery = "";
+  lastRun = null;
+  textClear.hidden = true;
+  $("#text").focus();
+}
+textClear.addEventListener("click", clearText);
+$("#text").addEventListener("input", () => (textClear.hidden = !$("#text").value && !out.children.length));
+
+textForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("#text").value.trim();
+  if (!text) return $("#text").focus();
+  lastQuery = text;
+  checkText(text);
+});
+$("#text").addEventListener("keydown", (e) => {
+  // Enter submits a short food name; Shift+Enter (or a long pasted list) keeps newlines.
+  if (e.key === "Enter" && !e.shiftKey && !e.target.value.includes("\n")) {
+    e.preventDefault();
+    textForm.requestSubmit();
+  }
+});
+
+// ---- photo
+const photo = $("#photo");
+const photoBtn = $("#photo-go");
+let photoBlob = null;
+
+// Shrink big phone photos before upload; the server makes the final fit.
+async function shrink(file, maxSide = 1568) {
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const scale = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+    if (scale === 1 && file.size < 3e6 && /jpe?g|png/.test(file.type)) return file;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bmp.width * scale);
+    canvas.height = Math.round(bmp.height * scale);
+    canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    return await new Promise((ok) => canvas.toBlob((b) => ok(b || file), "image/jpeg", 0.9));
+  } catch {
+    return file; // e.g. a format this browser can't decode; let the server try
+  }
+}
+
+photo.addEventListener("change", async () => {
+  const file = photo.files[0];
+  if (!file) return;
+  const img = $("#preview");
+  img.src = URL.createObjectURL(file);
+  img.hidden = false;
+  $("#drop-text").innerHTML = "<strong>Change photo</strong>";
+  $("#photo-clear").hidden = false;
+  photoBlob = await shrink(file);
+  photoBtn.disabled = false;
+  $("#pane-photo").requestSubmit();
+});
+
+const DROP_TEXT = $("#drop-text").innerHTML;
+$("#photo-clear").addEventListener("click", () => {
+  runId++;
+  const img = $("#preview");
+  if (img.src) URL.revokeObjectURL(img.src);
+  img.removeAttribute("src");
+  img.hidden = true;
+  $("#drop-text").innerHTML = DROP_TEXT;
+  photo.value = "";
+  photoBlob = null;
+  photoBtn.disabled = true;
+  $("#photo-clear").hidden = true;
+  out.innerHTML = "";
+  lastRun = null;
+});
+
+$("#pane-photo").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!photoBlob) return photo.click();
+  checkPhoto(photoBlob);
+});
+
+async function checkPhoto(blob) {
+  const id = ++runId;
+  lastRun = () => checkPhoto(blob);
+  prefsChanged = false;
+  setBusy(photoBtn, true);
+  const fd = new FormData();
+  fd.append("image", blob, "label.jpg");
+  for (const t of lists.allow) fd.append("allow", t);
+  for (const t of lists.avoid) fd.append("avoid", t);
+  try {
+    const result = await post("/api/check/image", { method: "POST", body: fd });
+    if (id === runId) render(result);
+  } catch (err) {
+    if (id === runId) showError(err.message);
+  } finally {
+    setBusy(photoBtn, false, "Check photo");
+  }
+}
+
+// ---- barcode scanning
+const scanBtn = $("#scan-go");
+const scanVideo = $("#scan-video");
+const scanStatus = $("#scan-status");
+const SCAN_HINT = scanStatus.textContent;
+const FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
+let scanning = null; // { stream, timer } while the camera is on
+let scanToken = 0; // bumped by start and stop, so a camera that opens late is closed again
+let detectorPromise = null;
+
+async function makeDetector() {
+  if ("BarcodeDetector" in window) {
+    try {
+      const have = await BarcodeDetector.getSupportedFormats();
+      if (FORMATS.every((f) => have.includes(f))) return new BarcodeDetector({ formats: FORMATS });
+    } catch {}
+  }
+  // iPhone Safari and Firefox have no BarcodeDetector; this one runs ZXing in WebAssembly.
+  const mod = await import("https://cdn.jsdelivr.net/npm/barcode-detector@3.2.2/dist/es/ponyfill.min.js");
+  return new mod.BarcodeDetector({ formats: FORMATS });
+}
+
+// UPC-E is a shortened UPC-A; the databases list the full 12 digits.
+function upcA(code) {
+  const [s, d, c] = [code[0], code.slice(1, 7), code[7]];
+  const last = Number(d[5]);
+  const mid = last <= 2 ? d.slice(0, 2) + d[5] + "0000" + d.slice(2, 5)
+    : last === 3 ? d.slice(0, 3) + "00000" + d.slice(3, 5)
+    : last === 4 ? d.slice(0, 4) + "00000" + d[4]
+    : d.slice(0, 5) + "0000" + d[5];
+  return s + mid + c;
+}
+
+function showCamera(on) {
+  scanVideo.hidden = !on;
+  $("#scan-aim").hidden = !on;
+  $("#scan-idle").hidden = on;
+}
+
+async function startScan() {
+  if (scanning) return;
+  const token = ++scanToken;
+  runId++; // a scan replaces whatever result is showing
+  out.innerHTML = "";
+  if (!navigator.mediaDevices?.getUserMedia) {
+    return showError("This browser can't use the camera on this page. The camera needs a secure (https) connection.");
+  }
+  scanStatus.textContent = "Starting camera…";
+  let stream, detector;
+  try {
+    detectorPromise ??= makeDetector();
+    [stream, detector] = await Promise.all([
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false }),
+      detectorPromise,
+    ]);
+  } catch (e) {
+    if (token !== scanToken) return;
+    scanStatus.textContent = SCAN_HINT;
+    if (e.name === "NotAllowedError") return showError("Camera access is blocked. Allow it in your browser settings, or use the Photo tab.");
+    if (e.name === "NotFoundError" || e.name === "NotReadableError") return showError("Couldn't open a camera on this device.");
+    detectorPromise = null;
+    return showError("Couldn't load the barcode reader. Check your connection and try again.");
+  }
+  if (token !== scanToken) return stream.getTracks().forEach((t) => t.stop());
+  scanning = { stream, timer: null };
+  scanVideo.srcObject = stream;
+  showCamera(true);
+  scanBtn.textContent = "Stop";
+  scanStatus.textContent = SCAN_HINT;
+  try { await scanVideo.play(); } catch {}
+
+  let failures = 0;
+  const tick = async () => {
+    if (token !== scanToken) return;
+    try {
+      if (scanVideo.readyState >= 2) {
+        const hit = (await detector.detect(scanVideo)).find((b) => /^\d{8,14}$/.test(b.rawValue));
+        if (hit && token === scanToken) return found(hit);
+      }
+      failures = 0;
+    } catch {
+      // The WebAssembly reader loads on first use, so a bad connection shows up here.
+      if (++failures > 20 && token === scanToken) {
+        stopScan();
+        scanStatus.textContent = SCAN_HINT;
+        return showError("The barcode reader stopped working. Check your connection and try again.");
+      }
+    }
+    if (token === scanToken) scanning.timer = setTimeout(tick, 150);
+  };
+  tick();
+}
+
+function stopScan() {
+  scanToken++;
+  if (!scanning) return;
+  clearTimeout(scanning.timer);
+  for (const t of scanning.stream.getTracks()) t.stop();
+  scanning = null;
+  scanVideo.srcObject = null;
+  showCamera(false);
+  scanBtn.textContent = "Scan barcode";
+}
+
+function found(hit) {
+  stopScan();
+  navigator.vibrate?.(40);
+  const code = hit.format === "upc_e" && hit.rawValue.length === 8 ? upcA(hit.rawValue) : hit.rawValue;
+  scanStatus.textContent = `Barcode ${code}`;
+  lastQuery = code;
+  checkText(code);
+}
+
+$("#pane-scan").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (scanning) {
+    stopScan();
+    scanStatus.textContent = SCAN_HINT;
+  } else {
+    startScan();
+  }
+});
+document.addEventListener("visibilitychange", () => document.hidden && stopScan());
+
+// ---- recent checks: the last few food names and barcodes, kept in this browser only.
+// Tapping one re-runs it, which the server's cache answers quickly, with the current Settings.
+const RECENT_KEY = "is-it-sugar.recent";
+const RECENT_MAX = 10;
+let recent = [];
+try {
+  const v = JSON.parse(localStorage.getItem(RECENT_KEY));
+  if (Array.isArray(v)) recent = v.filter((e) => e && typeof e.text === "string").slice(0, RECENT_MAX);
+} catch {}
+
+function saveRecent() {
+  try { localStorage.setItem(RECENT_KEY, JSON.stringify(recent)); } catch {}
+  renderRecent();
+}
+
+function remember(text, fdcId, r) {
+  const barcode = /^\d{8,14}$/.test(text);
+  const name = barcode ? (r.food ? titleCase(r.food.description) : r.off_product ? titleCase(r.off_product.name) : `Barcode ${text}`)
+    : r.ingredients_text && !r.food && !r.off_product ? `Ingredients: ${text}`
+    : text;
+  const key = text.toLowerCase();
+  recent = [{ text, fdcId, name, verdict: r.verdict, at: Date.now() }, ...recent.filter((e) => e.text.toLowerCase() !== key)]
+    .slice(0, RECENT_MAX);
+  saveRecent();
+}
+
+function ago(t) {
+  const days = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(t).setHours(0, 0, 0, 0)) / 864e5);
+  if (days <= 0) return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  if (days === 1) return "Yesterday";
+  return new Date(t).toLocaleDateString([], { month: "short", day: "numeric" });
+}
+
+function renderRecent() {
+  $("#recent .recent-list").innerHTML = recent.map((e, i) => `
+    <li><button type="button" class="${esc(e.verdict)}" data-recent="${i}">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="what">${esc(e.name)}</span>
+      <span class="when">${VERDICT[e.verdict] ?? ""} · ${ago(e.at)}</span>
+    </button></li>`).join("");
+  showRecent();
+}
+
+// Shown under the Type and Scan tabs while no result or error is on screen.
+function showRecent() {
+  $("#recent").hidden = !recent.length || out.children.length > 0 || !$("#pane-photo").hidden;
+}
+new MutationObserver(showRecent).observe(out, { childList: true });
+
+$("#recent .recent-list").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-recent]");
+  if (!b) return;
+  const { text, fdcId } = recent[Number(b.dataset.recent)];
+  if (!$("#pane-text").hidden && !/^\d{8,14}$/.test(text)) $("#text").value = text;
+  lastQuery = text;
+  checkText(text, fdcId ?? null);
+});
+$("#recent-clear").addEventListener("click", () => {
+  recent = [];
+  saveRecent();
+});
+
+renderRecent();
+renderSettings();
+route(false);
+</script>
+</body>
+</html>
