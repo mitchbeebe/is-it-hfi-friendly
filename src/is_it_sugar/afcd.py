@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-from .prefs import key
+from .sugars import key
 
 DATA = Path(__file__).parent / "data" / "afcd.json"
 

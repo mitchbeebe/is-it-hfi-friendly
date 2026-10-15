@@ -27,8 +27,8 @@ rating.
   measured amounts count: ingredient lists and AI estimates are never downgraded, and the avoid list still wins.
 
 **Recent** lists the last 10 food names and barcodes checked, under the Type and Scan tabs. Tapping one re-runs it
-(answered from the cache, with your current lists). Photos aren't kept. Like the lists, it's stored only in this
-browser.
+(answered from the cache, with your current lists), and "‹ Back" above a result returns to the list. Photos aren't
+kept. Like the lists, it's stored only in this browser.
 
 A term can be on only one list; adding it to one removes it from the other, and avoid wins on the server either way. The
 lists are stored in the browser (localStorage) and sent with each check; `prefs.py` applies them.
@@ -73,14 +73,31 @@ truth. Its tolerance column maps to a status:
 
 The worst status among the ingredients sets the verdict.
 
-**Ingredient lists** (any text with a comma, or starting with "Ingredients"): split into ingredients in code
-(`ingredients.py`), including sub-ingredients in parentheses. Each one is matched against the BU table and common label
-spellings (`sugars.py`); the longest name wins, so "high fructose corn syrup" isn't read as "corn syrup". Ingredients that
-aren't in the table (tomato paste, raisins, salt…) go to TypeSafe's Jev model, one Choice question per ingredient:
-fructose / sucrose / sorbitol / unsure / none.
+**Ingredient lists** (any text with a comma, or starting with "Ingredients"): split on top-level commas in code
+(`ingredients.py`). Brackets stay with their ingredient, so "vegetable oil (canola, soybean)" is one ingredient. Each
+one is checked in this order:
 
-**Food names**: searched in [USDA FoodData Central](https://fdc.nal.usda.gov/). Jev picks the result that matches what you
-typed (you can pick another under "Not it?"). Then the app uses, in order of preference:
+1. the BU table and common label spellings (`sugars.py`), across the whole ingredient including its brackets, so the
+   sugar in "chocolate chips (sugar, cocoa butter)" counts. The longest name wins, so "high fructose corn syrup" isn't
+   read as "corn syrup";
+2. known ingredients (`known.py`): about 190 common label words mapped to one AFCD entry each ("onion", "wheat flour",
+   "oats"), then about 800 more names Open Food Facts links to [CIQUAL](https://ciqual.anses.fr/), the French food
+   composition table ("paprika", "vinegar", "chicken"). These use measured fructose and sucrose. Vitamins, minerals,
+   acids, raising agents and fats match by name pattern as sugar-free;
+3. anything else (onion powder, natural flavor…) goes to TypeSafe's Jev model, one Choice question per ingredient:
+   fructose / sucrose / sorbitol / unsure / none. Jev sees the brackets too.
+
+A measured ingredient's amount is per 100 g of that ingredient, so it's the most it can add to the product. The Small
+amounts setting weighs those amounts like any other measured food.
+
+**Small amounts**: a food whose only flags are measured amounts is weighed by its fructose load (fructose + half of
+sucrose + sorbitol, per 100 g, the formula HFI studies use). Under 0.5 g it's OK, the lowest tier in Spanish HFI
+guidance and the strictest cut-off Italian centres use; under your limit (1 g by default) it's Caution. A sugar named
+on a label, or an AI estimate, keeps the food at Avoid.
+
+**Food names**: searched in [USDA FoodData Central](https://fdc.nal.usda.gov/), generic and branded foods separately so
+brands don't crowd out generic foods. Jev picks the result that matches what you typed (you can pick another under "Not
+it?"), preferring entries with measured sugars. Then the app uses, in order of preference:
 
 1. the product's ingredient list (branded foods), checked as above;
 2. for whole foods, measured sugars from the
@@ -89,7 +106,10 @@ typed (you can pick another under "Not it?"). Then the app uses, in order of pre
    USDA, reports sorbitol. Where it lists several kinds of a food (11 raw apples), amounts are shown as a range, for
    example "Fructose: 5.4–7.7 g per 100 g";
 3. measured fructose and sucrose from USDA, for any sugar AFCD doesn't report;
-4. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment.
+4. for sorbitol in a whole food: present in apples, pears and stone fruits (the only foods AFCD measures it in), and
+   otherwise not expected;
+5. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment. A food with no sugar data at all is
+   Caution, not OK.
 
 When Jev says the name is a brand and USDA has no ingredient list for it (common for non-US products such as Twiglets
 or Jaffa Cakes), the app searches [Open Food Facts](https://world.openfoodfacts.org/) for products that have one, and
@@ -108,9 +128,14 @@ recipes (Australian ketchup uses sucrose, US ketchup uses HFCS), so USDA stays t
 from other countries' tables are left out, since the licence doesn't cover them. AFCD data: Food Standards Australia New
 Zealand, AFCD Release 3, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
+`src/is_it_sugar/data/ciqual.json` is built by `uv run python scripts/build_ciqual.py`: CIQUAL foods with both fructose
+and sucrose measured, and the English names and synonyms Open Food Facts' ingredient taxonomy (pinned to a commit) links
+to them. CIQUAL values below a detection limit ("< 0.2") count at the limit. CIQUAL data: ANSES, Ciqual 2020,
+[Licence Ouverte](https://www.etalab.gouv.fr/licence-ouverte-open-licence/).
+
 Open Food Facts data is under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), credited in
-the page footer. It's queried per request and never bundled with the app. Open Food Facts rate-limits product reads, so
-a name search fetches at most 5 products, and only ones already marked as having ingredients. If Open Food Facts is
+the page footer. Products are queried per request. Open Food Facts rate-limits product reads, so a name search lets Jev
+pick from up to 5 search results that have ingredients, then fetches only that product. If Open Food Facts is
 unreachable, name searches fall back to the USDA result.
 
 **Photos**: resized to fit TypeSafe's image limits (`images.py`). Then one request asks Jev about the label: whether each BU
@@ -126,7 +151,8 @@ fly secrets import < .env      # TYPESAFE_API_KEY, FOODDATA_CENTRAL_API_KEY
 fly deploy --ha=false
 ```
 
-The app runs at https://is-it-hfi-friendly.fly.dev. `fly.toml` runs one small machine that sleeps when idle, with a 1 GB volume at `/data` for the cache. Rate limits read
+The app runs at https://is-it-hfi-friendly.fly.dev. `fly.toml` runs one small machine that suspends when idle (waking
+takes a few hundred ms, and costs the same as stopping), with a 1 GB volume at `/data` for the cache. Rate limits read
 the client address from `Fly-Client-IP` (set by `CLIENT_IP_HEADER`), since `X-Forwarded-For` can be forged.
 
 ## Layout
@@ -137,7 +163,9 @@ src/is_it_sugar/
   prefs.py        applies the Settings lists (tolerate / avoid) to a result
   afcd.py         Australian Food Composition Database search and variety ranges
   off.py          Open Food Facts product lookup (barcode) and search (name)
+  known.py        common label ingredients matched to AFCD and CIQUAL measurements
   data/afcd.json  the AFCD subset, built by scripts/build_afcd.py
+  data/ciqual.json  CIQUAL sugars by ingredient name, built by scripts/build_ciqual.py
   cache.py        SQLite cache for results and ingredient ratings
   ratelimit.py    per-IP limits
   analyze.py      FoodData Central lookups, TypeSafe questions, verdicts

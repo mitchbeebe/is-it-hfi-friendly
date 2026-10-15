@@ -18,23 +18,9 @@ from collections.abc import Sequence
 
 from . import analyze, sugars
 from .models import Item, Result
+from .sugars import key
 
 MAX_TERMS, MAX_TERM_LEN = 200, 80
-
-
-def _stem(word: str) -> str:
-    if word.endswith("ies") and len(word) > 4:
-        return word[:-3] + "y"
-    if word.endswith(("oes", "ches", "shes", "xes")):
-        return word[:-2]
-    if word.endswith("s") and not word.endswith("ss") and len(word) > 3:
-        return word[:-1]
-    return word
-
-
-def key(text: str) -> str:
-    """Normalized, singular form used for matching: "Tomatoes" -> "tomato"."""
-    return " ".join(_stem(w) for w in sugars.norm(text).split())
 
 
 def terms(raw: Sequence[str]) -> dict[str, str]:
@@ -65,8 +51,15 @@ def fructose_load(items: Sequence[Item]) -> float:
     return sum((i.grams or 0) * (0.5 if i.sugars == ["sucrose"] else 1) for i in items)
 
 
+# Under this fructose load per 100 g, a food is tolerated: the lowest tier in Spanish HFI guidance and
+# the strictest cut-off Italian centres use (Izquierdo-García 2026, doi:10.3390/nu18050771; Bruni 2026,
+# doi:10.3390/nu18162609).
+LOW_LOAD = 0.5
+
+
 def apply_trace(items: list[Item], limit: float) -> list[Item]:
-    """Measured amounts whose combined fructose load is under `limit` become Caution instead of Avoid.
+    """Measured amounts whose combined fructose load is under `limit` become Caution instead of Avoid,
+    and Tolerated when also under LOW_LOAD.
 
     Only measured values qualify. If any sugar is unmeasured but judged likely, or an ingredient
     list names a sugar, the food stays Avoid: there's no amount to weigh.
@@ -76,9 +69,12 @@ def apply_trace(items: list[Item], limit: float) -> list[Item]:
     load = fructose_load(measured)
     if not measured or unmeasured or load >= limit:
         return items
-    note = f"About {load:.2g} g fructose load per 100 g, under your {limit:g} g limit. "
+    if load < min(LOW_LOAD, limit):
+        status, note = "tolerated", f"About {load:.2g} g fructose load per 100 g, under {LOW_LOAD:g} g. "
+    else:
+        status, note = "caution", f"About {load:.2g} g fructose load per 100 g, under your {limit:g} g limit. "
     return [
-        i.model_copy(update={"status": "caution", "trace": True, "reason": note + i.reason})
+        i.model_copy(update={"status": status, "trace": True, "reason": note + i.reason})
         if i.grams is not None and i.status == "not_tolerated"
         else i
         for i in items

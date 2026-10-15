@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from .sugars import Status, Sugar
 
 Verdict = Literal["avoid", "caution", "ok"]
-Basis = Literal["bu_table", "jev", "fdc", "afcd", "known", "label", "settings"]
+Basis = Literal["bu_table", "jev", "fdc", "afcd", "ciqual", "known", "label", "settings"]
 
 
 class Item(BaseModel):

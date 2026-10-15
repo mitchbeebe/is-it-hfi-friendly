@@ -5,14 +5,25 @@ the form is unclear, the entry with more sugar is used, e.g. dried rather than c
 the amount in the product can only be lower. Concentrated forms ("onion powder", "dried apricots")
 aren't listed unless AFCD measured that form; they're left to the AI model.
 
+Other ingredients are looked up in CIQUAL, the French food composition table, by the names and
+synonyms Open Food Facts links to it (built by scripts/build_ciqual.py).
+
 Additives with no carbohydrate at all (vitamins, minerals, acids, leavening, fats) match by name pattern.
 """
 
+import json
 import re
 from dataclasses import dataclass
 from functools import cache
+from pathlib import Path
+from typing import Literal
 
 from . import afcd, sugars
+
+CIQUAL = Path(__file__).parent / "data" / "ciqual.json"
+# AFCD measures sorbitol above zero only in these fruits and foods made from them (apples, pears and
+# stone fruits, all in the rose family). Other whole foods aren't expected to contain it.
+SORBITOL_FRUITS = {"apple", "pear", "nashi", "cherry", "plum", "prune", "apricot", "peach", "nectarine"}
 
 # Label wording -> AFCD food name.
 FOODS: dict[str, str] = {
@@ -148,6 +159,8 @@ FOODS: dict[str, str] = {
     "red cabbage": "Cabbage, red, raw",
     "green bean": "Bean, green, fresh, raw",
     "eggplant": "Eggplant, unpeeled, fresh, raw",
+    "green pepper": "Capsicum, green, fresh, raw",  # in the US, a bell pepper rather than peppercorns
+    "roasted garlic": "Garlic, peeled, fresh, fried, no added fat",
     "broccoli": "Broccoli, fresh, raw",
     "cauliflower": "Cauliflower, fresh, raw",
     "zucchini": "Zucchini, green skin, fresh, unpeeled, raw",
@@ -198,7 +211,7 @@ FOODS: dict[str, str] = {
 }
 
 # Words that don't change what a food is, dropped before matching.
-QUALIFIERS = re.compile(r"\b(organic|fresh|pasteurized|pasteurised|natural|raw)\b")
+QUALIFIERS = re.compile(r"\b(organic|fresh|pasteurized|pasteurised|natural|raw|distilled)\b")
 
 _MINERAL = r"(mono|di|tri|tetra)?(sodium|potassium|calcium|magnesium|ammonium|ferric|ferrous|zinc|copper|manganese)"
 _SALT = r"(phosphate|pyrophosphate|carbonate|bicarbonate|chloride|citrate|sulfate|sulphate|oxide|hydroxide|lactate|iodide|gluconate|propionate|sorbate|benzoate|silicate)"
@@ -224,34 +237,79 @@ NO_SUGAR = re.compile(
             r"([a-z]+ ){0,3}(oil|shortening)",
             r"(soy |soya |sunflower )?lecithin",
             r"gelatine?",
+            r"(in an? )?(natural )?([a-z]+ )?casings?",  # sausage casings: intestine, collagen or cellulose
         ]
     )
 )
 
 
 @dataclass(frozen=True)
+class Measured:
+    """Sugars per 100 g, from one food composition table."""
+
+    source: Literal["afcd", "ciqual"]
+    name: str
+    fructose: float
+    sucrose: float
+    sorbitol: float | None
+    below: tuple[str, ...] = ()  # sugars reported only as under a detection limit; the limit is used
+
+
+@dataclass(frozen=True)
 class Known:
     name: str  # the ingredient as written
-    food: afcd.AfcdFood | None  # None for a sugar-free additive
+    food: Measured | None  # None for a sugar-free additive
+
+
+def is_sorbitol_fruit(name: str) -> bool:
+    """Whether a food's main name is a fruit that contains sorbitol: "Apples, raw", "Apple juice",
+    "Prune (dried plum)", but not "Pineapple"."""
+    main = re.split(r"[,(]", name)[0]
+    return bool(SORBITOL_FRUITS & set(sugars.key(main).split()))
 
 
 @cache
-def _food(name: str) -> afcd.AfcdFood:
-    return next(f for f in afcd.foods() if f.name == name)
+def _afcd(name: str) -> Measured:
+    f = next(f for f in afcd.foods() if f.name == name)
+    assert f.fructose is not None and f.sucrose is not None, name
+    return Measured("afcd", f.name, f.fructose, f.sucrose, f.sorbitol)
 
 
 def key(name: str) -> str:
-    return afcd.key(QUALIFIERS.sub(" ", sugars.norm(name).replace("-", " ")))
+    return sugars.key(QUALIFIERS.sub(" ", sugars.norm(name).replace("-", " ")))
 
 
 _KEYS = {key(k): v for k, v in FOODS.items()}
+
+
+@cache
+def _ciqual() -> dict[str, Measured]:
+    data = json.loads(CIQUAL.read_text())
+    foods = {
+        code: Measured(
+            "ciqual",
+            f["name"],
+            f["fructose"],
+            f["sucrose"],
+            # CIQUAL reports polyols together; in these fruits they're mostly sorbitol.
+            f["polyols"] if is_sorbitol_fruit(f["name"]) else None,
+            tuple(s if s != "polyols" else "sorbitol" for s in f["below"]),
+        )
+        for code, f in data["foods"].items()
+    }
+    by_key: dict[str, Measured] = {}
+    for name, code in data["names"].items():
+        by_key.setdefault(key(name), foods[code])
+    return by_key
 
 
 def lookup(name: str) -> Known | None:
     """The measured food or sugar-free additive an ingredient name means, if it's a known one."""
     k = key(name)
     if k in _KEYS:
-        return Known(name, _food(_KEYS[k]))
+        return Known(name, _afcd(_KEYS[k]))
+    if k in _ciqual():
+        return Known(name, _ciqual()[k])
     if NO_SUGAR.fullmatch(sugars.norm(name)):
         return Known(name, None)
     return None

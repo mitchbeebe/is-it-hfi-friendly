@@ -75,6 +75,7 @@
   [hidden] { display: none !important; }
 
   #out { margin-top: 16px; }
+  .back { display: inline-block; margin: 0 0 10px; font-size: .95rem; }
   .verdict { border-radius: var(--radius); padding: 18px 16px; }
   .verdict .label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
   .verdict h2 { margin: 2px 0 0; font-size: 1.35rem; line-height: 1.25; }
@@ -294,13 +295,15 @@
     <div class="card section">
       <h2>Small amounts</h2>
       <p class="muted">When a food's measured fructose load is under this limit, it shows Caution instead of Avoid.
-        Fructose load is fructose + half of sucrose + sorbitol, per 100 g. Set 0 to flag any amount.</p>
+        Under 0.5 g it shows OK. Fructose load is fructose + half of sucrose + sorbitol, per 100 g.
+        Set 0 to flag any amount.</p>
       <div class="add-row trace-row">
         <input id="trace-limit" type="number" inputmode="decimal" min="0" max="20" step="0.1"
           aria-label="Fructose load limit, grams per 100 g">
         <span>g per 100 g</span>
       </div>
-      <p class="empty">Only measured amounts count. Ingredient lists and AI estimates are never downgraded.</p>
+      <p class="empty">Only measured amounts count. In an ingredient list, each measured ingredient counts at its
+        full amount per 100 g, the most it could add. A listed sugar or an AI estimate keeps the food at Avoid.</p>
     </div>
 
     <div class="card section">
@@ -322,7 +325,9 @@
     packaged foods also in <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>
     (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL</a>),
     and, for whole foods, the <a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>
-    (Food Standards Australia New Zealand, Release 3, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>),
+    (Food Standards Australia New Zealand, Release 3, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)
+    and the <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>
+    (2020, <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/" target="_blank" rel="noopener">Licence Ouverte</a>),
     and anything else is classified by an AI model, which can make mistakes.
     Always read the label, and check with your doctor or dietitian before relying on a result.
   </footer>
@@ -338,7 +343,7 @@ const STATUS = {
   tolerated: "Tolerated",
 };
 const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
-const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA data", label: "From photo", settings: "Your settings", afcd: "Australian data", known: "Known additive" };
+const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA data", label: "From photo", settings: "Your settings", afcd: "Australian data", ciqual: "French data", known: "Known additive" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
@@ -532,14 +537,28 @@ async function post(url, init) {
   return body;
 }
 
+// Above every answer: back to the empty checker, where Recent shows.
+const BACK = '<button class="linkish back" type="button" data-back>‹ Back</button>';
+out.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-back]")) return;
+  runId++; // a late answer shouldn't land after going back
+  if (!$("#pane-photo").hidden) return $("#photo-clear").click();
+  $("#text").value = "";
+  textClear.hidden = true;
+  out.innerHTML = "";
+  lastQuery = "";
+  lastRun = null;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
 function showError(msg) {
-  out.innerHTML = `<div class="error">${esc(msg)}</div>`;
+  out.innerHTML = `${BACK}<div class="error">${esc(msg)}</div>`;
 }
 
 // ---- rendering
 function render(r) {
   const chips = r.sugars.map((s) => `<span class="chip">${SUGAR_LABEL[s]}</span>`).join("");
-  let html = `
+  let html = `${BACK}
     <div class="verdict v-${r.verdict}">
       <div class="label">${VERDICT[r.verdict]}</div>
       <h2>${esc(r.headline)}</h2>

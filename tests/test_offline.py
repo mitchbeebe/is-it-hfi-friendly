@@ -59,6 +59,14 @@ def test_split_separates_what_brackets_say():
         ("palm oil", "tolerated", "known"),
         ("raising agents (ammonium bicarbonate, monocalcium phosphate)", "tolerated", "known"),
         ("BROCCOLI", "not_tolerated", "afcd"),
+        ("ORGANIC GREEN PEPPER", "not_tolerated", "afcd"),  # bell pepper, not peppercorns
+        ("ORGANIC PAPRIKA", "not_tolerated", "ciqual"),
+        ("VINEGAR", "not_tolerated", "ciqual"),  # under detection limits; the limits count
+        ("ORGANIC CHICKEN", "tolerated", "ciqual"),
+        ("tomato concentrate", "not_tolerated", "ciqual"),
+        ("ORGANIC BLACK PEPPER", "not_tolerated", "ciqual"),
+        ("IN A NATURAL PORK CASING", "tolerated", "known"),
+        ("DISTILLED VINEGAR", "not_tolerated", "ciqual"),
     ],
 )
 def test_decide_uses_bu_table_then_measured_foods(ingredient, status, basis):
@@ -67,7 +75,8 @@ def test_decide_uses_bu_table_then_measured_foods(ingredient, status, basis):
 
 
 @pytest.mark.parametrize(
-    "ingredient", ["onion powder", "natural flavor", "chocolate (dextrose, cocoa butter)", "spice", "dried cranberries"]
+    "ingredient",
+    ["onion powder", "natural flavor", "chocolate (dextrose, cocoa butter)", "yeast extract", "dried cranberries"],
 )
 def test_decide_leaves_the_rest_to_jev(ingredient):
     assert analyze._decide(ingredient) is None
@@ -78,15 +87,15 @@ def test_measured_ingredient_is_an_upper_bound_for_the_trace_rule():
     assert flour is not None and flour.grams == 0.7 and flour.sugars == ["sucrose"]
     onion = analyze._decide("onion")
     assert onion is not None and onion.grams == pytest.approx(1.7 + 1.9 / 2)
-    # Only measured amounts, all under the limit: small amounts rather than avoid.
-    assert prefs.apply(analyze.summarize([flour]), trace_limit=1.0).verdict == "caution"
+    # Only measured amounts: flour alone is under 0.5 g, flour and onion under neither limit.
+    assert prefs.apply(analyze.summarize([flour]), trace_limit=1.0).verdict == "ok"
+    assert prefs.apply(analyze.summarize([flour, onion]), trace_limit=1.0).verdict == "avoid"
 
 
 def test_known_foods_exist_and_are_measured():
     for label, name in known.FOODS.items():
-        f = known._food(name)
-        assert f.fructose is not None and f.sucrose is not None, label
-        if analyze.is_sorbitol_fruit(f.name):
+        f = known._afcd(name)
+        if known.is_sorbitol_fruit(f.name):
             assert f.sorbitol is not None, label
 
 
@@ -449,6 +458,17 @@ def test_trace_rule_downgrades_small_measured_amounts():
     )
     assert prefs.apply(oats, trace_limit=0).verdict == "avoid"  # 0 turns it off
     assert prefs.apply(oats, trace_limit=0.5).verdict == "avoid"
+
+
+def test_very_low_load_is_tolerated():
+    rice = analyze.summarize([measured_item("fructose", 0.1), measured_item("sucrose", 0.6)])  # load 0.4
+    out = prefs.apply(rice, trace_limit=1.0)
+    assert (out.verdict, out.headline) == ("ok", "Very low in fructose and sucrose")
+    assert all(i.status == "tolerated" and i.trace for i in out.items)
+    assert out.items[0].reason.startswith("About 0.4 g fructose load per 100 g, under 0.5 g.")
+    # A stricter personal limit wins: under 0.3 g only.
+    assert prefs.apply(rice, trace_limit=0.3).verdict == "avoid"
+    assert prefs.apply(rice, trace_limit=0).verdict == "avoid"
 
 
 def test_trace_rule_sums_the_load_and_ignores_unmeasured():

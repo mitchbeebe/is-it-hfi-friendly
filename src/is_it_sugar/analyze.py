@@ -28,9 +28,6 @@ IMAGES_HEADER = {"TypeSafe-Danger-Zone-Images": "true"}
 SUGAR_ORDER: list[Sugar] = ["fructose", "sucrose", "sorbitol"]
 STATUS_ORDER = ["not_tolerated", "caution", "tolerated"]
 GENERIC_TYPES = {"Foundation", "SR Legacy", "Survey (FNDDS)"}
-# AFCD measures sorbitol above zero only in these fruits and foods made from them (apples, pears and
-# stone fruits, all in the rose family). Other whole foods aren't expected to contain it.
-SORBITOL_FRUITS = {"apple", "pear", "nashi", "cherry", "plum", "prune", "apricot", "peach", "nectarine"}
 log = logging.getLogger("uvicorn.error")
 
 
@@ -83,21 +80,22 @@ def _known_item(k: known.Known) -> Item:
             reason="Contains no sugar: a vitamin, mineral, acid, fat or similar.",
         )
     f = k.food
-    found = [s for s in SUGAR_ORDER if (getattr(f, s) or 0) > 0]
+    values = {"fructose": f.fructose, "sucrose": f.sucrose, "sorbitol": f.sorbitol or 0}
+    found = [s for s in SUGAR_ORDER if values[s] > 0]
     if not found:
         return Item(
-            name=k.name, status="tolerated", basis="afcd", reason=f"Measured: {f.name} has no fructose or sucrose."
+            name=k.name, status="tolerated", basis=f.source, reason=f"Measured: {f.name} has no fructose or sucrose."
         )
-    amounts = ", ".join(f"{getattr(f, s):g} g {s}" for s in found)
-    load = sum(getattr(f, s) * (0.5 if s == "sucrose" else 1) for s in found)
+    amounts = ", ".join(f"{'under ' if s in f.below else ''}{values[s]:g} g {s}" for s in found)
+    load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found)
     return Item(
         name=k.name,
         status="not_tolerated",
         sugars=found,
-        basis="afcd",
+        basis=f.source,
         reason=f"Measured: {f.name} has {amounts} per 100 g, so the product has at most that much from it.",
         # Per 100 g of the ingredient, an upper bound for the product. fructose_load halves sucrose itself.
-        grams=f.sucrose if found == ["sucrose"] else load,
+        grams=values["sucrose"] if found == ["sucrose"] else load,
     )
 
 
@@ -238,7 +236,7 @@ async def _search(http: httpx.AsyncClient, query: str) -> list[dict[str, Any]]:
     """Generic foods, then branded ones. Searched separately because branded products far outnumber
     generic foods and would otherwise crowd them out: "lentils" finds 25 brands and no SR Legacy entry."""
     generic, branded = await asyncio.gather(
-        _search_type(http, query, sorted(GENERIC_TYPES), 15),
+        _search_type(http, query, sorted(GENERIC_TYPES), 20),
         _search_type(http, query, ["Branded"], 10),
     )
     return generic + branded
@@ -276,6 +274,7 @@ async def _pick(
         questions["pick"] = Choice(
             instructions="Which database food best matches the food described in `user_typed`? Prefer a plain, "
             "generic version (SR Legacy, Foundation, or Survey data) unless `user_typed` names a brand or product. "
+            "If `user_typed` is a general name such as 'rice', pick its most common plain form, not a dish made with it. "
             "Among equally close matches, prefer one marked 'sugars measured'.",
             criteria=criteria,
         )
@@ -343,7 +342,9 @@ async def _pick_afcd(ts: AsyncTypeSafeClient, name: str) -> afcd.AfcdFood | None
         questions={
             "pick": Choice(
                 instructions="Which entry from the Australian food composition database is the same food as "
-                "`user_typed`? Pick the plain, raw version unless `user_typed` says how it is prepared.",
+                "`user_typed`? Pick the plain, raw version unless `user_typed` says how it is prepared, or the plain cooked "
+                "one when only cooked versions are listed. If "
+                "`user_typed` is a general name such as 'rice' or 'cheese', pick its most common plain form.",
                 criteria=criteria,
             )
         },
@@ -408,19 +409,12 @@ def measured_sugars(nutrients: dict[str, float], au: afcd.AfcdFood | None) -> tu
     return items, measured
 
 
-def is_sorbitol_fruit(name: str) -> bool:
-    """Whether a whole food's main name is a fruit that contains sorbitol: "Apples, raw", "Apple juice",
-    "Prune (dried plum)", but not "Pineapple"."""
-    main = re.split(r"[,(]", name)[0]
-    return bool(SORBITOL_FRUITS & set(afcd.key(main).split()))
-
-
 def known_sorbitol(names: Sequence[str]) -> list[Item]:
     """Sorbitol for a whole food with no sorbitol measurement, from which foods AFCD finds it in.
 
     `names` are the food's names in each database: AFCD calls apple juice "Juice, apple", USDA "Apple juice".
     """
-    if not any(is_sorbitol_fruit(n) for n in names):
+    if not any(known.is_sorbitol_fruit(n) for n in names):
         return []
     return [
         Item(
@@ -930,6 +924,8 @@ def summarize(items: list[Item], verdict: Verdict | None = None, **kw: Any) -> R
             headline = f"Small amounts of {_join(found)}"
         else:
             headline = "Unclear: may contain fructose, sucrose, or sorbitol"
+    elif low := [s for s in SUGAR_ORDER if any(i.trace and s in i.sugars for i in counted)]:
+        headline = f"Very low in {_join(low)}"
     elif len(counted) < len(items) and any(i.status != "tolerated" for i in items):
         headline = "OK with your allowed foods"
     else:

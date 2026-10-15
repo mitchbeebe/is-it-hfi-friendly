@@ -238,6 +238,21 @@ def norm(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _stem(word: str) -> str:
+    if word.endswith("ies") and len(word) > 4:
+        return word[:-3] + "y"
+    if word.endswith(("oes", "ches", "shes", "xes")):
+        return word[:-2]
+    if word.endswith("s") and not word.endswith("ss") and len(word) > 3:
+        return word[:-1]
+    return word
+
+
+def key(text: str) -> str:
+    """Normalized, singular form used for matching: "Tomatoes" -> "tomato"."""
+    return " ".join(_stem(w) for w in norm(text).split())
+
+
 # (normalized name, entry), longest first so the most specific name wins.
 _PATTERNS = sorted(
     ((norm(n), e) for e in TABLE for n in e.names),
