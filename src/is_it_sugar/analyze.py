@@ -488,6 +488,33 @@ async def check_food(
     return await _fdc_result(ts, query, chosen, au, alternatives, cache)
 
 
+UNITS = {"GRM": "g", "MLT": "ml"}
+
+
+def label_zero_sugar(items: list[Item], food: dict[str, Any]) -> list[Item]:
+    """For a product whose label lists 0 g total sugars per serving, which means under 0.5 g: fructose and
+    sucrose sources in its ingredient list are at most a trace, so Caution rather than Avoid.
+
+    Sorbitol and other sugar alcohols aren't counted in total sugars, so they still count in full.
+    """
+    size, unit = food.get("servingSize"), UNITS.get(food.get("servingSizeUnit") or "", "")
+    serving = ", ".join(x for x in (food.get("householdServingFullText"), size and unit and f"{size:g} {unit}") if x)
+    label = f"The label lists 0 g total sugars per serving{f' ({serving})' if serving else ''}, so under 0.5 g."
+    out = []
+    for i in items:
+        if i.name.startswith("Total sugars: 0 g"):
+            i = i.model_copy(
+                update={
+                    "name": "Total sugars: 0 g per serving",
+                    "reason": f"{label} Sorbitol isn't counted in total sugars; it's checked separately.",
+                }
+            )
+        elif i.status == "not_tolerated" and i.sugars and set(i.sugars) <= {"fructose", "sucrose"}:
+            i = i.model_copy(update={"status": "caution", "trace": True, "reason": f"{label} {i.reason}"})
+        out.append(i)
+    return out
+
+
 async def _fdc_result(
     ts: AsyncTypeSafeClient,
     query: str,
@@ -532,6 +559,8 @@ async def _fdc_result(
     nutrients = _nutrients(chosen) if chosen else {}
     measured_items, measured = measured_sugars(nutrients, au)
     items += measured_items
+    if chosen is not None and chosen["dataType"] == "Branded" and nutrients.get("Total Sugars") == 0:
+        items = label_zero_sugar(items, chosen)
     notes: list[str] = []
     if not ingredients_text:
         if au is not None:

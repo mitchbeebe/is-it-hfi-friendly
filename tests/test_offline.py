@@ -471,6 +471,27 @@ def test_very_low_load_is_tolerated():
     assert prefs.apply(rice, trace_limit=0).verdict == "avoid"
 
 
+def test_label_with_zero_sugar_makes_fructose_and_sucrose_sources_caution():
+    sausage = {"servingSize": 85.0, "servingSizeUnit": "GRM", "householdServingFullText": "1 link"}
+    items = [
+        analyze._decide("RED PEPPER"),
+        analyze._decide("sugar"),
+        analyze._decide("sorbitol"),
+        analyze._decide("SALT"),
+        *analyze.measured_sugars({"Total Sugars": 0.0}, None)[0],
+    ]
+    out = analyze.label_zero_sugar([i for i in items if i], sausage)
+    by_name = {i.name: i for i in out}
+    assert by_name["RED PEPPER"].status == by_name["sugar"].status == "caution"
+    assert by_name["sugar"].reason.startswith(
+        "The label lists 0 g total sugars per serving (1 link, 85 g), so under 0.5 g."
+    )
+    assert by_name["sorbitol"].status == "not_tolerated"  # not counted in total sugars
+    assert by_name["Total sugars: 0 g per serving"].status == "tolerated"
+    r = analyze.summarize([i for i in out if i.name != "sorbitol"])
+    assert (r.verdict, r.headline) == ("caution", "Small amounts of fructose and sucrose")
+
+
 def test_trace_rule_sums_the_load_and_ignores_unmeasured():
     tomato = analyze.summarize([measured_item("fructose", 0.6), measured_item("sorbitol", 0.5)])  # load 1.1
     assert prefs.apply(tomato, trace_limit=1.0).verdict == "avoid"
