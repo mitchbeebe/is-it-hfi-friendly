@@ -1,7 +1,6 @@
 """Split a label's ingredient statement into individual ingredients."""
 
 import re
-from dataclasses import dataclass
 
 # Section labels that introduce more ingredients, e.g. "contains 2% or less of:".
 _LEAD_IN = re.compile(
@@ -12,12 +11,6 @@ _TRAILER = re.compile(
     r"(?:^|[.;]\s*)(?:allergens?|contains|may contain|manufactured in|produced in)\b\s*:[^.]*\.?\s*$", re.IGNORECASE
 )
 _BRACKETS = {"(": ")", "[": "]", "{": "}"}
-
-
-@dataclass(frozen=True)
-class Ingredient:
-    name: str
-    parent: str | None = None
 
 
 def looks_like_list(text: str) -> bool:
@@ -61,22 +54,27 @@ def _clean(name: str) -> str:
     return name.strip(" .*:")
 
 
-def parse(text: str, parent: str | None = None) -> list[Ingredient]:
-    if parent is None:
-        text = _balance(_TRAILER.sub("", text.strip()))
-    out: list[Ingredient] = []
-    for part in _split_top(text):
-        m = re.match(r"^(.*?)[(\[{](.*)[)\]}]\s*(.*)$", part, re.DOTALL)
-        if m:
-            base = _clean(f"{m.group(1)} {m.group(3)}")
-            inner = m.group(2)
-            if base:
-                out.append(Ingredient(base, parent))
-            # "(color)" or "(to preserve freshness)" are notes, not sub-ingredients.
-            if "," in inner or ";" in inner or not base:
-                out.extend(parse(inner, base or parent))
-            elif base:
-                out[-1] = Ingredient(f"{base} ({inner.strip()})", parent)
-        elif name := _clean(part):
-            out.append(Ingredient(name, parent))
-    return list(dict.fromkeys(out))
+def parse(text: str) -> list[str]:
+    """Top-level ingredients. Each keeps its bracketed part, which describes it: "vegetable oil (canola,
+    soybean)" and "chocolate chips (sugar, cocoa butter)" stay whole."""
+    text = _balance(_TRAILER.sub("", text.strip()).rstrip(" ."))
+    return list(dict.fromkeys(name for part in _split_top(text) if (name := _clean(part))))
+
+
+def split(ingredient: str) -> tuple[str, list[str]]:
+    """ "enriched flour (wheat flour, niacin)" -> ("enriched flour", ["wheat flour", "niacin"])."""
+    base, groups, buf, depth = [], [], [], 0
+    for ch in _balance(ingredient):
+        if ch in _BRACKETS:
+            depth += 1
+            if depth == 1:
+                continue
+        elif ch in _BRACKETS.values() and depth:
+            depth -= 1
+            if depth == 0:
+                groups.append("".join(buf))
+                buf = []
+                continue
+        (buf if depth else base).append(ch)
+    inner = [name for g in groups for part in _split_top(g) if (name := _clean(part))]
+    return _clean("".join(base)), inner

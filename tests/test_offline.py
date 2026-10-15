@@ -5,60 +5,109 @@ import io
 import pytest
 from PIL import Image
 
-from is_it_sugar import analyze, images, ingredients, off, prefs, sugars
+from is_it_sugar import analyze, images, ingredients, known, off, prefs, sugars
 from is_it_sugar.models import Food, Item
-
-
-def names(text):
-    return [(i.name, i.parent) for i in ingredients.parse(text)]
 
 
 def test_parse_strips_lead_ins_and_allergens():
     text = "INGREDIENTS: SUGAR, SALT. CONTAINS 2% OR LESS OF: CITRIC ACID, NATURAL FLAVOR. CONTAINS: MILK, SOY."
-    assert names(text) == [("SUGAR", None), ("SALT", None), ("CITRIC ACID", None), ("NATURAL FLAVOR", None)]
+    assert ingredients.parse(text) == ["SUGAR", "SALT", "CITRIC ACID", "NATURAL FLAVOR"]
 
 
-def test_parse_flattens_sub_ingredients():
-    text = "flour, chocolate chips (sugar, cocoa butter), cocoa (processed with alkali)"
-    assert names(text) == [
-        ("flour", None),
-        ("chocolate chips", None),
-        ("sugar", "chocolate chips"),
-        ("cocoa butter", "chocolate chips"),
-        ("cocoa (processed with alkali)", None),
+def test_parse_keeps_brackets_with_their_ingredient():
+    text = (
+        "flour, chocolate chips (sugar, cocoa butter), vegetable oil (includes one of the following: canola, soybean)"
+    )
+    assert ingredients.parse(text) == [
+        "flour",
+        "chocolate chips (sugar, cocoa butter)",
+        "vegetable oil (includes one of the following: canola, soybean)",
     ]
 
 
 def test_parse_closes_unclosed_brackets():
     text = "Wholewheat Flour (80%), Flavouring [Yeast Extract (Barley), Salt, Vegetable Extract (Carrot), White Pepper."
-    assert names(text) == [
-        ("Wholewheat Flour (80%)", None),
-        ("Flavouring", None),
-        ("Yeast Extract (Barley)", "Flavouring"),
-        ("Salt", "Flavouring"),
-        ("Vegetable Extract (Carrot)", "Flavouring"),
-        ("White Pepper", "Flavouring"),
+    assert ingredients.parse(text) == [
+        "Wholewheat Flour (80%)",
+        "Flavouring [Yeast Extract (Barley), Salt, Vegetable Extract (Carrot), White Pepper]",
     ]
+
+
+def test_split_separates_what_brackets_say():
+    assert ingredients.split("enriched flour (wheat flour, niacin)") == ("enriched flour", ["wheat flour", "niacin"])
+    assert ingredients.split("vegetable oil (includes one of the following: canola, soybean)") == (
+        "vegetable oil",
+        ["canola", "soybean"],
+    )
+    assert ingredients.split("salt") == ("salt", [])
+
+
+@pytest.mark.parametrize(
+    ("ingredient", "status", "basis"),
+    [
+        ("chocolate chips (sugar, cocoa butter)", "not_tolerated", "bu_table"),  # sugar inside brackets counts
+        ("vegetable oil (includes one of the following: canola, soybean)", "tolerated", "afcd"),
+        ("enriched flour (wheat flour, niacin, reduced iron)", "not_tolerated", "afcd"),  # measured sucrose
+        ("Wholewheat Flour (80%)", "not_tolerated", "afcd"),
+        ("ONIONS", "not_tolerated", "afcd"),
+        ("Organic whole grain oats", "not_tolerated", "afcd"),
+        ("SALT", "tolerated", "afcd"),
+        ("VITAMIN B12", "tolerated", "known"),
+        ("TRIPOTASSIUM PHOSPHATE", "tolerated", "known"),
+        ("sodium acid pyrophosphate", "tolerated", "known"),
+        ("modified corn starch", "tolerated", "bu_table"),
+        ("palm oil", "tolerated", "known"),
+        ("raising agents (ammonium bicarbonate, monocalcium phosphate)", "tolerated", "known"),
+        ("BROCCOLI", "not_tolerated", "afcd"),
+    ],
+)
+def test_decide_uses_bu_table_then_measured_foods(ingredient, status, basis):
+    item = analyze._decide(ingredient)
+    assert item is not None and (item.status, item.basis) == (status, basis)
+
+
+@pytest.mark.parametrize(
+    "ingredient", ["onion powder", "natural flavor", "chocolate (dextrose, cocoa butter)", "spice", "dried cranberries"]
+)
+def test_decide_leaves_the_rest_to_jev(ingredient):
+    assert analyze._decide(ingredient) is None
+
+
+def test_measured_ingredient_is_an_upper_bound_for_the_trace_rule():
+    flour = analyze._decide("wheat flour")
+    assert flour is not None and flour.grams == 0.7 and flour.sugars == ["sucrose"]
+    onion = analyze._decide("onion")
+    assert onion is not None and onion.grams == pytest.approx(1.7 + 1.9 / 2)
+    # Only measured amounts, all under the limit: small amounts rather than avoid.
+    assert prefs.apply(analyze.summarize([flour]), trace_limit=1.0).verdict == "caution"
+
+
+def test_known_foods_exist_and_are_measured():
+    for label, name in known.FOODS.items():
+        f = known._food(name)
+        assert f.fructose is not None and f.sucrose is not None, label
+        if analyze.is_sorbitol_fruit(f.name):
+            assert f.sorbitol is not None, label
 
 
 def test_label_note_needs_confidence():
     note = analyze._jev_item(
-        "Dried", None, {"fructose": 0.05, "sucrose": 0, "sorbitol": 0, "unsure": 0.05, "none": 0.1, "label_note": 0.8}
+        "Dried", {"fructose": 0.05, "sucrose": 0, "sorbitol": 0, "unsure": 0.05, "none": 0.1, "label_note": 0.8}
     )
     assert (note.status, note.sugars) == ("tolerated", [])
     assert note.reason.startswith("Looks like a note on the label")
     # Unsure it's a note: judged as an ingredient instead, and "none" isn't confident enough here.
     item = analyze._jev_item(
-        "Dried", None, {"fructose": 0.1, "sucrose": 0, "sorbitol": 0, "unsure": 0.1, "none": 0.4, "label_note": 0.4}
+        "Dried", {"fructose": 0.1, "sucrose": 0, "sorbitol": 0, "unsure": 0.1, "none": 0.4, "label_note": 0.4}
     )
     assert item.status == "caution"
     # Ratings cached before the label_note option still work.
-    old = analyze._jev_item("apple", None, {"fructose": 0.9, "sucrose": 0, "sorbitol": 0.3, "unsure": 0, "none": 0.1})
+    old = analyze._jev_item("apple", {"fructose": 0.9, "sucrose": 0, "sorbitol": 0.3, "unsure": 0, "none": 0.1})
     assert (old.status, old.sugars) == ("not_tolerated", ["fructose", "sorbitol"])
 
 
 def test_parse_keeps_decimals():
-    assert names("salt, vitamin b2 0.5%, sugar") == [("salt", None), ("vitamin b2 0.5%", None), ("sugar", None)]
+    assert ingredients.parse("salt, vitamin b2 0.5%, sugar") == ["salt", "vitamin b2 0.5%", "sugar"]
 
 
 @pytest.mark.parametrize("text", ["sugar, salt", "Ingredients: water", "a; b"])
@@ -152,7 +201,7 @@ def test_prepare_rejects_non_images():
 
 def bu(name, display=None):
     e = sugars.BY_NAME[name]
-    return analyze._bu_item(e, display or name, None)
+    return analyze._bu_item(e, display or name)
 
 
 def judged(name, status="not_tolerated", sugars_: tuple[sugars.Sugar, ...] = ("fructose",)):

@@ -29,7 +29,16 @@ RESULT_TTL = 7 * 86400
 RESULT_VERSION = hashlib.sha256(
     b"".join(
         (Path(__file__).parent / f).read_bytes()
-        for f in ("analyze.py", "afcd.py", "off.py", "sugars.py", "ingredients.py", "models.py", "data/afcd.json")
+        for f in (
+            "analyze.py",
+            "afcd.py",
+            "known.py",
+            "off.py",
+            "sugars.py",
+            "ingredients.py",
+            "models.py",
+            "data/afcd.json",
+        )
     )
 ).hexdigest()[:12]
 # Generous: a grocery run can easily be dozens of checks. This guards the shared USDA key

@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from .sugars import Status, Sugar
 
 Verdict = Literal["avoid", "caution", "ok"]
-Basis = Literal["bu_table", "jev", "fdc", "afcd", "label", "settings"]
+Basis = Literal["bu_table", "jev", "fdc", "afcd", "known", "label", "settings"]
 
 
 class Item(BaseModel):
@@ -16,7 +16,6 @@ class Item(BaseModel):
     sugars: list[Sugar] = []
     basis: Basis
     reason: str
-    parent: str | None = None
     bu_name: str | None = None
     allowed_by: str | None = None  # the Settings term that allowed it
     avoided_by: str | None = None  # the Settings term that flagged it; wins over allowed_by

@@ -338,7 +338,7 @@ const STATUS = {
   tolerated: "Tolerated",
 };
 const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
-const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA data", label: "From photo", settings: "Your settings", afcd: "Australian data" };
+const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA data", label: "From photo", settings: "Your settings", afcd: "Australian data", known: "Known additive" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
@@ -588,7 +588,6 @@ function render(r) {
               <span class="dot" aria-hidden="true"></span>
               <div>
                 <span class="name">${esc(titleCase(i.name))}</span><span class="tag">${i.avoided_by ? "Avoided by you" : i.allowed_by ? "Allowed by you" : STATUS[i.status]}</span>
-                ${i.parent ? `<div class="why">in ${esc(titleCase(i.parent))}</div>` : ""}
                 ${i.avoided_by ? `<div class="why">You avoid “${esc(i.avoided_by)}”.</div>` : ""}
                 ${i.allowed_by && !i.avoided_by && i.status !== "tolerated" ? `<div class="why">You allowed “${esc(i.allowed_by)}”, so it doesn't count toward the verdict.</div>` : ""}
                 <div class="why">${esc(i.reason)} <em>(${BASIS[i.basis]})</em></div>

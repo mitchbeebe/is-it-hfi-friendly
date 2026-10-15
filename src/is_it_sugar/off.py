@@ -4,7 +4,6 @@ The data is crowd-sourced and recipes differ by country, so results say where a 
 Open Food Facts data: Open Database License (ODbL).
 """
 
-import asyncio
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -16,7 +15,7 @@ SEARCH = "https://search.openfoodfacts.org/search"
 # Open Food Facts asks every app to identify itself.
 HEADERS = {"User-Agent": "is-it-hfi-friendly/0.1 (+https://is-it-hfi-friendly.fly.dev)"}
 FIELDS = "code,product_name,product_name_en,brands,countries_tags,ingredients_text,ingredients_text_en,lang"
-# Each hit costs a product request, and Open Food Facts rate-limits those.
+SEARCH_FIELDS = "code,product_name,product_name_en,brands,countries_tags,lang"
 SEARCH_SIZE = 5
 
 
@@ -56,7 +55,9 @@ def _country(tag: str) -> str:
 def _product(p: dict[str, Any]) -> Product:
     english = (p.get("ingredients_text_en") or "").strip()
     other = (p.get("ingredients_text") or "").strip()
-    brand = (p.get("brands") or "").split(",")[0].strip() or None
+    # Products list brands as "A, B"; search hits as ["A", "B"].
+    brands = p.get("brands") or ""
+    brand = (brands.split(",") if isinstance(brands, str) else brands or [""])[0].strip() or None
     return Product(
         code=p["code"],
         name=(p.get("product_name_en") or p.get("product_name") or "").strip() or "Unnamed product",
@@ -77,16 +78,16 @@ async def product(http: httpx.AsyncClient, code: str) -> Product | None:
 
 
 async def search(http: httpx.AsyncClient, query: str) -> list[Product]:
-    """Products matching a name that have an ingredient list, English ones only when there are any.
+    """Products matching a name that have an ingredient list, English-language ones only when there are any.
 
-    Search results don't include ingredients, so each hit is fetched.
+    Search results don't include ingredients, so `ingredients` is None until the chosen one is
+    fetched with `product`. That keeps it to one product request, since Open Food Facts rate-limits those.
     """
     words = re.sub(r"[^\w\s'&.]", " ", query)  # the search takes Lucene syntax, e.g. field:value
     q = f'{words} states_tags:"en:ingredients-completed"'
-    r = await http.get(SEARCH, params={"q": q, "page_size": SEARCH_SIZE, "langs": "en"}, headers=HEADERS)
+    params = {"q": q, "page_size": SEARCH_SIZE, "langs": "en", "fields": SEARCH_FIELDS}
+    r = await http.get(SEARCH, params=params, headers=HEADERS)
     r.raise_for_status()
-    codes = [h["code"] for h in r.json().get("hits", []) if h.get("code")]
-    found = await asyncio.gather(*(product(http, c) for c in codes))
-    listed = [p for p in found if p is not None and p.ingredients]
-    english = [p for p in listed if p.english]
-    return english or listed
+    found = [_product(h) for h in r.json().get("hits", []) if h.get("code")]
+    english = [p for p in found if p.english]
+    return english or found

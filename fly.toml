@@ -9,8 +9,9 @@ primary_region = "ewr"
 [http_service]
   internal_port = 8080
   force_https = true
-  # Sleep when idle; the first request after a nap takes a couple of seconds.
-  auto_stop_machines = "stop"
+  # Sleep when idle. Suspending keeps memory, so waking takes a few hundred ms instead of a
+  # couple of seconds for a full boot. It costs the same as stopping.
+  auto_stop_machines = "suspend"
   auto_start_machines = true
   min_machines_running = 0
 
