@@ -38,6 +38,7 @@ RESULT_VERSION = hashlib.sha256(
             "ingredients.py",
             "models.py",
             "data/afcd.json",
+            "data/ingredients.json",
         )
     )
 ).hexdigest()[:12]

@@ -81,14 +81,17 @@ one is checked in this order:
    sugar in "chocolate chips (sugar, cocoa butter)" counts. The longest name wins, so "high fructose corn syrup" isn't
    read as "corn syrup";
 2. known ingredients (`known.py`): about 190 common label words mapped to one AFCD entry each ("onion", "wheat flour",
-   "oats"), then about 800 more names Open Food Facts links to [CIQUAL](https://ciqual.anses.fr/), the French food
-   composition table ("paprika", "vinegar", "chicken"). These use measured fructose and sucrose. Vitamins, minerals,
+   "oats"), then about 975 more names Open Food Facts links to measured foods in [CIQUAL](https://ciqual.anses.fr/), the
+   French food composition table ("paprika", "vinegar", "chicken"), or USDA ("cream cheese", "spelt"). These use
+   measured fructose and sucrose. Words like "organic" and "non-GMO" are ignored when matching. Vitamins, minerals,
    acids, raising agents and fats match by name pattern as sugar-free;
 3. anything else (onion powder, natural flavor…) goes to TypeSafe's Jev model, one Choice question per ingredient:
    fructose / sucrose / sorbitol / unsure / none. Jev sees the brackets too.
 
-A measured ingredient's amount is per 100 g of that ingredient, so it's the most it can add to the product. The Small
-amounts setting weighs those amounts like any other measured food.
+Labels list ingredients by weight, most first, so the nth ingredient is at most 1/n of the product, anything after
+"contains 2% or less of" is at most 2%, and a declared percentage ("tomatoes 45%") is used as given. A measured
+ingredient counts at its amount per 100 g times that share: paprika in the 2% part adds at most 0.14 g fructose load
+per 100 g of the product. The Small amounts setting weighs those bounds like any other measured food.
 
 When a USDA branded product's label lists 0 g total sugars per serving, which US labels allow for anything under 0.5 g,
 its fructose and sucrose sources are Caution rather than Avoid, unless the Small amounts limit is 0 (flag any amount).
@@ -132,9 +135,9 @@ recipes (Australian ketchup uses sucrose, US ketchup uses HFCS), so USDA stays t
 from other countries' tables are left out, since the licence doesn't cover them. AFCD data: Food Standards Australia New
 Zealand, AFCD Release 3, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-`src/is_it_sugar/data/ciqual.json` is built by `uv run python scripts/build_ciqual.py`: CIQUAL foods with both fructose
-and sucrose measured, and the English names and synonyms Open Food Facts' ingredient taxonomy (pinned to a commit) links
-to them. CIQUAL values below a detection limit ("< 0.2") count at the limit. CIQUAL data: ANSES, Ciqual 2020,
+`src/is_it_sugar/data/ingredients.json` is built by `uv run python scripts/build_ingredients.py`: the English names and
+synonyms Open Food Facts' ingredient taxonomy (pinned to a commit) links to CIQUAL or USDA foods with both fructose and
+sucrose measured, CIQUAL first. CIQUAL values below a detection limit ("< 0.2") count at the limit. CIQUAL data: ANSES, Ciqual 2020,
 [Licence Ouverte](https://www.etalab.gouv.fr/licence-ouverte-open-licence/).
 
 Open Food Facts data is under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), credited in
@@ -169,7 +172,7 @@ src/is_it_sugar/
   off.py          Open Food Facts product lookup (barcode) and search (name)
   known.py        common label ingredients matched to AFCD and CIQUAL measurements
   data/afcd.json  the AFCD subset, built by scripts/build_afcd.py
-  data/ciqual.json  CIQUAL sugars by ingredient name, built by scripts/build_ciqual.py
+  data/ingredients.json  CIQUAL and USDA sugars by ingredient name, built by scripts/build_ingredients.py
   cache.py        SQLite cache for results and ingredient ratings
   ratelimit.py    per-IP limits
   analyze.py      FoodData Central lookups, TypeSafe questions, verdicts

@@ -5,8 +5,8 @@ the form is unclear, the entry with more sugar is used, e.g. dried rather than c
 the amount in the product can only be lower. Concentrated forms ("onion powder", "dried apricots")
 aren't listed unless AFCD measured that form; they're left to the AI model.
 
-Other ingredients are looked up in CIQUAL, the French food composition table, by the names and
-synonyms Open Food Facts links to it (built by scripts/build_ciqual.py).
+Other ingredients are looked up by the names and synonyms Open Food Facts links to measured foods in
+CIQUAL, the French food composition table, or USDA FoodData Central (built by scripts/build_ingredients.py).
 
 Additives with no carbohydrate at all (vitamins, minerals, acids, leavening, fats) match by name pattern.
 """
@@ -20,7 +20,7 @@ from typing import Literal
 
 from . import afcd, sugars
 
-CIQUAL = Path(__file__).parent / "data" / "ciqual.json"
+LINKED = Path(__file__).parent / "data" / "ingredients.json"
 # AFCD measures sorbitol above zero only in these fruits and foods made from them (apples, pears and
 # stone fruits, all in the rose family). Other whole foods aren't expected to contain it.
 SORBITOL_FRUITS = {"apple", "pear", "nashi", "cherry", "plum", "prune", "apricot", "peach", "nectarine"}
@@ -211,7 +211,9 @@ FOODS: dict[str, str] = {
 }
 
 # Words that don't change what a food is, dropped before matching.
-QUALIFIERS = re.compile(r"\b(organic|fresh|pasteurized|pasteurised|natural|raw|distilled)\b")
+QUALIFIERS = re.compile(
+    r"\b(organic|fresh|pasteurized|pasteurised|natural|raw|distilled|non gmo|gmo free|certified|whole kernel)\b"
+)
 
 _MINERAL = r"(mono|di|tri|tetra)?(sodium|potassium|calcium|magnesium|ammonium|ferric|ferrous|zinc|copper|manganese)"
 _SALT = r"(phosphate|pyrophosphate|carbonate|bicarbonate|chloride|citrate|sulfate|sulphate|oxide|hydroxide|lactate|iodide|gluconate|propionate|sorbate|benzoate|silicate)"
@@ -247,7 +249,7 @@ NO_SUGAR = re.compile(
 class Measured:
     """Sugars per 100 g, from one food composition table."""
 
-    source: Literal["afcd", "ciqual"]
+    source: Literal["afcd", "ciqual", "fdc"]
     name: str
     fructose: float
     sucrose: float
@@ -283,16 +285,16 @@ _KEYS = {key(k): v for k, v in FOODS.items()}
 
 
 @cache
-def _ciqual() -> dict[str, Measured]:
-    data = json.loads(CIQUAL.read_text())
+def _linked() -> dict[str, Measured]:
+    data = json.loads(LINKED.read_text())
     foods = {
         code: Measured(
-            "ciqual",
+            f["source"],
             f["name"],
             f["fructose"],
             f["sucrose"],
             # CIQUAL reports polyols together; in these fruits they're mostly sorbitol.
-            f["polyols"] if is_sorbitol_fruit(f["name"]) else None,
+            f["polyols"] if f["polyols"] is not None and is_sorbitol_fruit(f["name"]) else None,
             tuple(s if s != "polyols" else "sorbitol" for s in f["below"]),
         )
         for code, f in data["foods"].items()
@@ -308,8 +310,8 @@ def lookup(name: str) -> Known | None:
     k = key(name)
     if k in _KEYS:
         return Known(name, _afcd(_KEYS[k]))
-    if k in _ciqual():
-        return Known(name, _ciqual()[k])
+    if k in _linked():
+        return Known(name, _linked()[k])
     if NO_SUGAR.fullmatch(sugars.norm(name)):
         return Known(name, None)
     return None

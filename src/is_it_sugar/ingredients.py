@@ -1,6 +1,7 @@
 """Split a label's ingredient statement into individual ingredients."""
 
 import re
+from dataclasses import dataclass
 
 # Section labels that introduce more ingredients, e.g. "contains 2% or less of:".
 _LEAD_IN = re.compile(
@@ -11,6 +12,21 @@ _TRAILER = re.compile(
     r"(?:^|[.;]\s*)(?:allergens?|contains|may contain|manufactured in|produced in)\b\s*:[^.]*\.?\s*$", re.IGNORECASE
 )
 _BRACKETS = {"(": ")", "[": "]", "{": "}"}
+# "contains 2% or less of", "less than 2% of": everything after is at most that share of the product.
+_AT_MOST = re.compile(r"(\d+(?:\.\d+)?)\s*%\s*or\s+less\s+of|less\s+than\s+(\d+(?:\.\d+)?)\s*%\s+of", re.IGNORECASE)
+# A share the label declares for one ingredient: "Wholewheat Flour (80%)", "tomatoes 45%".
+_DECLARED = re.compile(r"^(?:.*\s)?\(?(\d+(?:\.\d+)?)\s*%\)?$")
+
+
+@dataclass(frozen=True)
+class Ingredient:
+    name: str
+    share: float = 1.0  # the most this ingredient can be of the product, from 0 to 1
+    why: str = ""  # how `share` is known, e.g. "listed 3rd"
+
+
+def _ordinal(n: int) -> str:
+    return f"{n}{'th' if 10 <= n % 100 <= 20 else {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th')}"
 
 
 def looks_like_list(text: str) -> bool:
@@ -54,11 +70,32 @@ def _clean(name: str) -> str:
     return name.strip(" .*:")
 
 
-def parse(text: str) -> list[str]:
+def parse(text: str) -> list[Ingredient]:
     """Top-level ingredients. Each keeps its bracketed part, which describes it: "vegetable oil (canola,
-    soybean)" and "chocolate chips (sugar, cocoa butter)" stay whole."""
+    soybean)" and "chocolate chips (sugar, cocoa butter)" stay whole.
+
+    Labels list ingredients by weight, most first, so the nth is at most 1/n of the product. A
+    "2% or less" section, or a declared percentage, can bound it more tightly.
+    """
     text = _balance(_TRAILER.sub("", text.strip()).rstrip(" ."))
-    return list(dict.fromkeys(name for part in _split_top(text) if (name := _clean(part))))
+    found: dict[str, Ingredient] = {}
+    at_most: float | None = None
+    for part in _split_top(text):
+        if m := _AT_MOST.search(part):
+            at_most = float(m.group(1) or m.group(2))
+        name = _clean(part)
+        if not name or name in found:
+            continue
+        n = len(found) + 1
+        share, why = 1 / n, "the first ingredient" if n == 1 else f"listed {_ordinal(n)}"
+        if at_most is not None and at_most / 100 < share:
+            share, why = at_most / 100, f"in the {at_most:g}% or less part of the list"
+        base, inner = split(name)
+        declared = _DECLARED.match(base) or (len(inner) == 1 and _DECLARED.match(f"({inner[0]})"))
+        if declared:
+            share, why = float(declared.group(1)) / 100, f"declared as {float(declared.group(1)):g}%"
+        found[name] = Ingredient(name, min(share, 1.0), why)
+    return list(found.values())
 
 
 def split(ingredient: str) -> tuple[str, list[str]]:

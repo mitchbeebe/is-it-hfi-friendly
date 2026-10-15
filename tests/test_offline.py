@@ -11,14 +11,14 @@ from is_it_sugar.models import Food, Item
 
 def test_parse_strips_lead_ins_and_allergens():
     text = "INGREDIENTS: SUGAR, SALT. CONTAINS 2% OR LESS OF: CITRIC ACID, NATURAL FLAVOR. CONTAINS: MILK, SOY."
-    assert ingredients.parse(text) == ["SUGAR", "SALT", "CITRIC ACID", "NATURAL FLAVOR"]
+    assert [i.name for i in ingredients.parse(text)] == ["SUGAR", "SALT", "CITRIC ACID", "NATURAL FLAVOR"]
 
 
 def test_parse_keeps_brackets_with_their_ingredient():
     text = (
         "flour, chocolate chips (sugar, cocoa butter), vegetable oil (includes one of the following: canola, soybean)"
     )
-    assert ingredients.parse(text) == [
+    assert [i.name for i in ingredients.parse(text)] == [
         "flour",
         "chocolate chips (sugar, cocoa butter)",
         "vegetable oil (includes one of the following: canola, soybean)",
@@ -27,7 +27,7 @@ def test_parse_keeps_brackets_with_their_ingredient():
 
 def test_parse_closes_unclosed_brackets():
     text = "Wholewheat Flour (80%), Flavouring [Yeast Extract (Barley), Salt, Vegetable Extract (Carrot), White Pepper."
-    assert ingredients.parse(text) == [
+    assert [i.name for i in ingredients.parse(text)] == [
         "Wholewheat Flour (80%)",
         "Flavouring [Yeast Extract (Barley), Salt, Vegetable Extract (Carrot), White Pepper]",
     ]
@@ -70,26 +70,61 @@ def test_split_separates_what_brackets_say():
     ],
 )
 def test_decide_uses_bu_table_then_measured_foods(ingredient, status, basis):
-    item = analyze._decide(ingredient)
+    item = analyze._decide(ingredients.Ingredient(ingredient))
     assert item is not None and (item.status, item.basis) == (status, basis)
 
 
 @pytest.mark.parametrize(
     "ingredient",
-    ["onion powder", "natural flavor", "chocolate (dextrose, cocoa butter)", "yeast extract", "dried cranberries"],
+    [
+        "natural smoke flavor",
+        "natural flavor",
+        "chocolate (dextrose, cocoa butter)",
+        "yeast extract",
+        "dried cranberries",
+    ],
 )
 def test_decide_leaves_the_rest_to_jev(ingredient):
-    assert analyze._decide(ingredient) is None
+    assert analyze._decide(ingredients.Ingredient(ingredient)) is None
 
 
 def test_measured_ingredient_is_an_upper_bound_for_the_trace_rule():
-    flour = analyze._decide("wheat flour")
+    flour = analyze._decide(ingredients.Ingredient("wheat flour"))
     assert flour is not None and flour.grams == 0.7 and flour.sugars == ["sucrose"]
-    onion = analyze._decide("onion")
+    onion = analyze._decide(ingredients.Ingredient("onion"))
     assert onion is not None and onion.grams == pytest.approx(1.7 + 1.9 / 2)
     # Only measured amounts: flour alone is under 0.5 g, flour and onion under neither limit.
     assert prefs.apply(analyze.summarize([flour]), trace_limit=1.0).verdict == "ok"
     assert prefs.apply(analyze.summarize([flour, onion]), trace_limit=1.0).verdict == "avoid"
+
+
+def test_parse_bounds_each_ingredients_share_of_the_product():
+    text = "POPCORN, SUNFLOWER OIL, SEA SALT, CONTAINS 2% OR LESS OF: PAPRIKA, tomatoes 45%"
+    shares = {i.name: (round(i.share, 3), i.why) for i in ingredients.parse(text)}
+    assert shares == {
+        "POPCORN": (1.0, "the first ingredient"),
+        "SUNFLOWER OIL": (0.5, "listed 2nd"),
+        "SEA SALT": (0.333, "listed 3rd"),
+        "PAPRIKA": (0.02, "in the 2% or less part of the list"),
+        "tomatoes 45%": (0.45, "declared as 45%"),
+    }
+
+
+def test_measured_ingredient_counts_at_its_share():
+    paprika = ingredients.parse("popcorn, salt, contains 2% or less of: paprika")[2]
+    item = analyze._decide(paprika)
+    assert item is not None and item.basis == "ciqual"
+    assert item.grams == pytest.approx((6.71 + 0.81 / 2) * 0.02)
+    assert "in the 2% or less part of the list, so at most 2% of the product" in item.reason
+    # Popcorn (0.43 g load) and up to 2% paprika (0.14 g): all measured, just over 0.5 g, so small amounts.
+    items = [
+        analyze._decide(i)
+        for i in ingredients.parse("ORGANIC NON-GMO POPCORN, SEA SALT, CONTAINS 2% OR LESS OF: PAPRIKA")
+    ]
+    assert all(items) and items[0].basis == "ciqual"
+    r = prefs.apply(analyze.summarize(items), trace_limit=1.0)
+    assert (r.verdict, r.headline) == ("caution", "Small amounts of fructose and sucrose")
+    assert prefs.apply(analyze.summarize(items[:2]), trace_limit=1.0).verdict == "ok"  # popcorn and salt alone
 
 
 def test_known_foods_exist_and_are_measured():
@@ -116,7 +151,7 @@ def test_label_note_needs_confidence():
 
 
 def test_parse_keeps_decimals():
-    assert ingredients.parse("salt, vitamin b2 0.5%, sugar") == ["salt", "vitamin b2 0.5%", "sugar"]
+    assert [i.name for i in ingredients.parse("salt, vitamin b2 0.5%, sugar")] == ["salt", "vitamin b2 0.5%", "sugar"]
 
 
 @pytest.mark.parametrize("text", ["sugar, salt", "Ingredients: water", "a; b"])
@@ -474,10 +509,10 @@ def test_very_low_load_is_tolerated():
 def test_label_with_zero_sugar_makes_fructose_and_sucrose_sources_caution():
     sausage = {"servingSize": 85.0, "servingSizeUnit": "GRM", "householdServingFullText": "1 link"}
     items = [
-        analyze._decide("RED PEPPER"),
-        analyze._decide("sugar"),
-        analyze._decide("sorbitol"),
-        analyze._decide("SALT"),
+        analyze._decide(ingredients.Ingredient("RED PEPPER")),
+        analyze._decide(ingredients.Ingredient("sugar")),
+        analyze._decide(ingredients.Ingredient("sorbitol")),
+        analyze._decide(ingredients.Ingredient("SALT")),
         *analyze.measured_sugars({"Total Sugars": 0.0}, None)[0],
     ]
     marked = analyze.label_zero_sugar([i for i in items if i], sausage)

@@ -1,0 +1,5934 @@
+{
+"source": "ANSES, Ciqual French food composition table 2020 (Licence Ouverte / Open Licence); USDA FoodData Central (public domain). Ingredient names from the Open Food Facts taxonomy (ODbL).",
+"names": {
+"black pepper": "ciqual:11015",
+"ground black pepper": "ciqual:11015",
+"popcorn": "ciqual:9231",
+"popcorn kernels": "ciqual:9231",
+"popping corn": "ciqual:9231",
+"50-63% unsalted vegetable fat": "ciqual:16741",
+"50-63% unsalted vegetable fat with plant sterols esters": "ciqual:16739",
+"70% fat mayonnaise": "ciqual:11054",
+"80% fat salted butter": "ciqual:16403",
+"82% fat unsalted butter": "ciqual:16400",
+"abondance": "ciqual:12112",
+"abondance cheese from cow's milk": "ciqual:12112",
+"alaska pollock": "ciqual:26006",
+"alaskan pollock": "ciqual:26006",
+"almond": "ciqual:15041",
+"almond kernel": "ciqual:15041",
+"almond with skin": "ciqual:15000",
+"almonds": "ciqual:15041",
+"amaranth": "ciqual:9345",
+"ananas": "ciqual:13002",
+"angler fish": "ciqual:26018",
+"anglerfish": "ciqual:26018",
+"apple": "ciqual:13050",
+"apple juice": "ciqual:2074",
+"apple juice made from fresh apples": "ciqual:2074",
+"apple pulp": "ciqual:13050",
+"apples": "ciqual:13050",
+"apricot": "ciqual:13000",
+"apricot jam": "ciqual:31037",
+"apricot marmalade": "ciqual:31037",
+"avocado": "ciqual:13004",
+"bacon": "ciqual:28858",
+"badaam giri": "ciqual:15041",
+"baguette": "ciqual:7001",
+"baker's yeast": "ciqual:11045",
+"balsamic vinegar": "ciqual:11091",
+"banana": "ciqual:13005",
+"barbecue sauce": "ciqual:11100",
+"basmati": "ciqual:9119",
+"basmati rice": "ciqual:9119",
+"batavia": "ciqual:20123",
+"bayonne ham": "ciqual:28811",
+"bean curds": "ciqual:20904",
+"bechamel": "ciqual:11101",
+"bechamel sauce": "ciqual:11101",
+"beef broth": "ciqual:11001",
+"beef steak": "ciqual:6201",
+"beef stock": "ciqual:11001",
+"belgian endive": "ciqual:20026",
+"bengal gram": "ciqual:20516",
+"berries": "ciqual:13997",
+"berry": "ciqual:13997",
+"biscuit": "ciqual:24000",
+"biscuits": "ciqual:24000",
+"black currant": "ciqual:13007",
+"black pepper powder": "ciqual:11015",
+"black radish": "ciqual:20089",
+"black seabream": "ciqual:26099",
+"black treacle": "ciqual:31067",
+"blackberries": "ciqual:13029",
+"blackberry": "ciqual:13029",
+"blackcurrant": "ciqual:13007",
+"blackcurrants": "ciqual:13007",
+"bleu d'auvergne": "ciqual:12521",
+"blue cheese from cow's milk": "ciqual:12520",
+"blueberries": "ciqual:13028",
+"blueberry": "ciqual:13028",
+"boar": "ciqual:14002",
+"bogue": "ciqual:26100",
+"boiled chickpeas": "ciqual:20507",
+"bolognese sauce": "ciqual:11114",
+"brazil nut": "ciqual:15008",
+"brazil nuts": "ciqual:15008",
+"bread": "ciqual:7000",
+"bread crumbs": "ciqual:7500",
+"breadcrumbs": "ciqual:7500",
+"breading": "ciqual:7500",
+"brie": "ciqual:12020",
+"brie cheese": "ciqual:12020",
+"brie de meaux": "ciqual:12021",
+"brie de meaux cheese from cow's milk": "ciqual:12021",
+"brie de melun": "ciqual:12022",
+"brie de melun cheese from cow's milk": "ciqual:12022",
+"brioche": "ciqual:7741",
+"brioches": "ciqual:7741",
+"broccoli": "ciqual:20057",
+"broccoli cuts": "ciqual:20057",
+"brown flax seeds": "ciqual:15052",
+"brown flaxseed": "ciqual:15052",
+"brown linseed": "ciqual:15052",
+"brown rice": "ciqual:9102",
+"brown sugar": "ciqual:31017",
+"brussels sprouts": "ciqual:20058",
+"bulgar": "ciqual:9690",
+"bulgur": "ciqual:9690",
+"bulgur wheat": "ciqual:9690",
+"burger sauce": "ciqual:11196",
+"butter milk": "ciqual:19801",
+"buttermilk": "ciqual:19801",
+"b\u00e9arnaise sauce": "ciqual:11102",
+"b\u00e9chamel": "ciqual:11101",
+"b\u00e9chamel sauce": "ciqual:11101",
+"cake": "ciqual:23000",
+"cakes": "ciqual:23000",
+"camembert": "ciqual:12001",
+"camembert cheese": "ciqual:12001",
+"cane molasses": "ciqual:31067",
+"cane sugar molasses": "ciqual:31067",
+"canned concentrated tomato paste": "ciqual:20068",
+"canned corn": "ciqual:20066",
+"canned double concentrate tomato paste": "ciqual:20268",
+"cantal": "ciqual:12722",
+"cantal cheese half matured from cow's milk": "ciqual:12722",
+"cantal salers": "ciqual:12723",
+"cantaloupe": "ciqual:13026",
+"cantaloupe melon": "ciqual:13026",
+"cape hake": "ciqual:26233",
+"carrot": "ciqual:20009",
+"carrot juice": "ciqual:2006",
+"catsup": "ciqual:11008",
+"cauliflower": "ciqual:20016",
+"celery stalk": "ciqual:20023",
+"champignon": "ciqual:20056",
+"chaource cheese": "ciqual:12028",
+"chard": "ciqual:20004",
+"chards": "ciqual:20004",
+"charentais melon": "ciqual:13026",
+"chasselas": "ciqual:13101",
+"cheddar": "ciqual:12726",
+"cheddar cheese": "ciqual:12726",
+"cheddar cheese from cow's milk": "ciqual:12726",
+"cheese": "ciqual:12999",
+"cheese grana padano": "ciqual:12123",
+"cheese sauce": "ciqual:11189",
+"cherries": "ciqual:13008",
+"cherry": "ciqual:13008",
+"cherry tomato": "ciqual:20172",
+"cherry tomatoes": "ciqual:20172",
+"chestnut spread": "ciqual:15013",
+"chicken": "ciqual:36016",
+"chickens": "ciqual:36016",
+"chicory": "ciqual:20026",
+"chinese gooseberry": "ciqual:13021",
+"chocolate powder": "ciqual:18101",
+"cinnamon powder": "ciqual:11025",
+"clam": "ciqual:10017",
+"clams": "ciqual:10017",
+"clove": "ciqual:11052",
+"cocoa powder": "ciqual:18100",
+"coconut cream": "ciqual:18041",
+"coconut juice": "ciqual:18011",
+"coconut milk": "ciqual:18041",
+"coconut water": "ciqual:18011",
+"cod": "ciqual:26043",
+"codfish": "ciqual:26043",
+"colza oil": "ciqual:17130",
+"colza vegetable oil": "ciqual:17130",
+"common cornsalad": "ciqual:20099",
+"common dab": "ciqual:26057",
+"common ling": "ciqual:26130",
+"compressed baker's yeast": "ciqual:11010",
+"comt\u00e9": "ciqual:12110",
+"comt\u00e9 cheese": "ciqual:12110",
+"comt\u00e9 cheese from cow's milk": "ciqual:12110",
+"condensed whole milk": "ciqual:19026",
+"cooked chickpeas": "ciqual:20507",
+"cooked green lentils": "ciqual:20587",
+"cooked potato": "ciqual:4048",
+"cooked shortbread dough": "ciqual:23442",
+"cooked spelt freekeh": "ciqual:51510",
+"cooked spinach": "ciqual:20027",
+"cooked sweet potato": "ciqual:4102",
+"corn flour": "ciqual:9545",
+"corn salad": "ciqual:20099",
+"corn starch": "ciqual:9510",
+"cornflour": "ciqual:9545",
+"cornstarch": "ciqual:9510",
+"cos": "ciqual:20171",
+"courgette": "ciqual:20020",
+"cous cous": "ciqual:9683",
+"couscous": "ciqual:9683",
+"cranberries": "ciqual:13113",
+"cranberry": "ciqual:13113",
+"crassostrea gigas": "ciqual:10035",
+"crayfish": "ciqual:10030",
+"cream": "ciqual:19402",
+"creme anglaise": "ciqual:39700",
+"crottin cheese": "ciqual:12833",
+"crottin cheese from goat's milk": "ciqual:12833",
+"crottin de chavignol cheese": "ciqual:12834",
+"crottin de chavignol cheese from goat's milk": "ciqual:12834",
+"crustacean": "ciqual:10043",
+"crustaceans": "ciqual:10043",
+"cr\u00e8me anglaise": "ciqual:39700",
+"cucumber": "ciqual:20019",
+"cucumbers": "ciqual:20019",
+"cultivated mushrooms": "ciqual:20056",
+"cup mushroom": "ciqual:20056",
+"cured meat": "ciqual:30900",
+"curly cale": "ciqual:20218",
+"curly kale": "ciqual:20218",
+"curry powder": "ciqual:11005",
+"curry sauce": "ciqual:11132",
+"cuttlefish": "ciqual:10016",
+"date": "ciqual:13011",
+"dates": "ciqual:13011",
+"decaffeinated coffee": "ciqual:18070",
+"dehydrated and reconstituted tomato soup": "ciqual:25935",
+"dehydrated beef bouillon": "ciqual:11001",
+"dehydrated beef stock": "ciqual:11001",
+"desiccated coconut": "ciqual:15007",
+"doucette": "ciqual:20099",
+"dried basil": "ciqual:11032",
+"dried chickpea": "ciqual:20516",
+"dried garlic": "ciqual:11023",
+"dried lentils": "ciqual:20504",
+"dried oregano": "ciqual:11035",
+"dried pasta": "ciqual:9810",
+"dried peach": "ciqual:13118",
+"dried plum": "ciqual:13042",
+"dried split pea": "ciqual:20515",
+"drinking water": "ciqual:18066",
+"dry roasted pistachios": "ciqual:15044",
+"dry white wine": "ciqual:5215",
+"dry-cured ham": "ciqual:28812",
+"dry-cured serrano ham": "ciqual:28845",
+"dry-grilled and unsalted cashew nut": "ciqual:15055",
+"duck": "ciqual:36201",
+"duck meat": "ciqual:36201",
+"dulce de leche": "ciqual:31040",
+"edam": "ciqual:12729",
+"edam cheese": "ciqual:12729",
+"edam cheese from cow's milk": "ciqual:12729",
+"edible fungi": "ciqual:20056",
+"egg": "ciqual:22000",
+"egg albumen": "ciqual:22001",
+"egg albumin": "ciqual:22001",
+"egg white": "ciqual:22001",
+"egg yolk": "ciqual:22002",
+"egg yolk powder": "ciqual:22003",
+"eggs": "ciqual:22000",
+"eggs yolk": "ciqual:22002",
+"eggs yolk powder": "ciqual:22003",
+"elderberries": "ciqual:13126",
+"elderberry": "ciqual:13126",
+"emmental": "ciqual:12115",
+"emmental cheese": "ciqual:12115",
+"emmental cheese from cow's milk": "ciqual:12115",
+"emmental cheese grated from cow's milk": "ciqual:12118",
+"emmentaler cheese": "ciqual:12115",
+"english peas": "ciqual:20072",
+"european conger": "ciqual:26127",
+"european hake": "ciqual:26044",
+"european pilchard": "ciqual:26065",
+"extra old mimolette": "ciqual:12742",
+"extra old mimolette cheese": "ciqual:12742",
+"extra old mimolette cheese from cow's milk": "ciqual:12742",
+"extra virgin olive oil": "ciqual:17270",
+"faiselle": "ciqual:19641",
+"falafel": "ciqual:25571",
+"farmed rainbow trout": "ciqual:27009",
+"farmed raw carp": "ciqual:27003",
+"fat free yogurt": "ciqual:19671",
+"fennel": "ciqual:20028",
+"feta": "ciqual:12061",
+"feta cheese": "ciqual:12061",
+"feta cheese from ewe's milk": "ciqual:12061",
+"fetticus": "ciqual:20099",
+"field salad": "ciqual:20099",
+"fig": "ciqual:13012",
+"figs": "ciqual:13012",
+"filbert": "ciqual:15004",
+"filberts": "ciqual:15004",
+"flat bean": "ciqual:20269",
+"flat beans": "ciqual:20269",
+"flat green beans": "ciqual:20269",
+"flax seed": "ciqual:15034",
+"flax seeds": "ciqual:15034",
+"flaxseed": "ciqual:15034",
+"fourme d'ambert": "ciqual:12522",
+"frankfurter sausages": "ciqual:30134",
+"freekeh": "ciqual:51510",
+"french bean": "ciqual:20061",
+"fresh basil": "ciqual:11033",
+"fresh cream": "ciqual:19402",
+"fresh garlic": "ciqual:11000",
+"fresh sage": "ciqual:11069",
+"fresh walnut": "ciqual:15023",
+"freshly squeezed orange juice": "ciqual:2070",
+"frik": "ciqual:51510",
+"frog legs": "ciqual:34500",
+"fromage blanc": "ciqual:19501",
+"fructose": "ciqual:31077",
+"fruit juice": "ciqual:2004",
+"fruit juice from concentrate": "ciqual:2077",
+"fruit juices from concentrate": "ciqual:2077",
+"full cream milk": "ciqual:19023",
+"full grain rice": "ciqual:9102",
+"garden cress": "ciqual:20199",
+"garden peas": "ciqual:20072",
+"garlic powder": "ciqual:11023",
+"garlic powders": "ciqual:11023",
+"gelatin": "ciqual:11007",
+"ginger powder": "ciqual:11006",
+"gingerbread": "ciqual:23200",
+"goat's milk yogurt": "ciqual:19556",
+"goose meat": "ciqual:36501",
+"gorgonzola": "ciqual:12524",
+"gorgonzola cheese": "ciqual:12524",
+"gouda": "ciqual:12736",
+"gouda cheese": "ciqual:12736",
+"gouda cheese from cow's milk": "ciqual:12736",
+"grana padano": "ciqual:12123",
+"grana padano cheese": "ciqual:12123",
+"grana padano cheese from cow's milk": "ciqual:12123",
+"granola": "ciqual:32004",
+"grape": "ciqual:13112",
+"grape juice": "ciqual:2016",
+"grape juice from concentrate": "ciqual:2019",
+"grape seed oil": "ciqual:17350",
+"grapefruit pulp": "ciqual:13040",
+"grated emmental cheese": "ciqual:12118",
+"greek-style marinated mushrooms": "ciqual:25605",
+"green bean": "ciqual:20061",
+"green beans": "ciqual:20061",
+"green bell pepper": "ciqual:20085",
+"green cabbage": "ciqual:20069",
+"green grape": "ciqual:13044",
+"green olive": "ciqual:13033",
+"green olives": "ciqual:13033",
+"greengage": "ciqual:13041",
+"grilled and salted cashew nut": "ciqual:15019",
+"grilled and unsalted cashew nut": "ciqual:15054",
+"grilled aubergines": "ciqual:20300",
+"grilled chestnut": "ciqual:15021",
+"grilled courgette": "ciqual:20313",
+"grilled pistachio nut": "ciqual:15044",
+"ground ginger": "ciqual:11006",
+"guacamole": "ciqual:25620",
+"guava": "ciqual:13083",
+"guavas": "ciqual:13083",
+"haddock": "ciqual:26122",
+"hard cheese": "ciqual:12100",
+"hard-boiled egg": "ciqual:22010",
+"harissa": "ciqual:11112",
+"harissa paste": "ciqual:11112",
+"hazelnut": "ciqual:15004",
+"hazelnut oil": "ciqual:17210",
+"hazelnuts": "ciqual:15004",
+"helda bean": "ciqual:20269",
+"herring": "ciqual:26011",
+"honey": "ciqual:31008",
+"honeydew melon": "ciqual:13742",
+"houmous": "ciqual:25621",
+"hummus": "ciqual:25621",
+"husked sesame seed": "ciqual:15035",
+"iceberg lettuce": "ciqual:20200",
+"jasmine rice": "ciqual:9119",
+"kale": "ciqual:20218",
+"kefir": "ciqual:19865",
+"kephir": "ciqual:19865",
+"ketchup": "ciqual:11008",
+"khorasan wheat": "ciqual:9003",
+"kiwi": "ciqual:13021",
+"kiwi fruit": "ciqual:13021",
+"kiwifruit": "ciqual:13021",
+"kumquat": "ciqual:13549",
+"kumquats": "ciqual:13549",
+"laguiole cheese from cow's milk": "ciqual:12723",
+"lamb cutlet": "ciqual:21500",
+"lamb leg": "ciqual:21502",
+"lamb shoulders": "ciqual:21504",
+"lamb's lettuce": "ciqual:20099",
+"langres": "ciqual:12040",
+"lard": "ciqual:16520",
+"lardon": "ciqual:28501",
+"lardoon": "ciqual:28501",
+"leaf beet": "ciqual:20004",
+"leek": "ciqual:20039",
+"lemon pulp": "ciqual:13009",
+"lemon sole": "ciqual:26135",
+"lettuce": "ciqual:20031",
+"lettuces": "ciqual:20031",
+"light custard cream with vanilla": "ciqual:39700",
+"light mayonnaise": "ciqual:11079",
+"lightly salted 80% fat butter": "ciqual:16402",
+"lightly salted butter": "ciqual:16402",
+"lime pulp": "ciqual:13067",
+"ling": "ciqual:26130",
+"linseed": "ciqual:15034",
+"linseed seeds": "ciqual:15034",
+"linseeds": "ciqual:15034",
+"liquid 30% fat uht cream": "ciqual:19415",
+"litchi": "ciqual:13023",
+"litchis": "ciqual:13023",
+"livarot": "ciqual:12037",
+"lobster": "ciqual:10010",
+"lobster meat": "ciqual:10010",
+"low fat mayonnaise": "ciqual:11079",
+"low fat yogurt": "ciqual:19671",
+"lychee": "ciqual:13023",
+"maasdam-type firm cheese with around 27% fat": "ciqual:12741",
+"macadamia": "ciqual:15027",
+"macadamia nut": "ciqual:15027",
+"mackerel": "ciqual:26051",
+"maize flour": "ciqual:9545",
+"maize starch": "ciqual:9510",
+"mamra giri": "ciqual:15041",
+"mango": "ciqual:13025",
+"mango puree": "ciqual:13025",
+"mangoes": "ciqual:13025",
+"maple syrup": "ciqual:31034",
+"maracuja": "ciqual:13016",
+"maroilles": "ciqual:12036",
+"marshmallow": "ciqual:31050",
+"mascarpone": "ciqual:19584",
+"mascarpone cheese": "ciqual:19584",
+"mashed potato": "ciqual:4047",
+"mashed potatoes": "ciqual:4047",
+"mayonnaise": "ciqual:11054",
+"meringue": "ciqual:24520",
+"merling": "ciqual:26095",
+"milk chocolate": "ciqual:31004",
+"milk chocolate bar": "ciqual:31004",
+"milk cream": "ciqual:19402",
+"milk jam": "ciqual:31040",
+"millet flour": "ciqual:9555",
+"mimolette": "ciqual:12740",
+"mimolette cheese": "ciqual:12740",
+"mimolette cheese from cow's milk": "ciqual:12740",
+"mini marshmallow": "ciqual:31050",
+"miso": "ciqual:20916",
+"miso paste": "ciqual:20916",
+"mixed vine fruit": "ciqual:13112",
+"molasses": "ciqual:31067",
+"molasses of cane sugar": "ciqual:31067",
+"mollusc": "ciqual:10043",
+"molluscs": "ciqual:10043",
+"mollusk": "ciqual:10043",
+"mollusks": "ciqual:10043",
+"monkfish": "ciqual:26018",
+"morbier": "ciqual:12743",
+"morbier aop": "ciqual:12743",
+"mozzarella": "ciqual:19590",
+"mozzarella cheese": "ciqual:19590",
+"mozzarella soft cheese": "ciqual:19590",
+"mueslis": "ciqual:32004",
+"mullet": "ciqual:26091",
+"munster": "ciqual:12039",
+"munster cheese from cow's milk": "ciqual:12039",
+"munster cheeses": "ciqual:12039",
+"mushroom": "ciqual:20056",
+"mussel": "ciqual:10014",
+"mussels": "ciqual:10014",
+"mustard": "ciqual:11013",
+"m\u00fcesli": "ciqual:32004",
+"nectarine": "ciqual:13030",
+"neufch\u00e2tel": "ciqual:12031",
+"nntural shelled walnuts": "ciqual:15005",
+"nonfat dry milk": "ciqual:19054",
+"nusslisalat": "ciqual:20099",
+"nut lettuce": "ciqual:20099",
+"nutritional yeast": "ciqual:11009",
+"oat flakes": "ciqual:9311",
+"oatflakes": "ciqual:9311",
+"oatmeal flakes": "ciqual:9311",
+"octopus": "ciqual:10018",
+"old mimolette": "ciqual:12738",
+"old mimolette cheese": "ciqual:12738",
+"old mimolette cheese from cow's milk": "ciqual:12738",
+"olive": "ciqual:13184",
+"olives": "ciqual:13184",
+"onion": "ciqual:20034",
+"onions": "ciqual:20034",
+"orange juice from concentrate": "ciqual:2012",
+"orange juice from orange juice concentrate": "ciqual:2012",
+"orange juice made with concentrate": "ciqual:2012",
+"orange marmalade": "ciqual:31039",
+"orange pulp": "ciqual:13034",
+"oyster": "ciqual:10011",
+"oyster mushroom": "ciqual:20114",
+"oysters": "ciqual:10011",
+"pacific oyster": "ciqual:10035",
+"papaw": "ciqual:13035",
+"papaya": "ciqual:13035",
+"paprika": "ciqual:11049",
+"parboiled rice": "ciqual:9101",
+"parmesan": "ciqual:12120",
+"parmesan cheese": "ciqual:12120",
+"parmesan cheese from cow's milk": "ciqual:12120",
+"parmigiano reggiano": "ciqual:12120",
+"parmigiano reggiano cheese": "ciqual:12120",
+"parsley": "ciqual:11014",
+"passata": "ciqual:20170",
+"passion fruit": "ciqual:13016",
+"passionfruit": "ciqual:13016",
+"pasteurised whole milk": "ciqual:19024",
+"pasteurized semi-skimmed milk": "ciqual:19042",
+"pasteurized skimmed milk": "ciqual:19051",
+"pasteurized whole milk": "ciqual:19024",
+"pawpaw": "ciqual:13035",
+"peach puree": "ciqual:13043",
+"peanut": "ciqual:15001",
+"peanut butter or peanut paste": "ciqual:15202",
+"peanut oil": "ciqual:17040",
+"peanuts": "ciqual:15001",
+"pecan": "ciqual:15026",
+"pecan nut": "ciqual:15026",
+"pecan nuts": "ciqual:15026",
+"pecans": "ciqual:15026",
+"persimmon pulp": "ciqual:13066",
+"pesto": "ciqual:11179",
+"pesto sauce": "ciqual:11179",
+"picodon": "ciqual:12836",
+"picodon cheese from goat's milk": "ciqual:12836",
+"pine nut kernels": "ciqual:15025",
+"pine nuts": "ciqual:15025",
+"pineapple": "ciqual:13002",
+"pineapple juice": "ciqual:2073",
+"pinenuts": "ciqual:15025",
+"pink grapefruit": "ciqual:13180",
+"pita": "ciqual:7180",
+"pita bread": "ciqual:7180",
+"pitta": "ciqual:7180",
+"pitta bread": "ciqual:7180",
+"pitted cherry": "ciqual:13008",
+"pitted dried apricots": "ciqual:13001",
+"pizza sauce": "ciqual:25525",
+"plain goat's milk yogurt with around 5% fat": "ciqual:19556",
+"plain yogurt": "ciqual:19600",
+"plant oils": "ciqual:17001",
+"plum": "ciqual:13100",
+"poached egg": "ciqual:22011",
+"pollack": "ciqual:26129",
+"pollock": "ciqual:26134",
+"pomelo pulp": "ciqual:13040",
+"pont l'ev\u00eaque": "ciqual:12042",
+"poppy seed": "ciqual:11061",
+"poppy seeds": "ciqual:11061",
+"poppyseed": "ciqual:11061",
+"pork bellies": "ciqual:28002",
+"pork belly": "ciqual:28002",
+"pork chops": "ciqual:28100",
+"pork fillet": "ciqual:28201",
+"pork lard": "ciqual:16520",
+"pork loin": "ciqual:28003",
+"pork shoulder": "ciqual:28001",
+"pork spare-ribs": "ciqual:28400",
+"pork tenderloin": "ciqual:28201",
+"potato flakes": "ciqual:4022",
+"powdered egg yolk": "ciqual:22003",
+"prepackaged burger sauce": "ciqual:11196",
+"prepacked almond paste": "ciqual:15201",
+"prepacked bearnaise sauce": "ciqual:11102",
+"prepacked burger sauce": "ciqual:11196",
+"prepacked harissa": "ciqual:11112",
+"prepacked marzipan": "ciqual:15201",
+"prepacked pesto sauce": "ciqual:11179",
+"prepared meat": "ciqual:30900",
+"processed meat": "ciqual:30900",
+"prune": "ciqual:13042",
+"quark": "ciqual:19501",
+"queensland nuts": "ciqual:15027",
+"quenelle": "ciqual:8937",
+"quenelles": "ciqual:8937",
+"rabbit meat": "ciqual:34001",
+"raclette": "ciqual:12749",
+"radish": "ciqual:20045",
+"radishes": "ciqual:20045",
+"raiponce": "ciqual:20099",
+"raisin": "ciqual:13046",
+"raisin juice": "ciqual:2016",
+"raisins": "ciqual:13046",
+"rapeseed fat": "ciqual:17130",
+"rapeseed oil": "ciqual:17130",
+"rapeseed oil and fat": "ciqual:17130",
+"rapeseed vegetable oil": "ciqual:17130",
+"rapunzel": "ciqual:20099",
+"raspberries": "ciqual:13015",
+"raspberry": "ciqual:13015",
+"raspberry jam": "ciqual:31062",
+"raw alaska pollock": "ciqual:26006",
+"raw almond kernels": "ciqual:15041",
+"raw aubergine": "ciqual:20053",
+"raw broccoli": "ciqual:20057",
+"raw celeriac": "ciqual:20055",
+"raw chicken meat and skin": "ciqual:36003",
+"raw common octopus": "ciqual:10018",
+"raw common sole": "ciqual:26058",
+"raw cucumber pulp": "ciqual:20210",
+"raw european plaice": "ciqual:26055",
+"raw european seabass": "ciqual:26072",
+"raw farmed salmon": "ciqual:26036",
+"raw garlic": "ciqual:11000",
+"raw ginger": "ciqual:11074",
+"raw goat milk": "ciqual:19202",
+"raw ham": "ciqual:28800",
+"raw lean pork tenderloin": "ciqual:28201",
+"raw lime pulp": "ciqual:13067",
+"raw minced beef steak with 15% fat": "ciqual:6254",
+"raw minced beef steak with 5% fat": "ciqual:6250",
+"raw persimmon pulp": "ciqual:13066",
+"raw pork loin": "ciqual:28003",
+"raw pork shoulder": "ciqual:28001",
+"raw pumpkin": "ciqual:20139",
+"raw salmon": "ciqual:26036",
+"raw spinach": "ciqual:20059",
+"raw sprouted alfalfa seeds": "ciqual:15029",
+"raw tuna": "ciqual:26053",
+"red bell pepper": "ciqual:20087",
+"red cabbage": "ciqual:20014",
+"red capsicum": "ciqual:20087",
+"red currant": "ciqual:13019",
+"red fruit": "ciqual:13997",
+"red fruits": "ciqual:13997",
+"red grape": "ciqual:13045",
+"red lentils": "ciqual:20535",
+"red mullet": "ciqual:26085",
+"red pepper": "ciqual:20087",
+"red radish": "ciqual:20045",
+"red rice": "ciqual:9109",
+"redcurrant": "ciqual:13019",
+"reduced fat mayonnaise": "ciqual:11079",
+"refrigerated 30% fat thick cream": "ciqual:19410",
+"refrigerated panna cotta": "ciqual:19685",
+"rehydrated textured soy protein": "ciqual:20591",
+"rice bran": "ciqual:9643",
+"rice flour": "ciqual:9520",
+"riceflour": "ciqual:9520",
+"ricotta": "ciqual:19585",
+"ricotta cheese": "ciqual:19585",
+"rocamadour": "ciqual:12847",
+"rocamadour cheese": "ciqual:12847",
+"rocamadour cheese from goat's milk": "ciqual:12847",
+"rolled oats": "ciqual:9311",
+"romaine lettuce": "ciqual:20171",
+"romano bean": "ciqual:20269",
+"roquefort": "ciqual:12500",
+"roquefort cheese": "ciqual:12500",
+"roquefort cheese from ewe's milk": "ciqual:12500",
+"royal jelly": "ciqual:31108",
+"runner bean": "ciqual:20269",
+"rusk": "ciqual:7300",
+"rutabaga": "ciqual:20201",
+"rye": "ciqual:9390",
+"rye bread": "ciqual:7125",
+"rye flour t130": "ciqual:9533",
+"rye flour t170": "ciqual:9530",
+"rye flour t85": "ciqual:9532",
+"rye flour type 130": "ciqual:9533",
+"rye flour type 170": "ciqual:9530",
+"rye flour type 85": "ciqual:9532",
+"sabl\u00e9": "ciqual:24071",
+"sabl\u00e9 biscuit": "ciqual:24071",
+"sabl\u00e9 cookie": "ciqual:24071",
+"sabl\u00e9s": "ciqual:24071",
+"saint marcellin": "ciqual:12049",
+"saint nectaire": "ciqual:12752",
+"sainte maure cheese": "ciqual:12842",
+"sainte maure cheese from goat's milk": "ciqual:12842",
+"saithe": "ciqual:26134",
+"salami": "ciqual:30350",
+"salers": "ciqual:12725",
+"salers cheese": "ciqual:12725",
+"salmon": "ciqual:26036",
+"salted butter": "ciqual:16403",
+"sardine": "ciqual:26065",
+"sardines": "ciqual:26065",
+"savoy cabbage": "ciqual:20069",
+"scallop with coral": "ciqual:10003",
+"scallop without coral": "ciqual:10045",
+"sea trout": "ciqual:26092",
+"seakale beet": "ciqual:20004",
+"seitan": "ciqual:25598",
+"semi-skimmed milk powder": "ciqual:19044",
+"semi-skimmed pasteurized goat milk uht": "ciqual:19201",
+"shallot": "ciqual:20097",
+"shallots": "ciqual:20097",
+"shallow-water cape hake": "ciqual:26233",
+"shortbread": "ciqual:24071",
+"shortbread cookie": "ciqual:24071",
+"shortbread cookies": "ciqual:24071",
+"shortcrust dough": "ciqual:23410",
+"silver beet": "ciqual:20004",
+"skimmed cow's milk powder": "ciqual:19054",
+"skimmed milk powder": "ciqual:19054",
+"skimmed yogurt": "ciqual:19671",
+"smoked cured ham": "ciqual:28801",
+"smoked lardoons": "ciqual:28720",
+"smoked pork belly": "ciqual:28502",
+"smoked salmon": "ciqual:26037",
+"snail": "ciqual:10008",
+"soft-boiled egg": "ciqual:22014",
+"solid vegetable fat for frying": "ciqual:16080",
+"sour cherries": "ciqual:13110",
+"sour cherry": "ciqual:13110",
+"south african hake": "ciqual:26233",
+"soy drink": "ciqual:18900",
+"soy milk": "ciqual:18900",
+"soy oil": "ciqual:17420",
+"soy sauce": "ciqual:11104",
+"soy sauces": "ciqual:11104",
+"soya oil": "ciqual:17420",
+"soya sauce": "ciqual:11104",
+"soyabean oil": "ciqual:17420",
+"soybean oil": "ciqual:17420",
+"spelt flour": "ciqual:9480",
+"spelt wheat flour": "ciqual:9480",
+"spice": "ciqual:11081",
+"spices": "ciqual:11081",
+"spiny scorpionfish": "ciqual:26063",
+"squeezed orange juice": "ciqual:2070",
+"squeezed oranges": "ciqual:2070",
+"squeezed tangerine juices": "ciqual:2034",
+"squid": "ciqual:10001",
+"strawberries": "ciqual:13014",
+"strawberry": "ciqual:13014",
+"strawberry jam": "ciqual:31024",
+"strawberry maramalade": "ciqual:31024",
+"stuffed pasta": "ciqual:25216",
+"stuffed tomatoes": "ciqual:25103",
+"sunflower oil": "ciqual:17440",
+"sunflower seed oil": "ciqual:17440",
+"sunflower vegetable oil": "ciqual:17440",
+"surmullet": "ciqual:26085",
+"swede": "ciqual:20201",
+"sweet cream buttermilk": "ciqual:19801",
+"sweet potato": "ciqual:4101",
+"sweetened condensed whole milk": "ciqual:19027",
+"swiss chard": "ciqual:20004",
+"swordfish": "ciqual:26082",
+"tap water": "ciqual:18066",
+"tempeh": "ciqual:20917",
+"textured soy protein": "ciqual:20591",
+"texturised soya protein": "ciqual:20591",
+"thai rice": "ciqual:9119",
+"theragra chalcogramma": "ciqual:26006",
+"toasted hazelnuts": "ciqual:15033",
+"tofu": "ciqual:20904",
+"tofus": "ciqual:20904",
+"tomato": "ciqual:20047",
+"tomato concentrate": "ciqual:20068",
+"tomato passata": "ciqual:20170",
+"tomato paste": "ciqual:20068",
+"tomato pulp": "ciqual:20169",
+"tomato pur\u00e9e": "ciqual:20170",
+"tomatoes": "ciqual:20047",
+"tomme": "ciqual:12758",
+"tomme de savoie": "ciqual:12759",
+"tomme de savoie igp": "ciqual:12759",
+"trout": "ciqual:26092",
+"tub gurnard": "ciqual:26085",
+"tuna in brine": "ciqual:26039",
+"tunas in brine": "ciqual:26039",
+"turkey": "ciqual:36300",
+"turkey meat": "ciqual:36301",
+"turmeric powder": "ciqual:11089",
+"uht pasteurised whole milk": "ciqual:19023",
+"uht skimmed milk": "ciqual:19050",
+"uht sterilised skimmed milk": "ciqual:19050",
+"ultra heat treated skimmed milk": "ciqual:19050",
+"unsalted butter": "ciqual:16400",
+"vegetable juice": "ciqual:2075",
+"vegetable oil": "ciqual:17001",
+"vegetable oil blend": "ciqual:17700",
+"vegetable oils": "ciqual:17001",
+"vegetal oil": "ciqual:17001",
+"vegetal oils": "ciqual:17001",
+"vine fruit": "ciqual:13112",
+"vinegar": "ciqual:11018",
+"vinegar gherkin": "ciqual:11004",
+"wafer": "ciqual:23853",
+"wafers": "ciqual:23853",
+"walnut kernel": "ciqual:15005",
+"walnut oil": "ciqual:17220",
+"walnuts shelled": "ciqual:15005",
+"water": "ciqual:18066",
+"watermelon": "ciqual:13036",
+"watermelon pulp": "ciqual:13036",
+"wheat bran": "ciqual:9621",
+"wheat flour t55": "ciqual:9436",
+"wheat flour t65": "ciqual:9435",
+"wheat flour type 110": "ciqual:9410",
+"wheat flour type 150": "ciqual:9415",
+"wheat flour type 55": "ciqual:9436",
+"wheat flour type 55 for bread": "ciqual:9436",
+"wheat flour type 65": "ciqual:9435",
+"wheat germ": "ciqual:9660",
+"wheatgerm": "ciqual:9660",
+"white cabbage": "ciqual:20116",
+"white chocolate": "ciqual:31010",
+"white chocolate bar": "ciqual:31010",
+"white fish": "ciqual:26249",
+"white grape": "ciqual:13044",
+"white rice": "ciqual:9100",
+"white sugar": "ciqual:31016",
+"whiting": "ciqual:26095",
+"whole condensed milk with sugar": "ciqual:19027",
+"whole goat milk": "ciqual:19202",
+"whole grain durum wheat": "ciqual:9060",
+"whole grain rice": "ciqual:9102",
+"whole milk": "ciqual:19023",
+"whole rice": "ciqual:9102",
+"wholegrain rice": "ciqual:9102",
+"wild boar": "ciqual:14002",
+"wild rice": "ciqual:9108",
+"wild turbot": "ciqual:26042",
+"yellow bell pepper": "ciqual:20168",
+"yellow capsicum": "ciqual:20168",
+"yellow grapefruit": "ciqual:13179",
+"yellow pepper": "ciqual:20168",
+"yellowfin tuna": "ciqual:26064",
+"zucchini": "ciqual:20020",
+"agave nectar": "fdc:170277",
+"agave syrup": "fdc:170277",
+"almonds blanched": "fdc:170568",
+"american pistachios": "fdc:170184",
+"asparagus": "fdc:168389",
+"asparagus spears": "fdc:168389",
+"baby carrots": "fdc:168568",
+"bartlett pear": "fdc:167776",
+"bartlett pears": "fdc:167776",
+"beurr\u00e9 bosc pear": "fdc:167778",
+"blanched hazelnut": "fdc:170582",
+"blanches almonds": "fdc:170568",
+"boabab": "fdc:167806",
+"boabab fruit": "fdc:167806",
+"bosc pear": "fdc:167778",
+"bottled pomegranate juice": "fdc:167787",
+"broccoli raab": "fdc:170381",
+"broccolii rabe": "fdc:170381",
+"cabbage": "fdc:169975",
+"california avocado": "fdc:171706",
+"canadian maple syrup": "fdc:170276",
+"cantharellus cibarius": "fdc:168422",
+"cashew": "fdc:170162",
+"cashew nut": "fdc:170162",
+"cashew nuts": "fdc:170162",
+"cashewnut": "fdc:170162",
+"cashews": "fdc:170162",
+"chili powder": "fdc:171319",
+"chilled orange juice": "fdc:169100",
+"cider vinegar": "fdc:173469",
+"clementine": "fdc:168195",
+"clementins": "fdc:168195",
+"concentrated raspberry juice": "fdc:168217",
+"corinthian raisins": "fdc:171724",
+"cream cheese": "fdc:173418",
+"cream with 10% milk fat": "fdc:171255",
+"cream with 36% milk fat": "fdc:170859",
+"cultured sour cream": "fdc:171257",
+"dark rye flour": "fdc:168885",
+"dark seedless raisin": "fdc:168165",
+"deglet nour dates": "fdc:171726",
+"dried minced onion": "fdc:171327",
+"dry whole-wheat pasta": "fdc:169738",
+"edamame": "fdc:168410",
+"edamame bean": "fdc:168410",
+"edamame beans": "fdc:168410",
+"edamame soybeans": "fdc:168410",
+"english walnut": "fdc:170187",
+"english walnuts": "fdc:170187",
+"enoki mushrooms": "fdc:169382",
+"enokitake": "fdc:169382",
+"feijoa": "fdc:168176",
+"flat fish": "fdc:174196",
+"florida avocado": "fdc:171707",
+"golden chanterelle": "fdc:168422",
+"golden needle mushrooms": "fdc:169382",
+"golden spoon": "fdc:167789",
+"granulated onion": "fdc:171327",
+"granulated sugar": "fdc:169655",
+"green leaf lettuce": "fdc:169249",
+"green peas": "fdc:170419",
+"ground clove": "fdc:171321",
+"half and half cream": "fdc:171255",
+"heavy whipping cream": "fdc:170859",
+"hemp seed": "fdc:170148",
+"hogberry": "fdc:167789",
+"jackfruit": "fdc:174687",
+"jalapeno pepper": "fdc:168576",
+"jalape\u00f1o chilli": "fdc:168576",
+"jalape\u00f1o chillies": "fdc:168576",
+"jalape\u00f1o pepper": "fdc:168576",
+"lemon juice from concentrate": "fdc:167748",
+"lentinula edodes": "fdc:169242",
+"lentinus edodes": "fdc:169242",
+"low sodium catsup": "fdc:169381",
+"lulo": "fdc:167790",
+"maitake mushroom": "fdc:169403",
+"maitake mushrooms": "fdc:169403",
+"malt beer": "fdc:174141",
+"mamey sapote": "fdc:167760",
+"mandarin orange": "fdc:169105",
+"medium rye flour": "fdc:168886",
+"medjool dates": "fdc:168191",
+"morel": "fdc:168423",
+"morels": "fdc:168423",
+"mustard flour": "fdc:170929",
+"mustard powder": "fdc:170929",
+"nance": "fdc:167789",
+"naranjilla": "fdc:167790",
+"okra": "fdc:169260",
+"onion powder": "fdc:171327",
+"onion powders": "fdc:171327",
+"pistachio": "fdc:170184",
+"pistachio kernels": "fdc:170184",
+"pistachio nuts": "fdc:170184",
+"plantain banana": "fdc:168215",
+"portobella": "fdc:169255",
+"portobello": "fdc:169255",
+"potato": "fdc:170026",
+"potatoes": "fdc:170026",
+"pumpkin seed": "fdc:170556",
+"rapini": "fdc:170381",
+"raspberry juice concentrate": "fdc:168217",
+"raspberry puree with seeds": "fdc:167809",
+"raw": "fdc:171689",
+"raw apples with skin": "fdc:171688",
+"raw celery": "fdc:169988",
+"raw custard apple": "fdc:173953",
+"raw extra sweet pineapple": "fdc:168194",
+"raw green anjou pears": "fdc:167779",
+"raw japanese persimmon": "fdc:169941",
+"raw lentils": "fdc:172420",
+"raw lime juice": "fdc:168156",
+"raw muscadine grapes": "fdc:173040",
+"raw navel orange": "fdc:169917",
+"raw pear": "fdc:169118",
+"raw red and whitecurrants": "fdc:173964",
+"raw red anjou pears": "fdc:167777",
+"raw traditional pineapple": "fdc:168193",
+"raw watermelon": "fdc:167765",
+"raw zespri sungold kiwifruit": "fdc:168211",
+"red leaf lettuce": "fdc:168431",
+"roasted almonds with salt added": "fdc:323294",
+"rowal": "fdc:167783",
+"rye grain": "fdc:168884",
+"rye grains": "fdc:168884",
+"seedless golden raisin": "fdc:168164",
+"seedless golden raisins": "fdc:168164",
+"seedless raspberry puree": "fdc:167808",
+"seeds of squash": "fdc:170556",
+"shiitake": "fdc:169242",
+"shiitake mushrooms": "fdc:169242",
+"spelt": "fdc:169745",
+"sunflower seed paste": "fdc:170155",
+"sweet cherry": "fdc:171719",
+"sweet onion": "fdc:170008",
+"sweet onions": "fdc:170008",
+"swiss cheese": "fdc:171251",
+"tangerine": "fdc:169105",
+"tangerines": "fdc:169105",
+"tart cherry juice": "fdc:167807",
+"teff": "fdc:169747",
+"tuna": "fdc:334194",
+"tuna fish": "fdc:334194",
+"turbinado sugar": "fdc:170674",
+"unprepared canadian bacon": "fdc:167869",
+"velvet shank": "fdc:169382",
+"walnut": "fdc:170187",
+"walnuts": "fdc:170187",
+"whole egg": "fdc:172188",
+"whole eggs": "fdc:172188",
+"whole grain sorghum flour": "fdc:168943",
+"whole sorghum flour": "fdc:168943",
+"wholemeal flour": "fdc:168893",
+"wild blueberry": "fdc:173949",
+"williams pear": "fdc:167776",
+"williams' bon chr\u00e9tien pear": "fdc:167776",
+"without skin": "fdc:171689",
+"yellow peach": "fdc:169928",
+"yellow peaches": "fdc:169928",
+"young green onion tops": "fdc:170006",
+"zante currants": "fdc:171724"
+},
+"foods": {
+"ciqual:10001": {
+"source": "ciqual",
+"name": "Squid, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10003": {
+"source": "ciqual",
+"name": "Scallop, with coral, raw",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:10008": {
+"source": "ciqual",
+"name": "Snail, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:10010": {
+"source": "ciqual",
+"name": "Lobster, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10011": {
+"source": "ciqual",
+"name": "Oyster, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10014": {
+"source": "ciqual",
+"name": "Mussel, common, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10016": {
+"source": "ciqual",
+"name": "Cuttlefish, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10017": {
+"source": "ciqual",
+"name": "Clam, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10018": {
+"source": "ciqual",
+"name": "Octopus, common, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:10030": {
+"source": "ciqual",
+"name": "Crayfish, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10035": {
+"source": "ciqual",
+"name": "Pacific oyster, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10043": {
+"source": "ciqual",
+"name": "Crustacean or mollusk (average)",
+"fructose": 0.049,
+"sucrose": 0.053,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:10045": {
+"source": "ciqual",
+"name": "Scallop, without coral, raw",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:11000": {
+"source": "ciqual",
+"name": "Garlic, fresh",
+"fructose": 0.3,
+"sucrose": 0.7,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:11001": {
+"source": "ciqual",
+"name": "Broth, stock or bouillon, beef, dehydrated",
+"fructose": 0.32,
+"sucrose": 3.36,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11004": {
+"source": "ciqual",
+"name": "Gherkin, pickled in vinegar",
+"fructose": 0.2,
+"sucrose": 0.4,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11005": {
+"source": "ciqual",
+"name": "Curry, powder",
+"fructose": 0.75,
+"sucrose": 0.59,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11006": {
+"source": "ciqual",
+"name": "Ginger, powder",
+"fructose": 1.78,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11007": {
+"source": "ciqual",
+"name": "Gelatine, dried",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11008": {
+"source": "ciqual",
+"name": "Ketchup, prepacked",
+"fructose": 5.15,
+"sucrose": 8.37,
+"polyols": 0.065,
+"below": []
+},
+"ciqual:11009": {
+"source": "ciqual",
+"name": "Nutritional yeast",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:11010": {
+"source": "ciqual",
+"name": "Baker's yeast, compressed",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11013": {
+"source": "ciqual",
+"name": "Mustard",
+"fructose": 0.62,
+"sucrose": 0.13,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11014": {
+"source": "ciqual",
+"name": "Parsley, fresh",
+"fructose": 0.3,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11015": {
+"source": "ciqual",
+"name": "Black pepper, powder",
+"fructose": 0.23,
+"sucrose": 0.02,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11018": {
+"source": "ciqual",
+"name": "Vinegar",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:11023": {
+"source": "ciqual",
+"name": "Garlic, powder, dried",
+"fructose": 0.31,
+"sucrose": 2.05,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11025": {
+"source": "ciqual",
+"name": "Cinnamon, powder",
+"fructose": 1.11,
+"sucrose": 0.02,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11032": {
+"source": "ciqual",
+"name": "Basil, dried",
+"fructose": 0.75,
+"sucrose": 0.02,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11033": {
+"source": "ciqual",
+"name": "Basil, fresh",
+"fructose": 0.02,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11035": {
+"source": "ciqual",
+"name": "Oregano, dried",
+"fructose": 1.13,
+"sucrose": 0.91,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11045": {
+"source": "ciqual",
+"name": "Baker's yeast, dehydrated",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11049": {
+"source": "ciqual",
+"name": "Paprika",
+"fructose": 6.71,
+"sucrose": 0.81,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11052": {
+"source": "ciqual",
+"name": "Cloves",
+"fructose": 1.07,
+"sucrose": 0.02,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11054": {
+"source": "ciqual",
+"name": "Mayonnaise (70% fat and more), prepacked",
+"fructose": 0.2,
+"sucrose": 0.7,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:11061": {
+"source": "ciqual",
+"name": "Poppy, seed",
+"fructose": 0.29,
+"sucrose": 2.33,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11069": {
+"source": "ciqual",
+"name": "Sage, fresh",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"fructose",
+"sucrose",
+"polyols"
+]
+},
+"ciqual:11074": {
+"source": "ciqual",
+"name": "Ginger, raw",
+"fructose": 0.64,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:11079": {
+"source": "ciqual",
+"name": "Mayonnaise, reduced fat or light mayonnaise, prepacked",
+"fructose": 1.04,
+"sucrose": 2.53,
+"polyols": null,
+"below": []
+},
+"ciqual:11081": {
+"source": "ciqual",
+"name": "Spice (average)",
+"fructose": 0.45,
+"sucrose": 0.088,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11089": {
+"source": "ciqual",
+"name": "Turmeric, powder",
+"fructose": 0.45,
+"sucrose": 2.38,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:11091": {
+"source": "ciqual",
+"name": "Vinegar, balsamic",
+"fructose": 9.49,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:11100": {
+"source": "ciqual",
+"name": "Barbecue sauce, prepacked",
+"fructose": 5.2,
+"sucrose": 16.4,
+"polyols": 0.0,
+"below": [
+"polyols"
+]
+},
+"ciqual:11101": {
+"source": "ciqual",
+"name": "Bechamel sauce, prepacked",
+"fructose": 0.1,
+"sucrose": 0.18,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:11102": {
+"source": "ciqual",
+"name": "Bearnaise sauce, prepacked",
+"fructose": 0.48,
+"sucrose": 1.25,
+"polyols": null,
+"below": []
+},
+"ciqual:11104": {
+"source": "ciqual",
+"name": "Soy sauce, prepacked",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:11112": {
+"source": "ciqual",
+"name": "Harissa (hot spicy sauce), prepacked",
+"fructose": 1.9,
+"sucrose": 0.5,
+"polyols": null,
+"below": [
+"sucrose"
+]
+},
+"ciqual:11114": {
+"source": "ciqual",
+"name": "Tomato sauce, with meat or Bolognese sauce, prepacked",
+"fructose": 2.19,
+"sucrose": 0.76,
+"polyols": null,
+"below": []
+},
+"ciqual:11132": {
+"source": "ciqual",
+"name": "Curry sauce, prepacked",
+"fructose": 2.92,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:11179": {
+"source": "ciqual",
+"name": "Sauce, pesto, prepacked",
+"fructose": 0.2,
+"sucrose": 0.8,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:11189": {
+"source": "ciqual",
+"name": "Cheese sauce for risotto or pasta, prepacked",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": null,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:11196": {
+"source": "ciqual",
+"name": "Burger sauce, prepacked",
+"fructose": 0.59,
+"sucrose": 7.12,
+"polyols": null,
+"below": []
+},
+"ciqual:12001": {
+"source": "ciqual",
+"name": "Camembert cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12020": {
+"source": "ciqual",
+"name": "Brie cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12021": {
+"source": "ciqual",
+"name": "Brie de Meaux cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12022": {
+"source": "ciqual",
+"name": "Brie de Melun cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12028": {
+"source": "ciqual",
+"name": "Chaource cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12031": {
+"source": "ciqual",
+"name": "Neufch\u00e2tel cheese, from cow's milk",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:12036": {
+"source": "ciqual",
+"name": "Maroilles cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12037": {
+"source": "ciqual",
+"name": "Livarot cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12039": {
+"source": "ciqual",
+"name": "Munster cheese, from cow's milk",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12040": {
+"source": "ciqual",
+"name": "Langres cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12042": {
+"source": "ciqual",
+"name": "Pont l'Ev\u00eaque cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12049": {
+"source": "ciqual",
+"name": "Saint-Marcellin cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12061": {
+"source": "ciqual",
+"name": "Feta or Feta-type cheese, 100% from ewe's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12100": {
+"source": "ciqual",
+"name": "Hard cheese (average)",
+"fructose": 0.074,
+"sucrose": 0.074,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:12110": {
+"source": "ciqual",
+"name": "Comt\u00e9 cheese, from cow's milk",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12112": {
+"source": "ciqual",
+"name": "Abondance cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12115": {
+"source": "ciqual",
+"name": "Emmental cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12118": {
+"source": "ciqual",
+"name": "Emmental cheese, grated, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12120": {
+"source": "ciqual",
+"name": "Parmesan cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12123": {
+"source": "ciqual",
+"name": "Grana Padano cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12500": {
+"source": "ciqual",
+"name": "Roquefort cheese, from ewe's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12520": {
+"source": "ciqual",
+"name": "Blue cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12521": {
+"source": "ciqual",
+"name": "Auvergne blue cheese, from cow's milk",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12522": {
+"source": "ciqual",
+"name": "Fourme d'Ambert cheese, from cow's milk",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12524": {
+"source": "ciqual",
+"name": "Gorgonzola cheese, from cow's milk",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12722": {
+"source": "ciqual",
+"name": "Cantal cheese, half matured, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12723": {
+"source": "ciqual",
+"name": "Cantal, Salers or Laguiole cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12725": {
+"source": "ciqual",
+"name": "Salers cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12726": {
+"source": "ciqual",
+"name": "Cheddar cheese, from cow's milk",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:12729": {
+"source": "ciqual",
+"name": "Edam cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12736": {
+"source": "ciqual",
+"name": "Gouda cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12738": {
+"source": "ciqual",
+"name": "Mimolette cheese, old, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12740": {
+"source": "ciqual",
+"name": "Mimolette cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12741": {
+"source": "ciqual",
+"name": "Firm cheese, around 27% fat, Maasdam-type cheese",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12742": {
+"source": "ciqual",
+"name": "Mimolette cheese, extra old, from cow's milk",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:12743": {
+"source": "ciqual",
+"name": "Morbier cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12749": {
+"source": "ciqual",
+"name": "Raclette cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12752": {
+"source": "ciqual",
+"name": "Saint-Nectaire cheese, from cow's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12758": {
+"source": "ciqual",
+"name": "Tomme cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12759": {
+"source": "ciqual",
+"name": "Tomme cheese, from mountain or Savoy",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12833": {
+"source": "ciqual",
+"name": "Crottin cheese, from goat's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12834": {
+"source": "ciqual",
+"name": "Crottin de Chavignol cheese, from goat's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12836": {
+"source": "ciqual",
+"name": "Picodon cheese, from goat's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12842": {
+"source": "ciqual",
+"name": "Sainte Maure cheese, from goat's milk",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12847": {
+"source": "ciqual",
+"name": "Rocamadour cheese, from goat's milk",
+"fructose": 0.26,
+"sucrose": 0.26,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:12999": {
+"source": "ciqual",
+"name": "Cheese (average)",
+"fructose": 0.071,
+"sucrose": 0.075,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:13000": {
+"source": "ciqual",
+"name": "Apricot, pitted, raw",
+"fructose": 1.3,
+"sucrose": 3.4,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13001": {
+"source": "ciqual",
+"name": "Apricot, pitted, dried",
+"fructose": 10.6,
+"sucrose": 7.7,
+"polyols": 22.6,
+"below": []
+},
+"ciqual:13002": {
+"source": "ciqual",
+"name": "Pineapple, pulp, raw",
+"fructose": 2.3,
+"sucrose": 6.4,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13004": {
+"source": "ciqual",
+"name": "Avocado, pulp, raw",
+"fructose": 0.16,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13005": {
+"source": "ciqual",
+"name": "Banana, pulp, raw",
+"fructose": 3.8,
+"sucrose": 7.9,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13007": {
+"source": "ciqual",
+"name": "Black currant, raw",
+"fructose": 4.95,
+"sucrose": 0.49,
+"polyols": null,
+"below": []
+},
+"ciqual:13008": {
+"source": "ciqual",
+"name": "Cherry, pitted, raw",
+"fructose": 4.6,
+"sucrose": 0.2,
+"polyols": 2.8,
+"below": [
+"sucrose"
+]
+},
+"ciqual:13009": {
+"source": "ciqual",
+"name": "Lemon, pulp, raw",
+"fructose": 0.4,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13011": {
+"source": "ciqual",
+"name": "Date, pulp and peel, dried",
+"fructose": 31.1,
+"sucrose": 0.52,
+"polyols": null,
+"below": []
+},
+"ciqual:13012": {
+"source": "ciqual",
+"name": "Fig, raw",
+"fructose": 6.2,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13014": {
+"source": "ciqual",
+"name": "Strawberry, raw",
+"fructose": 3.3,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13015": {
+"source": "ciqual",
+"name": "Raspberry, raw",
+"fructose": 2.8,
+"sucrose": 0.5,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13016": {
+"source": "ciqual",
+"name": "Passion fruit, pulp and pips, raw",
+"fructose": 2.5,
+"sucrose": 3.6,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13019": {
+"source": "ciqual",
+"name": "Red currant, raw",
+"fructose": 3.86,
+"sucrose": 0.1,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13021": {
+"source": "ciqual",
+"name": "Kiwi fruit, pulp and seeds, raw",
+"fructose": 4.3,
+"sucrose": 0.8,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13023": {
+"source": "ciqual",
+"name": "Lychee, pulp, raw",
+"fructose": 8.1,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13025": {
+"source": "ciqual",
+"name": "Mango, pulp, raw",
+"fructose": 3.4,
+"sucrose": 8.5,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13026": {
+"source": "ciqual",
+"name": "Melon, cantaloupe (ex Cavaillon or Charentais melon), pulp, raw",
+"fructose": 2.49,
+"sucrose": 6.56,
+"polyols": 4.0,
+"below": []
+},
+"ciqual:13028": {
+"source": "ciqual",
+"name": "Blueberry, raw",
+"fructose": 4.97,
+"sucrose": 0.11,
+"polyols": 0.014,
+"below": []
+},
+"ciqual:13029": {
+"source": "ciqual",
+"name": "Blackberry, raw",
+"fructose": 3.08,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13030": {
+"source": "ciqual",
+"name": "Nectarine, pulp and peel, raw",
+"fructose": 1.37,
+"sucrose": 4.87,
+"polyols": 0.08,
+"below": []
+},
+"ciqual:13033": {
+"source": "ciqual",
+"name": "Olives, green, in brine",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13034": {
+"source": "ciqual",
+"name": "Orange, pulp, raw",
+"fructose": 2.1,
+"sucrose": 3.5,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13035": {
+"source": "ciqual",
+"name": "Papaya, pulp, raw",
+"fructose": 4.1,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13036": {
+"source": "ciqual",
+"name": "Watermelon, pulp, raw",
+"fructose": 3.6,
+"sucrose": 2.5,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13040": {
+"source": "ciqual",
+"name": "Grapefruit, pulp, raw",
+"fructose": 1.9,
+"sucrose": 2.8,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13041": {
+"source": "ciqual",
+"name": "Greengage plum, raw",
+"fructose": 1.8,
+"sucrose": 4.6,
+"polyols": 2.3,
+"below": []
+},
+"ciqual:13042": {
+"source": "ciqual",
+"name": "Prune",
+"fructose": 12.5,
+"sucrose": 0.15,
+"polyols": 9.6,
+"below": []
+},
+"ciqual:13043": {
+"source": "ciqual",
+"name": "Peach, pulp and peel, raw",
+"fructose": 1.29,
+"sucrose": 5.35,
+"polyols": 0.84,
+"below": []
+},
+"ciqual:13044": {
+"source": "ciqual",
+"name": "Grape, white, raw",
+"fructose": 8.5,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13045": {
+"source": "ciqual",
+"name": "Grape, red, raw",
+"fructose": 7.1,
+"sucrose": 0.5,
+"polyols": 0.2,
+"below": []
+},
+"ciqual:13046": {
+"source": "ciqual",
+"name": "Raisin",
+"fructose": 36.0,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13050": {
+"source": "ciqual",
+"name": "Apple, pulp, raw",
+"fructose": 6.03,
+"sucrose": 0.82,
+"polyols": 0.59,
+"below": []
+},
+"ciqual:13066": {
+"source": "ciqual",
+"name": "Persimmon, pulp, raw",
+"fructose": 6.4,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13067": {
+"source": "ciqual",
+"name": "Lime, pulp, raw",
+"fructose": 0.8,
+"sucrose": 0.5,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:13083": {
+"source": "ciqual",
+"name": "Guava, pulp, raw",
+"fructose": 2.6,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:13100": {
+"source": "ciqual",
+"name": "Plum, raw",
+"fructose": 2.94,
+"sucrose": 1.57,
+"polyols": null,
+"below": []
+},
+"ciqual:13101": {
+"source": "ciqual",
+"name": "Grape, Chasselas, raw",
+"fructose": 8.4,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:13110": {
+"source": "ciqual",
+"name": "Morello cherry, raw",
+"fructose": 3.51,
+"sucrose": 0.8,
+"polyols": null,
+"below": []
+},
+"ciqual:13112": {
+"source": "ciqual",
+"name": "Grape, raw",
+"fructose": 8.13,
+"sucrose": 0.15,
+"polyols": 0.2,
+"below": []
+},
+"ciqual:13113": {
+"source": "ciqual",
+"name": "Cranberry, raw",
+"fructose": 0.63,
+"sucrose": 0.13,
+"polyols": null,
+"below": []
+},
+"ciqual:13118": {
+"source": "ciqual",
+"name": "Peach, dried",
+"fructose": 6.7,
+"sucrose": 38.3,
+"polyols": null,
+"below": []
+},
+"ciqual:13126": {
+"source": "ciqual",
+"name": "Elderberry, berries, raw",
+"fructose": 3.12,
+"sucrose": 0.25,
+"polyols": null,
+"below": []
+},
+"ciqual:13179": {
+"source": "ciqual",
+"name": "Grapefruit, yellow, pulp, raw",
+"fructose": 1.66,
+"sucrose": 2.37,
+"polyols": null,
+"below": []
+},
+"ciqual:13180": {
+"source": "ciqual",
+"name": "Grapefruit, red or pink, pulp, raw",
+"fructose": 1.59,
+"sucrose": 3.16,
+"polyols": null,
+"below": []
+},
+"ciqual:13184": {
+"source": "ciqual",
+"name": "Olive (average)",
+"fructose": 0.05,
+"sucrose": 0.063,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:13549": {
+"source": "ciqual",
+"name": "Kumquat, without pips, raw",
+"fructose": 2.3,
+"sucrose": 2.01,
+"polyols": null,
+"below": []
+},
+"ciqual:13742": {
+"source": "ciqual",
+"name": "Melon, honeydew, pulp, raw",
+"fructose": 1.55,
+"sucrose": 1.37,
+"polyols": null,
+"below": []
+},
+"ciqual:13997": {
+"source": "ciqual",
+"name": "Red berries (raspberries, strawberries, red currants, black currants) , raw",
+"fructose": 3.92,
+"sucrose": 0.3,
+"polyols": null,
+"below": [
+"sucrose"
+]
+},
+"ciqual:14002": {
+"source": "ciqual",
+"name": "Wild boar, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:15000": {
+"source": "ciqual",
+"name": "Almond, (with peel)",
+"fructose": 0.2,
+"sucrose": 4.0,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:15001": {
+"source": "ciqual",
+"name": "Peanut",
+"fructose": 0.2,
+"sucrose": 5.9,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:15004": {
+"source": "ciqual",
+"name": "Hazelnut",
+"fructose": 0.2,
+"sucrose": 4.6,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:15005": {
+"source": "ciqual",
+"name": "Walnut, dried, husked",
+"fructose": 0.2,
+"sucrose": 2.8,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:15007": {
+"source": "ciqual",
+"name": "Coconut, kernel, dried",
+"fructose": 0.3,
+"sucrose": 5.83,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:15008": {
+"source": "ciqual",
+"name": "Brazil nut",
+"fructose": 0.0,
+"sucrose": 2.33,
+"polyols": null,
+"below": []
+},
+"ciqual:15013": {
+"source": "ciqual",
+"name": "Chestnut cream",
+"fructose": 0.2,
+"sucrose": 49.5,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:15019": {
+"source": "ciqual",
+"name": "Cashew nut, grilled, salted",
+"fructose": 0.08,
+"sucrose": 6.9,
+"polyols": null,
+"below": []
+},
+"ciqual:15021": {
+"source": "ciqual",
+"name": "Chestnut, grilled",
+"fructose": 0.0,
+"sucrose": 10.0,
+"polyols": null,
+"below": []
+},
+"ciqual:15023": {
+"source": "ciqual",
+"name": "Walnut, fresh",
+"fructose": 0.5,
+"sucrose": 0.2,
+"polyols": null,
+"below": []
+},
+"ciqual:15025": {
+"source": "ciqual",
+"name": "Pine nuts",
+"fructose": 0.063,
+"sucrose": 4.75,
+"polyols": null,
+"below": []
+},
+"ciqual:15026": {
+"source": "ciqual",
+"name": "Pecan nut",
+"fructose": 0.04,
+"sucrose": 3.56,
+"polyols": null,
+"below": []
+},
+"ciqual:15027": {
+"source": "ciqual",
+"name": "Macadamia nut",
+"fructose": 0.065,
+"sucrose": 4.11,
+"polyols": null,
+"below": []
+},
+"ciqual:15029": {
+"source": "ciqual",
+"name": "Alfalfa seeds, sprouted, raw",
+"fructose": 0.12,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:15033": {
+"source": "ciqual",
+"name": "Hazelnut, grilled",
+"fructose": 0.061,
+"sucrose": 4.13,
+"polyols": null,
+"below": []
+},
+"ciqual:15034": {
+"source": "ciqual",
+"name": "Flaxseed",
+"fructose": 0.0,
+"sucrose": 1.15,
+"polyols": null,
+"below": []
+},
+"ciqual:15035": {
+"source": "ciqual",
+"name": "Sesame seed, husked",
+"fructose": 0.07,
+"sucrose": 0.31,
+"polyols": null,
+"below": []
+},
+"ciqual:15041": {
+"source": "ciqual",
+"name": "Almond, peeled, unpeeled or blanched",
+"fructose": 0.0,
+"sucrose": 4.46,
+"polyols": null,
+"below": []
+},
+"ciqual:15044": {
+"source": "ciqual",
+"name": "Pistachio nut, grilled",
+"fructose": 0.22,
+"sucrose": 7.12,
+"polyols": null,
+"below": []
+},
+"ciqual:15052": {
+"source": "ciqual",
+"name": "Flaxseed, brown",
+"fructose": 0.2,
+"sucrose": 1.1,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:15054": {
+"source": "ciqual",
+"name": "Cashew nut, grilled, unsalted",
+"fructose": 0.1,
+"sucrose": 6.06,
+"polyols": 0.0,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:15055": {
+"source": "ciqual",
+"name": "Cashew nut, dry-grilled, unsalted",
+"fructose": 0.1,
+"sucrose": 6.63,
+"polyols": 0.0,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:15201": {
+"source": "ciqual",
+"name": "Almond paste or marzipan, prepacked",
+"fructose": 5.32,
+"sucrose": 48.8,
+"polyols": 2.8,
+"below": []
+},
+"ciqual:15202": {
+"source": "ciqual",
+"name": "Peanut butter or peanut paste",
+"fructose": 0.12,
+"sucrose": 10.2,
+"polyols": null,
+"below": []
+},
+"ciqual:16080": {
+"source": "ciqual",
+"name": "Solid vegetable fat (margarine type), for frying",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:16400": {
+"source": "ciqual",
+"name": "Butter, 82% fat, unsalted",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:16402": {
+"source": "ciqual",
+"name": "Butter, 80% fat, lightly salted",
+"fructose": 0.13,
+"sucrose": 0.13,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:16403": {
+"source": "ciqual",
+"name": "Butter, 80% fat, salted",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:16520": {
+"source": "ciqual",
+"name": "Lard or pork fat",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:16739": {
+"source": "ciqual",
+"name": "Vegetable fat (margarine type), spreadable, 50-63% fat, light, unsalted, with plant sterols esters",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:16741": {
+"source": "ciqual",
+"name": "Vegetable fat (margarine type), spreadable, 50-63% fat, light, unsalted",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:17001": {
+"source": "ciqual",
+"name": "Vegetable oil (average)",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17040": {
+"source": "ciqual",
+"name": "Peanut oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17130": {
+"source": "ciqual",
+"name": "Rapeseed oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17210": {
+"source": "ciqual",
+"name": "Hazelnut oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17220": {
+"source": "ciqual",
+"name": "Walnut oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17270": {
+"source": "ciqual",
+"name": "Olive oil, extra virgin",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17350": {
+"source": "ciqual",
+"name": "Grapeseed oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17420": {
+"source": "ciqual",
+"name": "Soy oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17440": {
+"source": "ciqual",
+"name": "Sunflower oil",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:17700": {
+"source": "ciqual",
+"name": "Combined oil (blended vegetable oils)",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:18011": {
+"source": "ciqual",
+"name": "Coconut water",
+"fructose": 0.92,
+"sucrose": 0.86,
+"polyols": 0.7,
+"below": []
+},
+"ciqual:18041": {
+"source": "ciqual",
+"name": "Coconut milk or coconut cream",
+"fructose": 0.3,
+"sucrose": 2.0,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:18066": {
+"source": "ciqual",
+"name": "Water, municipal",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:18070": {
+"source": "ciqual",
+"name": "Decaffeinated not instant coffee, without sugar, ready-to-drink",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:18100": {
+"source": "ciqual",
+"name": "Cocoa powder, without sugar, powder, instant",
+"fructose": 0.2,
+"sucrose": 0.9,
+"polyols": 0.5,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:18101": {
+"source": "ciqual",
+"name": "Cocoa or chocolate powder, for beverages, with sugar",
+"fructose": 0.2,
+"sucrose": 54.4,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:18900": {
+"source": "ciqual",
+"name": "Soy drink, plain, prepacked",
+"fructose": 0.2,
+"sucrose": 0.39,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19023": {
+"source": "ciqual",
+"name": "Milk, whole, UHT",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19024": {
+"source": "ciqual",
+"name": "Milk, whole, pasteurised",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19026": {
+"source": "ciqual",
+"name": "Condensed milk, without sugar, whole",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19027": {
+"source": "ciqual",
+"name": "Condensed milk, with sugar, whole",
+"fructose": 1.14,
+"sucrose": 43.5,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19042": {
+"source": "ciqual",
+"name": "Milk, semi-skimmed, pasteurised",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19044": {
+"source": "ciqual",
+"name": "Milk, powder, semi-skimmed",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19050": {
+"source": "ciqual",
+"name": "Milk, skimmed, UHT",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19051": {
+"source": "ciqual",
+"name": "Milk, skimmed, pasteurised",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19054": {
+"source": "ciqual",
+"name": "Milk, powder, skimmed",
+"fructose": 0.002,
+"sucrose": 0.002,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19201": {
+"source": "ciqual",
+"name": "Goat milk, half skimmed, UHT pasteurized",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19202": {
+"source": "ciqual",
+"name": "Goat milk, whole, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19402": {
+"source": "ciqual",
+"name": "Cream, fat content unknown (average)",
+"fructose": 0.05,
+"sucrose": 0.053,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19410": {
+"source": "ciqual",
+"name": "Thick cream 30% fat, refrigerated",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19415": {
+"source": "ciqual",
+"name": "Liquid cream 30% fat, UHT",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19501": {
+"source": "ciqual",
+"name": "Quark, plain or fruit (average)",
+"fructose": 0.06,
+"sucrose": 0.27,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19556": {
+"source": "ciqual",
+"name": "Yogurt, goat's milk, plain, around 5% fat",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19584": {
+"source": "ciqual",
+"name": "Mascarpone cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19585": {
+"source": "ciqual",
+"name": "Ricotta cheese",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19590": {
+"source": "ciqual",
+"name": "Mozzarella cheese, from cow's milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19600": {
+"source": "ciqual",
+"name": "Yoghurt, plain (average)",
+"fructose": 0.095,
+"sucrose": 1.52,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19641": {
+"source": "ciqual",
+"name": "Drained soft fresh cheese, around 6% fat",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose",
+"polyols"
+]
+},
+"ciqual:19671": {
+"source": "ciqual",
+"name": "Yogurt, fermented milk or dairy specialty, w fruits or flavoured, 0% fat (average)",
+"fructose": 0.18,
+"sucrose": 0.23,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19685": {
+"source": "ciqual",
+"name": "Panna cotta, refrigerated",
+"fructose": 0.79,
+"sucrose": 7.6,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:19801": {
+"source": "ciqual",
+"name": "Fermented milk drink, plain, skimmed milk",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:19865": {
+"source": "ciqual",
+"name": "Kefir",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:20004": {
+"source": "ciqual",
+"name": "Swiss chard, raw",
+"fructose": 0.5,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20009": {
+"source": "ciqual",
+"name": "Carrot, raw",
+"fructose": 0.9,
+"sucrose": 4.0,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:20014": {
+"source": "ciqual",
+"name": "Red cabbage, raw",
+"fructose": 1.4,
+"sucrose": 0.3,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:20016": {
+"source": "ciqual",
+"name": "Cauliflower, raw",
+"fructose": 0.8,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20019": {
+"source": "ciqual",
+"name": "Cucumber, pulp and peel, raw",
+"fructose": 0.79,
+"sucrose": 0.03,
+"polyols": 0.039,
+"below": []
+},
+"ciqual:20020": {
+"source": "ciqual",
+"name": "Courgette or zucchini, pulp and peel, raw",
+"fructose": 0.99,
+"sucrose": 0.036,
+"polyols": 0.014,
+"below": []
+},
+"ciqual:20023": {
+"source": "ciqual",
+"name": "Celery stalk, raw",
+"fructose": 0.44,
+"sucrose": 0.2,
+"polyols": 0.8,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20026": {
+"source": "ciqual",
+"name": "Chicory, raw",
+"fructose": 0.9,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20027": {
+"source": "ciqual",
+"name": "Spinach, cooked",
+"fructose": 0.5,
+"sucrose": 0.5,
+"polyols": null,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:20028": {
+"source": "ciqual",
+"name": "Fennel, raw",
+"fructose": 1.0,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20031": {
+"source": "ciqual",
+"name": "Lettuce, raw",
+"fructose": 0.4,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:20034": {
+"source": "ciqual",
+"name": "Onion, raw",
+"fructose": 1.7,
+"sucrose": 1.5,
+"polyols": null,
+"below": []
+},
+"ciqual:20039": {
+"source": "ciqual",
+"name": "Leek, raw",
+"fructose": 0.67,
+"sucrose": 0.53,
+"polyols": 0.056,
+"below": []
+},
+"ciqual:2004": {
+"source": "ciqual",
+"name": "Fruit juice (average)",
+"fructose": 3.19,
+"sucrose": 2.89,
+"polyols": 0.092,
+"below": []
+},
+"ciqual:20045": {
+"source": "ciqual",
+"name": "Radish, raw",
+"fructose": 0.4,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20047": {
+"source": "ciqual",
+"name": "Tomato, raw",
+"fructose": 1.4,
+"sucrose": 0.0,
+"polyols": 0.013,
+"below": []
+},
+"ciqual:20053": {
+"source": "ciqual",
+"name": "Eggplant, raw",
+"fructose": 1.12,
+"sucrose": 0.14,
+"polyols": null,
+"below": []
+},
+"ciqual:20055": {
+"source": "ciqual",
+"name": "Celeriac, raw",
+"fructose": 0.2,
+"sucrose": 1.6,
+"polyols": 2.2,
+"below": [
+"fructose"
+]
+},
+"ciqual:20056": {
+"source": "ciqual",
+"name": "Button mushroom or cultivated mushroom, raw",
+"fructose": 0.49,
+"sucrose": 0.0,
+"polyols": 0.45,
+"below": []
+},
+"ciqual:20057": {
+"source": "ciqual",
+"name": "Broccoli, raw",
+"fructose": 0.73,
+"sucrose": 0.18,
+"polyols": null,
+"below": []
+},
+"ciqual:20058": {
+"source": "ciqual",
+"name": "Brussels sprout, raw",
+"fructose": 0.67,
+"sucrose": 0.98,
+"polyols": null,
+"below": []
+},
+"ciqual:20059": {
+"source": "ciqual",
+"name": "Spinach, raw",
+"fructose": 0.086,
+"sucrose": 0.082,
+"polyols": null,
+"below": []
+},
+"ciqual:2006": {
+"source": "ciqual",
+"name": "Carrot juice, pure juice",
+"fructose": 1.31,
+"sucrose": 3.06,
+"polyols": null,
+"below": []
+},
+"ciqual:20061": {
+"source": "ciqual",
+"name": "French bean, raw",
+"fructose": 1.04,
+"sucrose": 0.45,
+"polyols": null,
+"below": []
+},
+"ciqual:20066": {
+"source": "ciqual",
+"name": "Sweet corn, canned, drained",
+"fructose": 0.25,
+"sucrose": 3.91,
+"polyols": 0.13,
+"below": []
+},
+"ciqual:20068": {
+"source": "ciqual",
+"name": "Tomato paste, concentrated, canned",
+"fructose": 6.6,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20069": {
+"source": "ciqual",
+"name": "Green cabbage, raw",
+"fructose": 0.87,
+"sucrose": 0.048,
+"polyols": null,
+"below": []
+},
+"ciqual:20072": {
+"source": "ciqual",
+"name": "Garden peas, raw",
+"fructose": 0.28,
+"sucrose": 4.68,
+"polyols": null,
+"below": []
+},
+"ciqual:20085": {
+"source": "ciqual",
+"name": "Sweet pepper, green, raw",
+"fructose": 1.5,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20087": {
+"source": "ciqual",
+"name": "Sweet pepper, red, raw",
+"fructose": 2.6,
+"sucrose": 0.2,
+"polyols": 1.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20089": {
+"source": "ciqual",
+"name": "Radish, black, raw",
+"fructose": 1.4,
+"sucrose": 0.3,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:20097": {
+"source": "ciqual",
+"name": "Shallot, raw",
+"fructose": 0.8,
+"sucrose": 1.4,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:20099": {
+"source": "ciqual",
+"name": "Lamb's lettuce, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"fructose",
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20114": {
+"source": "ciqual",
+"name": "Oyster mushroom, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.45,
+"below": []
+},
+"ciqual:20116": {
+"source": "ciqual",
+"name": "White cabbage, raw",
+"fructose": 1.8,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:2012": {
+"source": "ciqual",
+"name": "Orange juice, reconstituted from a concentrate",
+"fructose": 2.6,
+"sucrose": 3.17,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:20123": {
+"source": "ciqual",
+"name": "Lettuce, var. batavia, raw",
+"fructose": 0.6,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20139": {
+"source": "ciqual",
+"name": "Squash, all types, raw",
+"fructose": 0.9,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:2016": {
+"source": "ciqual",
+"name": "Grape juice, pure juice",
+"fructose": 7.73,
+"sucrose": 0.047,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20168": {
+"source": "ciqual",
+"name": "Sweet pepper, yellow, raw",
+"fructose": 2.3,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20169": {
+"source": "ciqual",
+"name": "Tomato pulp, canned",
+"fructose": 1.7,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20170": {
+"source": "ciqual",
+"name": "Tomato puree, canned",
+"fructose": 1.7,
+"sucrose": 0.26,
+"polyols": 0.011,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20171": {
+"source": "ciqual",
+"name": "Cos or romaine lettuce, raw",
+"fructose": 0.8,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:20172": {
+"source": "ciqual",
+"name": "Tomato, cherry, raw",
+"fructose": 2.5,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:2019": {
+"source": "ciqual",
+"name": "Grape juice, reconstituted from a concentrate",
+"fructose": 8.49,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20199": {
+"source": "ciqual",
+"name": "Garden cress, raw",
+"fructose": 0.07,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:20200": {
+"source": "ciqual",
+"name": "Iceberg lettuce, raw",
+"fructose": 0.83,
+"sucrose": 0.034,
+"polyols": null,
+"below": []
+},
+"ciqual:20201": {
+"source": "ciqual",
+"name": "Rutabaga or Swede, raw",
+"fructose": 1.61,
+"sucrose": 0.53,
+"polyols": null,
+"below": []
+},
+"ciqual:20210": {
+"source": "ciqual",
+"name": "Cucumber, pulp, raw",
+"fructose": 1.0,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:20218": {
+"source": "ciqual",
+"name": "Curly kale, raw",
+"fructose": 0.82,
+"sucrose": 0.7,
+"polyols": null,
+"below": []
+},
+"ciqual:20268": {
+"source": "ciqual",
+"name": "Tomato paste, double concentrate, canned",
+"fructose": 7.14,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20269": {
+"source": "ciqual",
+"name": "Flat bean, raw",
+"fructose": 0.7,
+"sucrose": 0.3,
+"polyols": null,
+"below": [
+"sucrose"
+]
+},
+"ciqual:20300": {
+"source": "ciqual",
+"name": "Eggplant, pulp and skin, roasted/baked",
+"fructose": 1.4,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:20313": {
+"source": "ciqual",
+"name": "Courgette or zucchini, pulp and peel, roasted/baked",
+"fructose": 1.5,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:2034": {
+"source": "ciqual",
+"name": "Mandarin or clementine juice, pure juice",
+"fructose": 2.0,
+"sucrose": 5.1,
+"polyols": null,
+"below": []
+},
+"ciqual:20504": {
+"source": "ciqual",
+"name": "Lentil, dried",
+"fructose": 0.17,
+"sucrose": 0.9,
+"polyols": null,
+"below": []
+},
+"ciqual:20507": {
+"source": "ciqual",
+"name": "Chick pea, boiled/cooked in water",
+"fructose": 0.2,
+"sucrose": 0.3,
+"polyols": 0.5,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:20515": {
+"source": "ciqual",
+"name": "Split pea, dried",
+"fructose": 0.1,
+"sucrose": 2.51,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:20516": {
+"source": "ciqual",
+"name": "Chick pea, dried",
+"fructose": 0.2,
+"sucrose": 2.3,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:20535": {
+"source": "ciqual",
+"name": "Lentil, pink or red, dried",
+"fructose": 0.2,
+"sucrose": 1.29,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:20587": {
+"source": "ciqual",
+"name": "Lentil, green, boiled/cooked in water",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:20591": {
+"source": "ciqual",
+"name": "Soy protein, textured, rehydrated",
+"fructose": 0.1,
+"sucrose": 2.87,
+"polyols": 0.0,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:2070": {
+"source": "ciqual",
+"name": "Orange juice, pure juice",
+"fructose": 2.56,
+"sucrose": 3.46,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:2073": {
+"source": "ciqual",
+"name": "Pineapple juice, pure juice",
+"fructose": 2.79,
+"sucrose": 4.24,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:2074": {
+"source": "ciqual",
+"name": "Apple juice, pure juice",
+"fructose": 5.96,
+"sucrose": 1.44,
+"polyols": 0.5,
+"below": []
+},
+"ciqual:2075": {
+"source": "ciqual",
+"name": "Vegetable juice (average)",
+"fructose": 1.3,
+"sucrose": 1.13,
+"polyols": 0.0055,
+"below": []
+},
+"ciqual:2077": {
+"source": "ciqual",
+"name": "Fruit juice, from concentrate (average)",
+"fructose": 3.66,
+"sucrose": 2.94,
+"polyols": 0.083,
+"below": []
+},
+"ciqual:20904": {
+"source": "ciqual",
+"name": "Tofu, plain",
+"fructose": 0.1,
+"sucrose": 0.39,
+"polyols": 0.0,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:20916": {
+"source": "ciqual",
+"name": "Miso",
+"fructose": 6.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:20917": {
+"source": "ciqual",
+"name": "Tempeh",
+"fructose": 0.1,
+"sucrose": 0.13,
+"polyols": 0.0,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:21500": {
+"source": "ciqual",
+"name": "Lamb, cutlet, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:21502": {
+"source": "ciqual",
+"name": "Lamb, leg, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:21504": {
+"source": "ciqual",
+"name": "Lamb, shoulder, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:22000": {
+"source": "ciqual",
+"name": "Egg, raw",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:22001": {
+"source": "ciqual",
+"name": "Egg white, raw",
+"fructose": 0.07,
+"sucrose": 0.07,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:22002": {
+"source": "ciqual",
+"name": "Egg yolk, raw",
+"fructose": 0.07,
+"sucrose": 0.07,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:22003": {
+"source": "ciqual",
+"name": "Egg yolk, powder",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:22010": {
+"source": "ciqual",
+"name": "Egg, hard-boiled",
+"fructose": 0.075,
+"sucrose": 0.075,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:22011": {
+"source": "ciqual",
+"name": "Egg, poached",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:22014": {
+"source": "ciqual",
+"name": "Egg, soft-boiled",
+"fructose": 0.11,
+"sucrose": 0.11,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:23000": {
+"source": "ciqual",
+"name": "Cake (average)",
+"fructose": 2.87,
+"sucrose": 21.8,
+"polyols": null,
+"below": []
+},
+"ciqual:23200": {
+"source": "ciqual",
+"name": "Gingerbread",
+"fructose": 15.5,
+"sucrose": 0.72,
+"polyols": null,
+"below": []
+},
+"ciqual:23410": {
+"source": "ciqual",
+"name": "Short crust pastry, raw",
+"fructose": 0.39,
+"sucrose": 0.93,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:23442": {
+"source": "ciqual",
+"name": "Shortbread dough, cooked",
+"fructose": 0.3,
+"sucrose": 21.6,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:23853": {
+"source": "ciqual",
+"name": "Wafer biscuit, crunchy (thin or dry), plain or with sugar, prepacked",
+"fructose": 4.6,
+"sucrose": 14.7,
+"polyols": null,
+"below": []
+},
+"ciqual:24000": {
+"source": "ciqual",
+"name": "Biscuit (cookie)",
+"fructose": 0.0,
+"sucrose": 24.5,
+"polyols": null,
+"below": []
+},
+"ciqual:24071": {
+"source": "ciqual",
+"name": "Shortbread pastry biscuit",
+"fructose": 0.5,
+"sucrose": 22.0,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:24520": {
+"source": "ciqual",
+"name": "Meringue",
+"fructose": 0.2,
+"sucrose": 94.3,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:25103": {
+"source": "ciqual",
+"name": "Stuffed tomatoes",
+"fructose": 0.47,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:25216": {
+"source": "ciqual",
+"name": "Pasta (e.g. ravioli), filled, cooked",
+"fructose": 0.15,
+"sucrose": 0.21,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:25525": {
+"source": "ciqual",
+"name": "Topping sauce for pizza",
+"fructose": 1.74,
+"sucrose": 0.4,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:25571": {
+"source": "ciqual",
+"name": "Falafel",
+"fructose": 0.2,
+"sucrose": 0.8,
+"polyols": 0.9,
+"below": [
+"fructose"
+]
+},
+"ciqual:25598": {
+"source": "ciqual",
+"name": "Seitan",
+"fructose": 0.12,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"sucrose",
+"polyols"
+]
+},
+"ciqual:25605": {
+"source": "ciqual",
+"name": "Greek-style marinated mushrooms, prepacked",
+"fructose": 0.7,
+"sucrose": 0.3,
+"polyols": null,
+"below": []
+},
+"ciqual:25620": {
+"source": "ciqual",
+"name": "Guacamole, prepacked",
+"fructose": 0.6,
+"sucrose": 0.2,
+"polyols": null,
+"below": [
+"sucrose"
+]
+},
+"ciqual:25621": {
+"source": "ciqual",
+"name": "Hummus, prepacked",
+"fructose": 0.3,
+"sucrose": 0.35,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:25935": {
+"source": "ciqual",
+"name": "Soup, tomatoes, dehydrated and reconstituted",
+"fructose": 0.49,
+"sucrose": 0.98,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26006": {
+"source": "ciqual",
+"name": "Alaska pollock, raw",
+"fructose": 0.15,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26011": {
+"source": "ciqual",
+"name": "Atlantic herring, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26018": {
+"source": "ciqual",
+"name": "Anglerfish, raw",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26036": {
+"source": "ciqual",
+"name": "Salmon, raw, farmed",
+"fructose": 0.088,
+"sucrose": 0.088,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26037": {
+"source": "ciqual",
+"name": "Salmon, smoked",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26039": {
+"source": "ciqual",
+"name": "Tuna, plain, canned, drained",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26042": {
+"source": "ciqual",
+"name": "Turbot, raw, wild",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26043": {
+"source": "ciqual",
+"name": "Cod, raw",
+"fructose": 0.1,
+"sucrose": 0.1,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26044": {
+"source": "ciqual",
+"name": "European hake, raw",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26051": {
+"source": "ciqual",
+"name": "Mackerel, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26053": {
+"source": "ciqual",
+"name": "Tuna, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26055": {
+"source": "ciqual",
+"name": "European plaice, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26057": {
+"source": "ciqual",
+"name": "Common dab, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26058": {
+"source": "ciqual",
+"name": "Common sole, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26063": {
+"source": "ciqual",
+"name": "Spiny scorpionfish, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26064": {
+"source": "ciqual",
+"name": "Yellowfin tuna, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26065": {
+"source": "ciqual",
+"name": "European pilchard or sardine, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26072": {
+"source": "ciqual",
+"name": "European bass, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26082": {
+"source": "ciqual",
+"name": "Swordfish, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26085": {
+"source": "ciqual",
+"name": "Surmullet or red mullet, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26091": {
+"source": "ciqual",
+"name": "Mullet, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26092": {
+"source": "ciqual",
+"name": "Sea trout, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26095": {
+"source": "ciqual",
+"name": "Whiting, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26099": {
+"source": "ciqual",
+"name": "Black seabream, raw",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26100": {
+"source": "ciqual",
+"name": "Bogue, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26122": {
+"source": "ciqual",
+"name": "Haddock, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26127": {
+"source": "ciqual",
+"name": "Conger, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26129": {
+"source": "ciqual",
+"name": "Pollack, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26130": {
+"source": "ciqual",
+"name": "Ling, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26134": {
+"source": "ciqual",
+"name": "Saithe, raw",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26135": {
+"source": "ciqual",
+"name": "Lemon sole, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:26233": {
+"source": "ciqual",
+"name": "Shallow-water Cape hake, raw",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:26249": {
+"source": "ciqual",
+"name": "Fish, white, without skin, cooked",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:27003": {
+"source": "ciqual",
+"name": "Carp, raw, farmed",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:27009": {
+"source": "ciqual",
+"name": "Rainbow trout, raw, farmed",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28001": {
+"source": "ciqual",
+"name": "Pork, shoulder, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28002": {
+"source": "ciqual",
+"name": "Pork, belly, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28003": {
+"source": "ciqual",
+"name": "Pork loin, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28100": {
+"source": "ciqual",
+"name": "Pork, chop, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28201": {
+"source": "ciqual",
+"name": "Pork tenderloin, lean, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28400": {
+"source": "ciqual",
+"name": "Pork, spare-ribs, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:28501": {
+"source": "ciqual",
+"name": "Lardoons, raw",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28502": {
+"source": "ciqual",
+"name": "Pork belly, smoked, raw",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28720": {
+"source": "ciqual",
+"name": "Smoked lardoons, raw",
+"fructose": 0.2,
+"sucrose": 0.18,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:28800": {
+"source": "ciqual",
+"name": "Cured ham, raw",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28801": {
+"source": "ciqual",
+"name": "Cured ham, raw, smoked",
+"fructose": 0.15,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28811": {
+"source": "ciqual",
+"name": "Bayonne Cured ham, raw, smoked",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28812": {
+"source": "ciqual",
+"name": "Dry-cured ham",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28845": {
+"source": "ciqual",
+"name": "Serrano dry-cured ham",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:28858": {
+"source": "ciqual",
+"name": "Pancetta, dried",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:30134": {
+"source": "ciqual",
+"name": "Frankfurter sausage",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:30350": {
+"source": "ciqual",
+"name": "Salami",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:30900": {
+"source": "ciqual",
+"name": "Cured meat and sausages (average)",
+"fructose": 0.13,
+"sucrose": 0.15,
+"polyols": 0.014,
+"below": []
+},
+"ciqual:31004": {
+"source": "ciqual",
+"name": "Milk chocolate bar",
+"fructose": 0.1,
+"sucrose": 42.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:31008": {
+"source": "ciqual",
+"name": "Honey",
+"fructose": 39.9,
+"sucrose": 1.24,
+"polyols": null,
+"below": []
+},
+"ciqual:31010": {
+"source": "ciqual",
+"name": "White chocolate bar",
+"fructose": 0.2,
+"sucrose": 43.4,
+"polyols": null,
+"below": [
+"fructose"
+]
+},
+"ciqual:31016": {
+"source": "ciqual",
+"name": "Sugar, white",
+"fructose": 0.0,
+"sucrose": 99.8,
+"polyols": null,
+"below": []
+},
+"ciqual:31017": {
+"source": "ciqual",
+"name": "Sugar, brown",
+"fructose": 0.81,
+"sucrose": 93.8,
+"polyols": null,
+"below": []
+},
+"ciqual:31024": {
+"source": "ciqual",
+"name": "Jam, strawberry",
+"fructose": 13.4,
+"sucrose": 30.7,
+"polyols": 0.5,
+"below": [
+"polyols"
+]
+},
+"ciqual:31034": {
+"source": "ciqual",
+"name": "Syrup, maple",
+"fructose": 0.43,
+"sucrose": 61.5,
+"polyols": null,
+"below": []
+},
+"ciqual:31037": {
+"source": "ciqual",
+"name": "Jam, apricot",
+"fructose": 13.0,
+"sucrose": 27.1,
+"polyols": 0.0,
+"below": [
+"polyols"
+]
+},
+"ciqual:31039": {
+"source": "ciqual",
+"name": "Marmalade, orange",
+"fructose": 16.5,
+"sucrose": 20.1,
+"polyols": 0.0,
+"below": [
+"polyols"
+]
+},
+"ciqual:31040": {
+"source": "ciqual",
+"name": "Dulce de leche or confiture de lait",
+"fructose": 0.31,
+"sucrose": 43.5,
+"polyols": null,
+"below": []
+},
+"ciqual:31050": {
+"source": "ciqual",
+"name": "Candies, marshmallows",
+"fructose": 3.6,
+"sucrose": 40.0,
+"polyols": null,
+"below": []
+},
+"ciqual:31062": {
+"source": "ciqual",
+"name": "Jam, raspberry",
+"fructose": 19.0,
+"sucrose": 15.5,
+"polyols": null,
+"below": []
+},
+"ciqual:31067": {
+"source": "ciqual",
+"name": "Cane molasses",
+"fructose": 12.8,
+"sucrose": 29.4,
+"polyols": null,
+"below": []
+},
+"ciqual:31077": {
+"source": "ciqual",
+"name": "Fructose",
+"fructose": 95.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"ciqual:31108": {
+"source": "ciqual",
+"name": "Royal jelly",
+"fructose": 6.0,
+"sucrose": 0.9,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:32004": {
+"source": "ciqual",
+"name": "Muesli (average)",
+"fructose": 3.98,
+"sucrose": 14.3,
+"polyols": 0.19,
+"below": []
+},
+"ciqual:34001": {
+"source": "ciqual",
+"name": "Rabbit, meat, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:34500": {
+"source": "ciqual",
+"name": "Frog, leg, raw",
+"fructose": 0.3,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:36003": {
+"source": "ciqual",
+"name": "Chicken, meat, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:36016": {
+"source": "ciqual",
+"name": "Chicken, meat and skin, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:36201": {
+"source": "ciqual",
+"name": "Duck, meat, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:36300": {
+"source": "ciqual",
+"name": "Turkey, meat and skin, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:36301": {
+"source": "ciqual",
+"name": "Turkey, meat, raw",
+"fructose": 0.0,
+"sucrose": 0.07,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:36501": {
+"source": "ciqual",
+"name": "Goose, meat and skin, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:39700": {
+"source": "ciqual",
+"name": "Light custard cream with vanilla, prepacked",
+"fructose": 0.3,
+"sucrose": 9.5,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:4022": {
+"source": "ciqual",
+"name": "Potato flakes, dehydrated, plain",
+"fructose": 0.68,
+"sucrose": 0.69,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:4047": {
+"source": "ciqual",
+"name": "Mashed potatoes (average)",
+"fructose": 0.18,
+"sucrose": 0.15,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:4048": {
+"source": "ciqual",
+"name": "Potato, cooked (average food)",
+"fructose": 0.35,
+"sucrose": 0.24,
+"polyols": 0.052,
+"below": []
+},
+"ciqual:4101": {
+"source": "ciqual",
+"name": "Sweet potato, raw",
+"fructose": 0.75,
+"sucrose": 2.51,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:4102": {
+"source": "ciqual",
+"name": "Sweet potato, cooked",
+"fructose": 0.47,
+"sucrose": 1.86,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:51510": {
+"source": "ciqual",
+"name": "Frik (crushed immature durum wheat), raw",
+"fructose": 0.5,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:5215": {
+"source": "ciqual",
+"name": "Wine, white, dry",
+"fructose": 0.08,
+"sucrose": 0.05,
+"polyols": null,
+"below": [
+"sucrose"
+]
+},
+"ciqual:6201": {
+"source": "ciqual",
+"name": "Beef, steak or beef steak, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:6250": {
+"source": "ciqual",
+"name": "Beef, minced steak, 5% fat, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:6254": {
+"source": "ciqual",
+"name": "Beef, minced steak, 15% fat, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:7000": {
+"source": "ciqual",
+"name": "Bread (average)",
+"fructose": 0.26,
+"sucrose": 0.18,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:7001": {
+"source": "ciqual",
+"name": "Bread, French bread, baguette",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:7125": {
+"source": "ciqual",
+"name": "Rye bread, and wheat",
+"fructose": 0.3,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:7180": {
+"source": "ciqual",
+"name": "Pita bread",
+"fructose": 0.7,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:7300": {
+"source": "ciqual",
+"name": "Rusk",
+"fructose": 2.6,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:7500": {
+"source": "ciqual",
+"name": "Breadcrumbs",
+"fructose": 0.7,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:7741": {
+"source": "ciqual",
+"name": "Brioche",
+"fructose": 3.0,
+"sucrose": 0.2,
+"polyols": 0.0,
+"below": [
+"sucrose"
+]
+},
+"ciqual:8937": {
+"source": "ciqual",
+"name": "Quenelle, plain, raw",
+"fructose": 0.3,
+"sucrose": 0.29,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:9003": {
+"source": "ciqual",
+"name": "Khorasan wheat",
+"fructose": 0.11,
+"sucrose": 0.54,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9060": {
+"source": "ciqual",
+"name": "Durum wheat, whole, raw",
+"fructose": 0.0,
+"sucrose": 0.54,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9100": {
+"source": "ciqual",
+"name": "Rice, raw",
+"fructose": 0.1,
+"sucrose": 0.16,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9101": {
+"source": "ciqual",
+"name": "Rice, parboiled, raw",
+"fructose": 0.02,
+"sucrose": 0.26,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9102": {
+"source": "ciqual",
+"name": "Rice, brown, raw",
+"fructose": 0.5,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:9108": {
+"source": "ciqual",
+"name": "Wild rice, raw",
+"fructose": 0.5,
+"sucrose": 0.9,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9109": {
+"source": "ciqual",
+"name": "Rice, red, raw",
+"fructose": 0.5,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"fructose",
+"sucrose"
+]
+},
+"ciqual:9119": {
+"source": "ciqual",
+"name": "Basmati rice, raw",
+"fructose": 0.2,
+"sucrose": 0.17,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9231": {
+"source": "ciqual",
+"name": "Pop-corn or air-popped maize, unsalted",
+"fructose": 0.07,
+"sucrose": 0.72,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9311": {
+"source": "ciqual",
+"name": "Oatmeal flakes",
+"fructose": 0.0,
+"sucrose": 0.97,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9345": {
+"source": "ciqual",
+"name": "Amaranth, raw",
+"fructose": 0.0099,
+"sucrose": 1.39,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9390": {
+"source": "ciqual",
+"name": "Rye, whole, raw",
+"fructose": 0.21,
+"sucrose": 0.49,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9410": {
+"source": "ciqual",
+"name": "Wheat flour, type 110",
+"fructose": 0.2,
+"sucrose": 0.56,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9415": {
+"source": "ciqual",
+"name": "Wheat flour, type 150",
+"fructose": 0.1,
+"sucrose": 0.59,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9435": {
+"source": "ciqual",
+"name": "Wheat flour, type 65",
+"fructose": 0.1,
+"sucrose": 0.23,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9436": {
+"source": "ciqual",
+"name": "Wheat flour, type 55 (for bread)",
+"fructose": 0.2,
+"sucrose": 0.3,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9480": {
+"source": "ciqual",
+"name": "Spelt flour",
+"fructose": 0.2,
+"sucrose": 0.6,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9510": {
+"source": "ciqual",
+"name": "Maize/corn starch",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9520": {
+"source": "ciqual",
+"name": "Rice flour",
+"fructose": 0.2,
+"sucrose": 0.9,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9530": {
+"source": "ciqual",
+"name": "Rye flour, type 170",
+"fructose": 0.23,
+"sucrose": 1.79,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9532": {
+"source": "ciqual",
+"name": "Rye flour, type 85",
+"fructose": 0.09,
+"sucrose": 0.57,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9533": {
+"source": "ciqual",
+"name": "Rye flour, type 130",
+"fructose": 0.12,
+"sucrose": 0.9,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9545": {
+"source": "ciqual",
+"name": "Maize/corn flour",
+"fructose": 0.12,
+"sucrose": 0.51,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9555": {
+"source": "ciqual",
+"name": "Millet flour",
+"fructose": 0.2,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9621": {
+"source": "ciqual",
+"name": "Wheat bran",
+"fructose": 0.49,
+"sucrose": 1.45,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9643": {
+"source": "ciqual",
+"name": "Rice bran",
+"fructose": 0.2,
+"sucrose": 0.5,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9660": {
+"source": "ciqual",
+"name": "Wheat germ",
+"fructose": 0.2,
+"sucrose": 9.5,
+"polyols": 0.0,
+"below": [
+"fructose"
+]
+},
+"ciqual:9683": {
+"source": "ciqual",
+"name": "Couscous (precooked durum wheat semolina), cooked, unsalted",
+"fructose": 0.2,
+"sucrose": 0.2,
+"polyols": 0.5,
+"below": [
+"fructose",
+"polyols"
+]
+},
+"ciqual:9690": {
+"source": "ciqual",
+"name": "Wheat bulgur, raw",
+"fructose": 0.0,
+"sucrose": 0.41,
+"polyols": 0.0,
+"below": []
+},
+"ciqual:9810": {
+"source": "ciqual",
+"name": "Dried pasta, raw",
+"fructose": 0.08,
+"sucrose": 0.44,
+"polyols": 0.0,
+"below": []
+},
+"fdc:167748": {
+"source": "fdc",
+"name": "Lemon juice from concentrate, canned or bottled",
+"fructose": 0.7,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:167760": {
+"source": "fdc",
+"name": "Sapote, mamey, raw",
+"fructose": 7.66,
+"sucrose": 4.09,
+"polyols": null,
+"below": []
+},
+"fdc:167765": {
+"source": "fdc",
+"name": "Watermelon, raw",
+"fructose": 3.36,
+"sucrose": 1.21,
+"polyols": null,
+"below": []
+},
+"fdc:167776": {
+"source": "fdc",
+"name": "Pears, raw, bartlett (Includes foods for USDA's Food Distribution Program)",
+"fructose": 6.76,
+"sucrose": 0.43,
+"polyols": null,
+"below": []
+},
+"fdc:167777": {
+"source": "fdc",
+"name": "Pears, raw, red anjou",
+"fructose": 6.48,
+"sucrose": 0.26,
+"polyols": null,
+"below": []
+},
+"fdc:167778": {
+"source": "fdc",
+"name": "Pears, raw, bosc (Includes foods for USDA's Food Distribution Program)",
+"fructose": 5.64,
+"sucrose": 2.11,
+"polyols": null,
+"below": []
+},
+"fdc:167779": {
+"source": "fdc",
+"name": "Pears, raw, green anjou (Includes foods for USDA's Food Distribution Program)",
+"fructose": 6.06,
+"sucrose": 0.33,
+"polyols": null,
+"below": []
+},
+"fdc:167783": {
+"source": "fdc",
+"name": "Rowal, raw",
+"fructose": 0.5,
+"sucrose": 12.5,
+"polyols": null,
+"below": []
+},
+"fdc:167787": {
+"source": "fdc",
+"name": "Pomegranate juice, bottled",
+"fructose": 6.37,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:167789": {
+"source": "fdc",
+"name": "Nance, frozen, unsweetened",
+"fructose": 4.73,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:167790": {
+"source": "fdc",
+"name": "Naranjilla (lulo) pulp, frozen, unsweetened",
+"fructose": 1.04,
+"sucrose": 1.72,
+"polyols": null,
+"below": []
+},
+"fdc:167806": {
+"source": "fdc",
+"name": "Baobab powder",
+"fructose": 4.28,
+"sucrose": 9.22,
+"polyols": null,
+"below": []
+},
+"fdc:167807": {
+"source": "fdc",
+"name": "Cherry juice, tart",
+"fructose": 4.95,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:167808": {
+"source": "fdc",
+"name": "Raspberries, puree, seedless",
+"fructose": 3.05,
+"sucrose": 0.18,
+"polyols": null,
+"below": []
+},
+"fdc:167809": {
+"source": "fdc",
+"name": "Raspberries, puree, with seeds",
+"fructose": 3.3,
+"sucrose": 0.21,
+"polyols": null,
+"below": []
+},
+"fdc:167869": {
+"source": "fdc",
+"name": "Canadian bacon, unprepared",
+"fructose": 0.0,
+"sucrose": 0.7,
+"polyols": null,
+"below": []
+},
+"fdc:168156": {
+"source": "fdc",
+"name": "Lime juice, raw",
+"fructose": 0.61,
+"sucrose": 0.48,
+"polyols": null,
+"below": []
+},
+"fdc:168164": {
+"source": "fdc",
+"name": "Raisins, golden, seedless",
+"fructose": 34.7,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:168165": {
+"source": "fdc",
+"name": "Raisins, dark, seedless (Includes foods for USDA's Food Distribution Program)",
+"fructose": 34.7,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:168176": {
+"source": "fdc",
+"name": "Feijoa, raw",
+"fructose": 2.95,
+"sucrose": 2.93,
+"polyols": null,
+"below": []
+},
+"fdc:168191": {
+"source": "fdc",
+"name": "Dates, medjool",
+"fructose": 32.0,
+"sucrose": 0.53,
+"polyols": null,
+"below": []
+},
+"fdc:168193": {
+"source": "fdc",
+"name": "Pineapple, raw, traditional varieties",
+"fructose": 1.94,
+"sucrose": 4.59,
+"polyols": null,
+"below": []
+},
+"fdc:168194": {
+"source": "fdc",
+"name": "Pineapple, raw, extra sweet variety",
+"fructose": 2.15,
+"sucrose": 6.47,
+"polyols": null,
+"below": []
+},
+"fdc:168195": {
+"source": "fdc",
+"name": "Clementines, raw",
+"fructose": 1.64,
+"sucrose": 5.96,
+"polyols": null,
+"below": []
+},
+"fdc:168211": {
+"source": "fdc",
+"name": "Kiwifruit, ZESPRI SunGold, raw",
+"fructose": 5.8,
+"sucrose": 1.22,
+"polyols": null,
+"below": []
+},
+"fdc:168215": {
+"source": "fdc",
+"name": "Plantains, green, raw",
+"fructose": 1.02,
+"sucrose": 0.18,
+"polyols": null,
+"below": []
+},
+"fdc:168217": {
+"source": "fdc",
+"name": "Raspberry juice concentrate",
+"fructose": 20.1,
+"sucrose": 1.03,
+"polyols": null,
+"below": []
+},
+"fdc:168389": {
+"source": "fdc",
+"name": "Asparagus, raw",
+"fructose": 1.0,
+"sucrose": 0.23,
+"polyols": null,
+"below": []
+},
+"fdc:168410": {
+"source": "fdc",
+"name": "Edamame, frozen, unprepared",
+"fructose": 0.21,
+"sucrose": 1.13,
+"polyols": null,
+"below": []
+},
+"fdc:168422": {
+"source": "fdc",
+"name": "Mushrooms, Chanterelle, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:168423": {
+"source": "fdc",
+"name": "Mushrooms, morel, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:168431": {
+"source": "fdc",
+"name": "Lettuce, red leaf, raw",
+"fructose": 0.28,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:168568": {
+"source": "fdc",
+"name": "Carrots, baby, raw",
+"fructose": 1.0,
+"sucrose": 2.72,
+"polyols": null,
+"below": []
+},
+"fdc:168576": {
+"source": "fdc",
+"name": "Peppers, jalapeno, raw",
+"fructose": 2.63,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:168884": {
+"source": "fdc",
+"name": "Rye grain",
+"fructose": 0.11,
+"sucrose": 0.71,
+"polyols": null,
+"below": []
+},
+"fdc:168885": {
+"source": "fdc",
+"name": "Rye flour, dark",
+"fructose": 0.23,
+"sucrose": 1.8,
+"polyols": null,
+"below": []
+},
+"fdc:168886": {
+"source": "fdc",
+"name": "Rye flour, medium",
+"fructose": 0.12,
+"sucrose": 0.9,
+"polyols": null,
+"below": []
+},
+"fdc:168893": {
+"source": "fdc",
+"name": "Wheat flour, whole-grain (Includes foods for USDA's Food Distribution Program)",
+"fructose": 0.05,
+"sucrose": 0.36,
+"polyols": null,
+"below": []
+},
+"fdc:168943": {
+"source": "fdc",
+"name": "Sorghum flour, whole-grain",
+"fructose": 0.16,
+"sucrose": 0.47,
+"polyols": null,
+"below": []
+},
+"fdc:169100": {
+"source": "fdc",
+"name": "Orange juice, chilled, includes from concentrate",
+"fructose": 2.23,
+"sucrose": 4.01,
+"polyols": null,
+"below": []
+},
+"fdc:169105": {
+"source": "fdc",
+"name": "Tangerines, (mandarin oranges), raw",
+"fructose": 2.4,
+"sucrose": 6.05,
+"polyols": null,
+"below": []
+},
+"fdc:169118": {
+"source": "fdc",
+"name": "Pears, raw",
+"fructose": 6.42,
+"sucrose": 0.71,
+"polyols": null,
+"below": []
+},
+"fdc:169242": {
+"source": "fdc",
+"name": "Mushrooms, shiitake, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:169249": {
+"source": "fdc",
+"name": "Lettuce, green leaf, raw",
+"fructose": 0.43,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:169255": {
+"source": "fdc",
+"name": "Mushrooms, portabella, raw",
+"fructose": 0.49,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:169260": {
+"source": "fdc",
+"name": "Okra, raw",
+"fructose": 0.57,
+"sucrose": 0.6,
+"polyols": null,
+"below": []
+},
+"fdc:169381": {
+"source": "fdc",
+"name": "Catsup, low sodium",
+"fructose": 8.72,
+"sucrose": 2.3,
+"polyols": null,
+"below": []
+},
+"fdc:169382": {
+"source": "fdc",
+"name": "Mushrooms, enoki, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:169403": {
+"source": "fdc",
+"name": "Mushrooms, maitake, raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:169655": {
+"source": "fdc",
+"name": "Sugars, granulated",
+"fructose": 0.0,
+"sucrose": 99.8,
+"polyols": null,
+"below": []
+},
+"fdc:169738": {
+"source": "fdc",
+"name": "Pasta, whole-wheat, dry (Includes foods for USDA's Food Distribution Program)",
+"fructose": 0.3,
+"sucrose": 0.68,
+"polyols": null,
+"below": []
+},
+"fdc:169745": {
+"source": "fdc",
+"name": "Spelt, uncooked",
+"fructose": 0.24,
+"sucrose": 0.59,
+"polyols": null,
+"below": []
+},
+"fdc:169747": {
+"source": "fdc",
+"name": "Teff, uncooked",
+"fructose": 0.47,
+"sucrose": 0.62,
+"polyols": null,
+"below": []
+},
+"fdc:169917": {
+"source": "fdc",
+"name": "Oranges, raw, navels (Includes foods for USDA's Food Distribution Program)",
+"fructose": 2.25,
+"sucrose": 4.28,
+"polyols": null,
+"below": []
+},
+"fdc:169928": {
+"source": "fdc",
+"name": "Peaches, yellow, raw",
+"fructose": 1.53,
+"sucrose": 4.76,
+"polyols": null,
+"below": []
+},
+"fdc:169941": {
+"source": "fdc",
+"name": "Persimmons, japanese, raw",
+"fructose": 5.56,
+"sucrose": 1.54,
+"polyols": null,
+"below": []
+},
+"fdc:169975": {
+"source": "fdc",
+"name": "Cabbage, raw",
+"fructose": 1.45,
+"sucrose": 0.08,
+"polyols": null,
+"below": []
+},
+"fdc:169988": {
+"source": "fdc",
+"name": "Celery, raw",
+"fructose": 0.37,
+"sucrose": 0.08,
+"polyols": null,
+"below": []
+},
+"fdc:170006": {
+"source": "fdc",
+"name": "Onions, young green, tops only",
+"fructose": 2.12,
+"sucrose": 0.16,
+"polyols": null,
+"below": []
+},
+"fdc:170008": {
+"source": "fdc",
+"name": "Onions, sweet, raw",
+"fructose": 2.02,
+"sucrose": 0.72,
+"polyols": null,
+"below": []
+},
+"fdc:170026": {
+"source": "fdc",
+"name": "Potatoes, flesh and skin, raw",
+"fructose": 0.26,
+"sucrose": 0.17,
+"polyols": null,
+"below": []
+},
+"fdc:170148": {
+"source": "fdc",
+"name": "Seeds, hemp seed, hulled",
+"fructose": 0.31,
+"sucrose": 0.85,
+"polyols": null,
+"below": []
+},
+"fdc:170155": {
+"source": "fdc",
+"name": "Seeds, sunflower seed butter, without salt",
+"fructose": 0.0,
+"sucrose": 10.5,
+"polyols": null,
+"below": []
+},
+"fdc:170162": {
+"source": "fdc",
+"name": "Nuts, cashew nuts, raw",
+"fructose": 0.05,
+"sucrose": 5.81,
+"polyols": null,
+"below": []
+},
+"fdc:170184": {
+"source": "fdc",
+"name": "Nuts, pistachio nuts, raw",
+"fructose": 0.24,
+"sucrose": 6.87,
+"polyols": null,
+"below": []
+},
+"fdc:170187": {
+"source": "fdc",
+"name": "Nuts, walnuts, english",
+"fructose": 0.09,
+"sucrose": 2.43,
+"polyols": null,
+"below": []
+},
+"fdc:170276": {
+"source": "fdc",
+"name": "Syrup, maple, Canadian",
+"fructose": 0.34,
+"sucrose": 58.9,
+"polyols": null,
+"below": []
+},
+"fdc:170277": {
+"source": "fdc",
+"name": "Sweetener, syrup, agave",
+"fructose": 55.6,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:170381": {
+"source": "fdc",
+"name": "Broccoli raab, raw",
+"fructose": 0.17,
+"sucrose": 0.11,
+"polyols": null,
+"below": []
+},
+"fdc:170419": {
+"source": "fdc",
+"name": "Peas, green, raw",
+"fructose": 0.39,
+"sucrose": 4.99,
+"polyols": null,
+"below": []
+},
+"fdc:170556": {
+"source": "fdc",
+"name": "Seeds, pumpkin and squash seed kernels, dried",
+"fructose": 0.15,
+"sucrose": 1.13,
+"polyols": null,
+"below": []
+},
+"fdc:170568": {
+"source": "fdc",
+"name": "Nuts, almonds, blanched",
+"fructose": 0.0,
+"sucrose": 4.46,
+"polyols": null,
+"below": []
+},
+"fdc:170582": {
+"source": "fdc",
+"name": "Nuts, hazelnuts or filberts, blanched",
+"fructose": 0.07,
+"sucrose": 3.35,
+"polyols": null,
+"below": []
+},
+"fdc:170674": {
+"source": "fdc",
+"name": "Sugar, turbinado",
+"fructose": 0.0,
+"sucrose": 99.2,
+"polyols": null,
+"below": []
+},
+"fdc:170859": {
+"source": "fdc",
+"name": "Cream, fluid, heavy whipping",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:170929": {
+"source": "fdc",
+"name": "Spices, mustard seed, ground",
+"fructose": 0.02,
+"sucrose": 3.69,
+"polyols": null,
+"below": []
+},
+"fdc:171251": {
+"source": "fdc",
+"name": "Cheese, swiss",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:171255": {
+"source": "fdc",
+"name": "Cream, fluid, half and half",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:171257": {
+"source": "fdc",
+"name": "Cream, sour, cultured",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:171319": {
+"source": "fdc",
+"name": "Spices, chili powder",
+"fructose": 4.29,
+"sucrose": 0.76,
+"polyols": null,
+"below": []
+},
+"fdc:171321": {
+"source": "fdc",
+"name": "Spices, cloves, ground",
+"fructose": 1.07,
+"sucrose": 0.02,
+"polyols": null,
+"below": []
+},
+"fdc:171327": {
+"source": "fdc",
+"name": "Spices, onion powder",
+"fructose": 1.67,
+"sucrose": 3.87,
+"polyols": null,
+"below": []
+},
+"fdc:171688": {
+"source": "fdc",
+"name": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+"fructose": 5.9,
+"sucrose": 2.07,
+"polyols": null,
+"below": []
+},
+"fdc:171689": {
+"source": "fdc",
+"name": "Apples, raw, without skin",
+"fructose": 6.03,
+"sucrose": 0.82,
+"polyols": null,
+"below": []
+},
+"fdc:171706": {
+"source": "fdc",
+"name": "Avocados, raw, California",
+"fructose": 0.08,
+"sucrose": 0.06,
+"polyols": null,
+"below": []
+},
+"fdc:171707": {
+"source": "fdc",
+"name": "Avocados, raw, Florida",
+"fructose": 0.25,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:171719": {
+"source": "fdc",
+"name": "Cherries, sweet, raw",
+"fructose": 5.37,
+"sucrose": 0.15,
+"polyols": null,
+"below": []
+},
+"fdc:171724": {
+"source": "fdc",
+"name": "Currants, zante, dried",
+"fructose": 32.5,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:171726": {
+"source": "fdc",
+"name": "Dates, deglet noor",
+"fructose": 19.6,
+"sucrose": 23.8,
+"polyols": null,
+"below": []
+},
+"fdc:172188": {
+"source": "fdc",
+"name": "Egg, whole, dried",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:172420": {
+"source": "fdc",
+"name": "Lentils, raw",
+"fructose": 0.27,
+"sucrose": 1.47,
+"polyols": null,
+"below": []
+},
+"fdc:173040": {
+"source": "fdc",
+"name": "Grapes, muscadine, raw",
+"fructose": 3.92,
+"sucrose": 0.57,
+"polyols": null,
+"below": []
+},
+"fdc:173418": {
+"source": "fdc",
+"name": "Cheese, cream",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:173469": {
+"source": "fdc",
+"name": "Vinegar, cider",
+"fructose": 0.3,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:173949": {
+"source": "fdc",
+"name": "Blueberries, wild, frozen (Includes foods for USDA's Food Distribution Program)",
+"fructose": 3.71,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:173953": {
+"source": "fdc",
+"name": "Cherimoya, raw",
+"fructose": 6.28,
+"sucrose": 0.66,
+"polyols": null,
+"below": []
+},
+"fdc:173964": {
+"source": "fdc",
+"name": "Currants, red and white, raw",
+"fructose": 3.53,
+"sucrose": 0.61,
+"polyols": null,
+"below": []
+},
+"fdc:174141": {
+"source": "fdc",
+"name": "Alcoholic beverage, malt beer, hard lemonade",
+"fructose": 3.91,
+"sucrose": 2.11,
+"polyols": null,
+"below": []
+},
+"fdc:174196": {
+"source": "fdc",
+"name": "Fish, flatfish (flounder and sole species), raw",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+},
+"fdc:174687": {
+"source": "fdc",
+"name": "Jackfruit, raw",
+"fructose": 9.19,
+"sucrose": 0.42,
+"polyols": null,
+"below": []
+},
+"fdc:323294": {
+"source": "fdc",
+"name": "Nuts, almonds, dry roasted, with salt added",
+"fructose": 0.0,
+"sucrose": 4.17,
+"polyols": null,
+"below": []
+},
+"fdc:334194": {
+"source": "fdc",
+"name": "Fish, tuna, light, canned in water, drained solids",
+"fructose": 0.0,
+"sucrose": 0.0,
+"polyols": null,
+"below": []
+}
+}
+}

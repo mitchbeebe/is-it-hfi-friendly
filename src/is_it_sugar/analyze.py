@@ -71,7 +71,7 @@ def _bu_item(entry: SugarEntry, name: str, basis: Basis = "bu_table") -> Item:
     )
 
 
-def _known_item(k: known.Known) -> Item:
+def _known_item(k: known.Known, i: ing.Ingredient) -> Item:
     if k.food is None:
         return Item(
             name=k.name,
@@ -87,15 +87,17 @@ def _known_item(k: known.Known) -> Item:
             name=k.name, status="tolerated", basis=f.source, reason=f"Measured: {f.name} has no fructose or sucrose."
         )
     amounts = ", ".join(f"{'under ' if s in f.below else ''}{values[s]:g} g {s}" for s in found)
-    load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found)
+    load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found) * i.share
+    share = "" if i.share == 1 else f" It's {i.why}, so at most {i.share:.0%} of the product:"
     return Item(
         name=k.name,
         status="not_tolerated",
         sugars=found,
         basis=f.source,
-        reason=f"Measured: {f.name} has {amounts} per 100 g, so the product has at most that much from it.",
-        # Per 100 g of the ingredient, an upper bound for the product. fructose_load halves sucrose itself.
-        grams=values["sucrose"] if found == ["sucrose"] else load,
+        reason=f"Measured: {f.name} has {amounts} per 100 g.{share} up to {load:.2g} g fructose load per 100 g "
+        "of the product.",
+        # An upper bound for the product. fructose_load halves sucrose itself.
+        grams=values["sucrose"] * i.share if found == ["sucrose"] else load,
     )
 
 
@@ -139,8 +141,9 @@ def _jev_item(name: str, probs: dict[str, float]) -> Item:
 INGREDIENT_TTL = 90 * 86400
 
 
-def _decide(name: str) -> Item | None:
+def _decide(i: ing.Ingredient) -> Item | None:
     """An ingredient's item from the BU table or known foods, or None if it needs the AI model."""
+    name = i.name
     # A sugar anywhere counts, including inside brackets: "chocolate chips (sugar, cocoa butter)".
     matches = sugars.match(name)
     flagged = [e for e in matches if e.status != "tolerated"]
@@ -151,10 +154,11 @@ def _decide(name: str) -> Item | None:
     # soybean)", "wholewheat flour (80%)". A tolerated sugar only inside them ("chocolate (dextrose, ...)")
     # says nothing about the rest.
     base, _ = ing.split(name)
+    base = re.sub(r"\s*\d+(?:\.\d+)?\s*%$", "", base)  # "tomatoes 45%"
     if base_matches := sugars.match(base):
         return _bu_item(base_matches[0], name)
     if k := known.lookup(base):
-        return _known_item(known.Known(name, k.food))
+        return _known_item(known.Known(name, k.food), i)
     return None
 
 
@@ -162,8 +166,9 @@ async def classify_ingredients(ts: AsyncTypeSafeClient, text: str, cache: Cache 
     parsed = ing.parse(text)
     items: list[Item | None] = []
     unknown: dict[str, str] = {}
-    for i, name in enumerate(parsed):
-        if item := _decide(name):
+    for i, part in enumerate(parsed):
+        name = part.name
+        if item := _decide(part):
             items.append(item)
         elif cache and (probs := cache.get(INGREDIENT_NS, sugars.norm(name), INGREDIENT_TTL)):
             items.append(_jev_item(name, probs))
