@@ -104,7 +104,11 @@ def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = N
     unmeasured_sorbitol = f.sorbitol is None and foods.is_sorbitol_fruit(f.name)
     if not found and not unmeasured_sorbitol:
         return Item(
-            name=i.name, status="tolerated", basis=f.source, reason=f"{_short(f.name)}: no fructose or sucrose."
+            name=i.name,
+            status="tolerated",
+            basis=f.source,
+            reason=f"{_short(f.name)}: no fructose or sucrose.",
+            url=foods.url(f.id),
         )
     amounts = ", ".join(f"{values[s]:.2g} g {s}" for s in found)
     load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found) * i.share
@@ -129,6 +133,7 @@ def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = N
         reason=reason,
         # Per 100 g of the product, an upper bound; fructose_load halves sucrose itself. None when sorbitol has no amount.
         grams=None if unmeasured_sorbitol else values["sucrose"] * i.share if found == ["sucrose"] else load,
+        url=foods.url(f.id),
     )
 
 
@@ -410,11 +415,20 @@ async def _pick_local(ts: AsyncTypeSafeClient, name: str) -> foods.Food | None:
     return _local_choice(local, r.choices["whole"].choice)
 
 
-def measured_sugars(nutrients: dict[str, float], local: foods.Food | None) -> tuple[list[Item], list[Sugar]]:
+def _source(local: foods.Food | None, fdc_id: int | None, use_local: bool) -> tuple[Basis, str | None]:
+    """Which source a whole food's value came from, and its page there."""
+    if use_local and local is not None:
+        return local.source, foods.url(local.id)
+    return "fdc", foods.url(f"fdc:{fdc_id}") if fdc_id is not None else None
+
+
+def measured_sugars(
+    nutrients: dict[str, float], local: foods.Food | None, fdc_id: int | None = None
+) -> tuple[list[Item], list[Sugar]]:
     """One item per measured sugar (zeros included), and which sugars were measured.
 
     Per sugar, the composition table's value (AFCD or CIQUAL, mostly lab-analysed) wins over USDA's
-    search result. AFCD reports every variety of a food, so its amounts are shown as a range.
+    search result, `fdc_id`. AFCD reports every variety of a food, so its amounts are shown as a range.
     """
     items: list[Item] = []
     measured: list[Sugar] = []
@@ -446,6 +460,7 @@ def measured_sugars(nutrients: dict[str, float], local: foods.Food | None) -> tu
         else:
             continue
         measured.append(s)
+        url = _source(local, fdc_id, basis != "fdc")[1]
         if hi > 0:
             items.append(
                 Item(
@@ -455,20 +470,23 @@ def measured_sugars(nutrients: dict[str, float], local: foods.Food | None) -> tu
                     basis=basis,
                     reason=reason,
                     grams=hi,
+                    url=url,
                 )
             )
         elif not no_sugar:
-            items.append(Item(name=f"{label}: {amount} per 100 g", status="tolerated", basis=basis, reason=""))
+            items.append(Item(name=f"{label}: {amount} per 100 g", status="tolerated", basis=basis, reason="", url=url))
     if no_sugar:
         measured += [s for s in ("fructose", "sucrose") if s not in measured]
+        basis, url = _source(local, fdc_id, local is not None and local.total_sugars == 0)
         items.insert(
             0,
             Item(
                 name="Total sugars: 0 g per 100 g",
                 status="tolerated",
-                basis=local.source if local is not None and local.total_sugars == 0 else "fdc",
+                basis=basis,
                 # Sugar alcohols such as sorbitol aren't counted in total sugars.
                 reason="Sorbitol isn't counted in total sugars.",
+                url=url,
             ),
         )
     return items, measured
@@ -493,7 +511,11 @@ def known_sorbitol(names: Sequence[str]) -> list[Item]:
 
 
 def unidentified_sugars(
-    nutrients: dict[str, float], local: foods.Food | None, measured: list[Sugar], items: list[Item]
+    nutrients: dict[str, float],
+    local: foods.Food | None,
+    measured: list[Sugar],
+    items: list[Item],
+    fdc_id: int | None = None,
 ) -> list[Item]:
     """A caution item when the data shows sugar but not which kind, or no sugar data at all, so "OK" never
     rests on a guess alone."""
@@ -506,20 +528,24 @@ def unidentified_sugars(
     if total == 0 or explained:
         return []
     if total is None:
+        basis, url = _source(local, fdc_id, True)
         return [
             Item(
                 name="Sugars: not measured",
                 status="caution",
-                basis=local.source if local is not None else "fdc",
+                basis=basis,
                 reason="No sugar measurements, so nothing confirms it's free of fructose and sucrose.",
+                url=url,
             )
         ]
+    basis, url = _source(local, fdc_id, local is not None and local.total_sugars is not None)
     return [
         Item(
             name=f"Sugars: {total:g} g per 100 g",
             status="caution",
-            basis=local.source if local is not None and local.total_sugars is not None else "fdc",
+            basis=basis,
             reason="Sugar measured, but not which kinds. Some may be fructose or sucrose.",
+            url=url,
         )
     ]
 
@@ -617,7 +643,8 @@ async def _fdc_result(
         local = None
         items += await classify_ingredients(ts, ingredients_text, cache, serving)
 
-    measured_items, measured = measured_sugars(nutrients, local)
+    fdc_id = food.fdc_id if food is not None else None
+    measured_items, measured = measured_sugars(nutrients, local, fdc_id)
     if serving is not None:
         # The label's total sugars are per serving; the per-100 g line would only restate them.
         measured_items = [i for i in measured_items if not i.name.startswith("Total sugars: 0 g")]
@@ -637,7 +664,7 @@ async def _fdc_result(
             names = ([local.name] if local is not None else []) + ([food.description] if food is not None else [])
             items += known_sorbitol(names)
         items += await _estimate(ts, name, unmeasured)
-        items += unidentified_sugars(nutrients, local, measured, items)
+        items += unidentified_sugars(nutrients, local, measured, items, fdc_id)
         if generic:
             notes.append(
                 "This is a generic food without an ingredient list. Packaged versions vary, so check the label."

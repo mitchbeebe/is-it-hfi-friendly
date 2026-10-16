@@ -162,6 +162,19 @@ def test_measured_ingredient_counts_at_its_share():
     assert prefs.apply(analyze.summarize([popcorn, salt]), trace_limit=1.0).verdict == "ok"
 
 
+def test_items_link_to_the_food_in_their_source():
+    paprika = food("Paprika", "ciqual")
+    item = analyze._measured_item(ingredients.Ingredient("paprika"), paprika)
+    assert item.url == f"https://ciqual.anses.fr/#/aliments/{paprika.id.removeprefix('ciqual:')}"
+    mustard = analyze._measured_item(ingredients.Ingredient("mustard"), food("Mustard powder", "afcd"))
+    assert (
+        mustard.url == "https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd/search/food/F005972"
+    )
+    items, _ = analyze.measured_sugars({"Sucrose": 2.0}, None, 170567)
+    assert items[0].url == "https://fdc.nal.usda.gov/food-details/170567/nutrients"
+    assert analyze.measured_sugars({"Sucrose": 2.0}, None)[0][0].url is None
+
+
 def test_unmeasured_sorbitol_in_a_sorbitol_fruit_has_no_amount():
     apples = next(f for f in foods._all() if f.source == "fdc" and f.name.startswith("Apples, raw, with skin"))
     item = analyze._measured_item(ingredients.Ingredient("apples"), apples)

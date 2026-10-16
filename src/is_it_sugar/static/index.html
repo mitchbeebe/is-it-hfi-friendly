@@ -659,7 +659,7 @@ function render(r) {
                 <span class="name">${esc(titleCase(i.name))}</span><span class="tag">${i.avoided_by ? "Avoided by you" : i.allowed_by ? "Allowed by you" : STATUS[i.status]}</span>
                 ${i.avoided_by ? `<div class="why">You avoid “${esc(i.avoided_by)}”.</div>` : ""}
                 ${i.allowed_by && !i.avoided_by && i.status !== "tolerated" ? `<div class="why">You allowed “${esc(i.allowed_by)}”, so it doesn't count toward the verdict.</div>` : ""}
-                <div class="why">${esc(i.reason)} <em>(${BASIS_URL[i.basis] ? `<a href="${BASIS_URL[i.basis]}" target="_blank" rel="noopener">${BASIS[i.basis]}</a>` : BASIS[i.basis]})</em></div>
+                <div class="why">${esc(i.reason)} <em>(${i.url || BASIS_URL[i.basis] ? `<a href="${esc(i.url || BASIS_URL[i.basis])}" target="_blank" rel="noopener">${BASIS[i.basis]}</a>` : BASIS[i.basis]})</em></div>
               </div>
             </li>`).join("")}
         </ul>

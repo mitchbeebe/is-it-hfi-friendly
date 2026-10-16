@@ -20,6 +20,7 @@ class Item(BaseModel):
     allowed_by: str | None = None  # the Settings term that allowed it
     avoided_by: str | None = None  # the Settings term that flagged it; wins over allowed_by
     grams: float | None = None  # measured amount per 100 g (top of the range), for the trace rule
+    url: str | None = None  # the source's page for the food the amounts come from
     trace: bool = False  # measured, but under the person's fructose-load limit
 
 

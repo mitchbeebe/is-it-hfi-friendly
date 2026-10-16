@@ -99,6 +99,16 @@ def _index() -> sqlite3.Connection:
     return db
 
 
+def url(food_id: str) -> str:
+    """The source's own page for a food: "fdc:170567", "ciqual:20047" or "afcd:F005972"."""
+    source, code = food_id.split(":", 1)
+    return {
+        "afcd": "https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd/search/food/{}",
+        "ciqual": "https://ciqual.anses.fr/#/aliments/{}",
+        "fdc": "https://fdc.nal.usda.gov/food-details/{}/nutrients",
+    }[source].format(code)
+
+
 def get(food_id: str) -> Food | None:
     return _by_id().get(food_id)
 
