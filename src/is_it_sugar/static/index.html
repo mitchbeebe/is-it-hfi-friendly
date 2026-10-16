@@ -123,6 +123,9 @@
   .s-caution .tag { color: var(--caution); }
   .s-tolerated .tag { color: var(--ok); }
   .items .why { color: var(--muted); font-size: .85rem; }
+  .items .why em a, .about a { color: inherit; }
+  .about ul { margin: 0 0 12px; padding-left: 18px; font-size: .88rem; display: grid; gap: 6px; }
+  .about h3 { margin-top: 14px; }
   details summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
   details p { font-size: .88rem; overflow-wrap: anywhere; }
   .notes { margin: 0; padding-left: 18px; color: var(--muted); font-size: .88rem; }
@@ -193,7 +196,6 @@
   .recent-list .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .recent-list .when { color: var(--muted); font-size: .8rem; white-space: nowrap; }
   footer { margin-top: 14px; color: var(--muted); font-size: .8rem; }
-  footer a { color: inherit; }
 </style>
 </head>
 <body>
@@ -303,9 +305,13 @@
           aria-label="Fructose load limit, grams per 100 g">
         <span>g per 100 g</span>
       </div>
-      <p class="empty">Only measured amounts count: each ingredient at the most it can be of the product, and all of
-        them together at no more than the label's total sugars. A sugar with no amount, or an AI estimate, keeps the food
-        at Avoid.</p>
+	  <details class="section">
+		<summary>Measurement</summary>
+      <p class="empty">Only measured amounts count, each ingredient at the most it can be of the product. When the
+        label gives a serving size and total sugars, fructose and sucrose count at no more than those sugars, even a
+        listed sugar or an AI estimate with no amount. Otherwise, a sugar with no amount or an AI estimate keeps the
+        food at Avoid. Sorbitol always needs a measured amount.</p>
+	  </details>
     </div>
 
     <div class="card section">
@@ -320,15 +326,52 @@
     </div>
   </section>
 
+  <details class="card section about">
+    <summary>Data sources and research</summary>
+    <h3>Sugar ratings</h3>
+    <ul>
+      <li><a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>:
+        whether each sugar and sweetener is tolerated.</li>
+    </ul>
+    <h3>Measured sugars</h3>
+    <ul>
+      <li><a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>,
+        Release 3 (FSANZ, CC BY 4.0): fructose, sucrose and sorbitol in about 900 foods.</li>
+      <li><a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>,
+        2020 (Licence Ouverte): fructose and sucrose in about 2,100 foods.</li>
+      <li><a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>:
+        SR Legacy and Foundation foods for fructose and sucrose, and branded foods for ingredient lists, serving
+        sizes and total sugars.</li>
+    </ul>
+    <h3>Products</h3>
+    <ul>
+      <li><a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a> (ODbL):
+        ingredient lists by barcode, and the other names its ingredient taxonomy gives each food.</li>
+    </ul>
+    <h3>Research</h3>
+    <ul>
+      <li>Izquierdo-García E, et al.
+        <a href="https://doi.org/10.3390/nu18050771" target="_blank" rel="noopener">Dietary patterns in a nationwide
+        cohort of patients with hereditary fructose intolerance</a>. <i>Nutrients</i> 2026;18(5):771.
+        Fructose load as fructose + half of sucrose + sorbitol; vegetables grouped under 0.5, 0.5 to 1, and over
+        1 g per 100 g; and a daily limit of 40 mg per kg of body weight, at most 1 to 1.5 g.</li>
+      <li>Bruni G, et al.
+        <a href="https://doi.org/10.3390/nu18162609" target="_blank" rel="noopener">Current dietary practices in
+        hereditary fructose intolerance: results from a national survey across 15 Italian metabolic centres</a>.
+        <i>Nutrients</i> 2026;18(16):2609. Of 14 centres, 5 allow vegetables under 0.5 g fructose per 100 g and
+        9 under 1 g; centres disagree on many sweeteners.</li>
+      <li>The per-serving tiers (under 0.1 g OK, up to 0.5 g Caution) are this app's own, set well under the daily
+        limit. No paper gives one.</li>
+    </ul>
+    <h3>AI judgment</h3>
+    <ul>
+      <li>An AI model picks which measured food an ingredient is, and judges ingredients with no measured data. It
+        can make mistakes.</li>
+    </ul>
+  </details>
+
   <footer>
-    Sugars are judged against the
-	<a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>. 
-    Foods are looked up in <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>,
-    <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>,
-    <a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>,
-	and <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>. 
-	Other ingredients are classified by an AI model, which can make mistakes. Always read the label, 
-	and check with your doctor or dietitian before relying on a result.
+    Always read the label, and check with your doctor or dietitian before relying on a result.
   </footer>
 </main>
 
@@ -343,6 +386,12 @@ const STATUS = {
 };
 const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
 const TABLES = { afcd: "Australian Food Composition Database", ciqual: "CIQUAL French food composition table", fdc: "USDA FoodData Central" };
+const BASIS_URL = {
+  bu_table: "https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm",
+  fdc: "https://fdc.nal.usda.gov/",
+  afcd: "https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd",
+  ciqual: "https://ciqual.anses.fr/",
+};
 const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
@@ -610,7 +659,7 @@ function render(r) {
                 <span class="name">${esc(titleCase(i.name))}</span><span class="tag">${i.avoided_by ? "Avoided by you" : i.allowed_by ? "Allowed by you" : STATUS[i.status]}</span>
                 ${i.avoided_by ? `<div class="why">You avoid “${esc(i.avoided_by)}”.</div>` : ""}
                 ${i.allowed_by && !i.avoided_by && i.status !== "tolerated" ? `<div class="why">You allowed “${esc(i.allowed_by)}”, so it doesn't count toward the verdict.</div>` : ""}
-                <div class="why">${esc(i.reason)} <em>(${BASIS[i.basis]})</em></div>
+                <div class="why">${esc(i.reason)} <em>(${BASIS_URL[i.basis] ? `<a href="${BASIS_URL[i.basis]}" target="_blank" rel="noopener">${BASIS[i.basis]}</a>` : BASIS[i.basis]})</em></div>
               </div>
             </li>`).join("")}
         </ul>

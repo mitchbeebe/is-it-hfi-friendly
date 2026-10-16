@@ -52,12 +52,13 @@ def fructose_load(items: Sequence[Item]) -> float:
     return sum((i.grams or 0) * (0.5 if i.sugars == ["sucrose"] else 1) for i in items)
 
 
-# Under this fructose load per 100 g, a food is tolerated: the lowest tier in Spanish HFI guidance and
-# the strictest cut-off Italian centres use (Izquierdo-García 2026, doi:10.3390/nu18050771; Bruni 2026,
-# doi:10.3390/nu18162609).
+# Under this fructose load per 100 g, a food is tolerated: the lowest vegetable tier in HFI guidance and
+# the strictest cut-off Italian centres use for vegetables (Izquierdo-García 2026, doi:10.3390/nu18050771;
+# Bruni 2026, doi:10.3390/nu18162609).
 LOW_LOAD = 0.5
-# Per serving, when the label gives one. Guidance puts the daily limit at 1 to 1.5 g fructose load, so a
-# serving under a tenth of the low end is tolerated, and up to half of it is Caution.
+# Per serving, when the label gives one. Guidance puts the daily limit at 40 mg/kg, at most 1 to 1.5 g
+# fructose load (Izquierdo-García 2026), so a serving under a tenth of the low end is tolerated, and up to
+# half of it is Caution. No guidance gives a per-serving limit; these are this app's own.
 SERVING_LOW = 0.1
 SERVING_MAX = 0.5
 FRUCTOSE_SUCROSE = {"fructose", "sucrose"}
