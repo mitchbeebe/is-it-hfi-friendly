@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from .sugars import Status, Sugar
 
 Verdict = Literal["avoid", "caution", "ok"]
-Basis = Literal["bu_table", "jev", "fdc", "afcd", "ciqual", "label", "settings"]
+Basis = Literal["bu_table", "jev", "fdc", "afcd", "ciqual", "label", "settings", "total"]
 
 
 class Item(BaseModel):
@@ -21,9 +21,6 @@ class Item(BaseModel):
     avoided_by: str | None = None  # the Settings term that flagged it; wins over allowed_by
     grams: float | None = None  # measured amount per 100 g (top of the range), for the trace rule
     trace: bool = False  # measured, but under the person's fructose-load limit
-    # A product label with 0 g sugars per serving caps this item at a trace. Settings decide whether
-    # that makes it Caution.
-    label_cap: bool = False
 
 
 class Food(BaseModel):
@@ -41,6 +38,15 @@ class MeasuredMatch(BaseModel):
     name: str
     note: str  # how AFCD derived the values, or the USDA dataset
     kinds: int  # how many varieties the ranges span
+
+
+class Serving(BaseModel):
+    """A packaged product's serving, from its label."""
+
+    grams: float
+    label: str  # "1 tsp (5 g)"
+    # The most total sugars a serving can have: labels round to the nearest gram and list under 0.5 g as 0 g.
+    max_sugars: float | None = None
 
 
 class OffMatch(BaseModel):
@@ -70,5 +76,6 @@ class Result(BaseModel):
     measured_food: MeasuredMatch | None = None
     off_product: OffMatch | None = None
     ingredients_text: str | None = None
+    serving: Serving | None = None
     alternatives: list[Alternative] = []
     notes: list[str] = []

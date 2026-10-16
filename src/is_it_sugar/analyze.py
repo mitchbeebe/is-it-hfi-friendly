@@ -21,7 +21,7 @@ from typesafe_sdk import AsyncTypeSafeClient, Choice, Image, Noul
 from . import afcd, foods, off, sugars
 from . import ingredients as ing
 from .cache import Cache
-from .models import Alternative, Basis, Food, Item, MeasuredMatch, OffMatch, Result, Verdict
+from .models import Alternative, Basis, Food, Item, MeasuredMatch, OffMatch, Result, Serving, Verdict
 from .sugars import TABLE, Sugar, SugarEntry
 
 FDC_SEARCH = "https://api.nal.usda.gov/fdc/v1/foods/search"
@@ -95,9 +95,10 @@ def _short(name: str) -> str:
     return ", ".join(re.sub(r"\s*\([^)]*\)", "", name).split(", ")[:3])
 
 
-def _measured_item(i: ing.Ingredient, f: foods.Food) -> Item:
-    """An ingredient matched to a measured food. Its amount counts at the most the ingredient can be of the product."""
-    values = {"fructose": f.fructose, "sucrose": f.sucrose, "sorbitol": f.sorbitol or 0.0}
+def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = None) -> Item:
+    """An ingredient matched to a measured food. Its amount counts at the most the ingredient can be of the
+    product, and per serving when the product's serving size is known."""
+    values = {s: f.amount(s) or 0.0 for s in SUGAR_ORDER}
     found = [s for s in SUGAR_ORDER if values[s] > 0]
     # Sorbitol fruits whose entry didn't measure it: present, but with no amount to weigh.
     unmeasured_sorbitol = f.sorbitol is None and foods.is_sorbitol_fruit(f.name)
@@ -105,11 +106,18 @@ def _measured_item(i: ing.Ingredient, f: foods.Food) -> Item:
         return Item(
             name=i.name, status="tolerated", basis=f.source, reason=f"{_short(f.name)}: no fructose or sucrose."
         )
-    amounts = ", ".join(f"{'under ' if s in f.below else ''}{values[s]:.2g} g {s}" for s in found)
+    amounts = ", ".join(f"{values[s]:.2g} g {s}" for s in found)
     load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found) * i.share
     reason = f"{_short(f.name)}: {amounts or 'no fructose or sucrose'} per 100 g."
-    if i.share < 1 and found:
-        reason += f" At most {i.share:.0%} of the product ({i.why}), so up to {load:.2g} g."
+    if found and serving:
+        part = (
+            f"At most {i.share:.0%} of a {serving.grams:g} g serving ({i.why}): {i.share * serving.grams:.2g} g, "
+            if i.share < 1
+            else f"In a {serving.grams:g} g serving, "
+        )
+        reason += f" {part}so up to {load * serving.grams / 100:.2g} g."
+    elif found and i.share < 1:
+        reason += f" At most {i.share:.0%} of the product ({i.why}), so up to {load:.2g} g per 100 g."
     if unmeasured_sorbitol:
         found.append("sorbitol")
         reason += " Sorbitol not measured, but this fruit contains it."
@@ -119,7 +127,7 @@ def _measured_item(i: ing.Ingredient, f: foods.Food) -> Item:
         sugars=found,
         basis=f.source,
         reason=reason,
-        # An upper bound for the product; fructose_load halves sucrose itself. None when sorbitol has no amount.
+        # Per 100 g of the product, an upper bound; fructose_load halves sucrose itself. None when sorbitol has no amount.
         grams=None if unmeasured_sorbitol else values["sucrose"] * i.share if found == ["sucrose"] else load,
     )
 
@@ -180,10 +188,10 @@ def _base(name: str) -> str:
     return re.sub(r"\s*\d+(?:\.\d+)?\s*%$", "", ing.split(name)[0])
 
 
-def _answer_item(i: ing.Ingredient, answer: dict[str, Any]) -> Item:
+def _answer_item(i: ing.Ingredient, answer: dict[str, Any], serving: Serving | None = None) -> Item:
     """An item from Jev's answer: the measured food it picked, or the sugars it described."""
     if (food_id := answer.get("food")) and (f := foods.get(food_id)):
-        return _measured_item(i, f)
+        return _measured_item(i, f, serving)
     return _jev_item(i.name, answer.get("probs") or {k: float(k == "unsure") for k in INGREDIENT_CRITERIA})
 
 
@@ -200,7 +208,9 @@ def _answer(candidates: list[foods.Food], match: dict[str, float] | None, descri
     return {"probs": {k: describe.get(k, 0.0) for k in INGREDIENT_CRITERIA}}
 
 
-async def classify_ingredients(ts: AsyncTypeSafeClient, text: str, cache: Cache | None = None) -> list[Item]:
+async def classify_ingredients(
+    ts: AsyncTypeSafeClient, text: str, cache: Cache | None = None, serving: Serving | None = None
+) -> list[Item]:
     """Each ingredient, first match wins: a BU sugar name, a food named exactly that in the measured data,
     an earlier answer for the same name, then one Jev call for the rest.
 
@@ -214,9 +224,9 @@ async def classify_ingredients(ts: AsyncTypeSafeClient, text: str, cache: Cache 
         if item := _bu_decide(part.name):
             items.append(item)
         elif f := foods.exact(_base(part.name)):
-            items.append(_measured_item(part, f))
+            items.append(_measured_item(part, f, serving))
         elif cache and (answer := cache.get(INGREDIENT_NS, sugars.norm(part.name), INGREDIENT_TTL)):
-            items.append(_answer_item(part, answer))
+            items.append(_answer_item(part, answer, serving))
         else:
             items.append(None)
             unknown[f"i{n}"] = (part, foods.candidates(_base(part.name)))
@@ -240,7 +250,7 @@ async def classify_ingredients(ts: AsyncTypeSafeClient, text: str, cache: Cache 
         for k, (part, candidates) in unknown.items():
             match = dict(r.choices[f"{k}_match"].probabilities) if candidates else None
             answer = _answer(candidates, match, dict(r.choices[f"{k}_describe"].probabilities))
-            items[int(k[1:])] = _answer_item(part, answer)
+            items[int(k[1:])] = _answer_item(part, answer, serving)
             if cache:
                 cache.set(INGREDIENT_NS, sugars.norm(part.name), answer)
     return [i for i in items if i is not None]
@@ -412,7 +422,7 @@ def measured_sugars(nutrients: dict[str, float], local: foods.Food | None) -> tu
     au = afcd.by_id(local.id) if local is not None and local.source == "afcd" else None
     for s in SUGAR_ORDER:
         label = s.capitalize()
-        value = getattr(local, s) if local is not None else None
+        value = local.amount(s) if local is not None else None
         if au is not None and getattr(au, s) is not None:
             kinds = [v for v in afcd.varieties(au) if getattr(v, s) is not None]
             values = [getattr(v, s) for v in kinds]
@@ -429,7 +439,7 @@ def measured_sugars(nutrients: dict[str, float], local: foods.Food | None) -> tu
                 reason = ""
         elif local is not None and value is not None:
             hi, basis = value, local.source
-            amount = f"{'under ' if s in local.below else ''}{value:g} g"
+            amount = f"under {getattr(local, s):g} g" if s in local.below else f"{value:g} g"
             reason = ""
         elif (grams := nutrients.get(label)) is not None:
             hi, amount, basis, reason = grams, f"{grams:g} g", "fdc", ""
@@ -448,7 +458,7 @@ def measured_sugars(nutrients: dict[str, float], local: foods.Food | None) -> tu
                 )
             )
         elif not no_sugar:
-            items.append(Item(name=f"{label}: 0 g per 100 g", status="tolerated", basis=basis, reason=""))
+            items.append(Item(name=f"{label}: {amount} per 100 g", status="tolerated", basis=basis, reason=""))
     if no_sugar:
         measured += [s for s in ("fructose", "sucrose") if s not in measured]
         items.insert(
@@ -540,31 +550,26 @@ async def check_food(
     return await _fdc_result(ts, query, chosen, local, alternatives, cache)
 
 
-UNITS = {"GRM": "g", "MLT": "ml"}
+# USDA writes units as codes or plain: "GRM" or "g", "MLT" or "ml".
+UNITS = {"grm": "g", "g": "g", "mlt": "ml", "ml": "ml"}
 
 
-def label_zero_sugar(items: list[Item], food: dict[str, Any]) -> list[Item]:
-    """For a product whose label lists 0 g total sugars per serving, which means under 0.5 g: marks the
-    fructose and sucrose sources in its ingredient list as capped at a trace. `prefs.apply_label_cap` makes
-    them Caution unless the person flags any amount.
+def _serving(food: dict[str, Any], nutrients: dict[str, float]) -> Serving | None:
+    """A USDA branded product's serving, and the most sugar it can have by the label's rounding.
 
-    Sorbitol and other sugar alcohols aren't counted in total sugars, so they still count in full.
+    US labels round total sugars to the nearest gram, and list under 0.5 g as 0 g, so a serving that
+    lists 3 g has at most 3.5 g. USDA stores values per 100 g, converted from the label's serving.
     """
-    size, unit = food.get("servingSize"), UNITS.get(food.get("servingSizeUnit") or "", "")
-    serving = ", ".join(x for x in (food.get("householdServingFullText"), size and unit and f"{size:g} {unit}") if x)
-    out = []
-    for i in items:
-        if i.name.startswith("Total sugars: 0 g"):
-            i = i.model_copy(
-                update={
-                    "name": f"Total sugars: 0 g per serving{f' ({serving})' if serving else ''}",
-                    "reason": "Labels list under 0.5 g as 0 g. Sorbitol isn't counted in total sugars.",
-                }
-            )
-        elif i.status == "not_tolerated" and i.sugars and set(i.sugars) <= {"fructose", "sucrose"}:
-            i = i.model_copy(update={"label_cap": True})
-        out.append(i)
-    return out
+    size, unit = food.get("servingSize"), (food.get("servingSizeUnit") or "").lower()
+    if not size or unit not in UNITS:
+        return None  # ml is close enough to g for the drinks and sauces that use it
+    household = food.get("householdServingFullText")
+    label = f"{household} ({size:g} {UNITS[unit]})" if household else f"{size:g} {UNITS[unit]}"
+    max_sugars = None
+    if (total := nutrients.get("Total Sugars")) is not None:
+        listed = total * size / 100
+        max_sugars = 0.5 if listed < 0.5 else round(listed) + 0.5
+    return Serving(grams=size, label=label, max_sugars=max_sugars)
 
 
 async def _fdc_result(
@@ -602,17 +607,19 @@ async def _fdc_result(
             data_type=chosen["dataType"],
         )
     items: list[Item] = []
+    nutrients = _nutrients(chosen) if chosen else {}
+    serving = _serving(chosen, nutrients) if chosen is not None and chosen["dataType"] == "Branded" else None
     ingredients_text = ((chosen or {}).get("ingredients") or "").strip() or None
     if ingredients_text:
         # A packaged product's own label beats generic data about the food it's made from.
         local = None
-        items += await classify_ingredients(ts, ingredients_text, cache)
+        items += await classify_ingredients(ts, ingredients_text, cache, serving)
 
-    nutrients = _nutrients(chosen) if chosen else {}
     measured_items, measured = measured_sugars(nutrients, local)
+    if serving is not None:
+        # The label's total sugars are per serving; the per-100 g line would only restate them.
+        measured_items = [i for i in measured_items if not i.name.startswith("Total sugars: 0 g")]
     items += measured_items
-    if chosen is not None and chosen["dataType"] == "Branded" and nutrients.get("Total Sugars") == 0:
-        items = label_zero_sugar(items, chosen)
     notes: list[str] = []
     if not ingredients_text:
         if local is not None:
@@ -648,6 +655,7 @@ async def _fdc_result(
         food=food,
         measured_food=measured_food,
         ingredients_text=ingredients_text,
+        serving=serving,
         alternatives=alternatives,
         notes=notes,
     )

@@ -48,6 +48,12 @@ class Food:
     below: tuple[str, ...]  # sugars reported only as under a detection limit; the limit is used
     note: str  # AFCD derivation or USDA dataset
 
+    def amount(self, sugar: str) -> float | None:
+        """Grams per 100 g, or None if not measured. A value only reported as under a detection limit
+        counts as 0: the lab found none it could measure."""
+        value = getattr(self, sugar)
+        return 0.0 if value is not None and sugar in self.below else value
+
     @property
     def label(self) -> str:
         return f"{self.name}"
@@ -131,7 +137,7 @@ def search(query: str, sources: tuple[Source, ...] = ("afcd", "ciqual", "fdc"), 
 
 def load(f: Food) -> float:
     """Fructose load per 100 g: fructose + half of sucrose + sorbitol."""
-    return f.fructose + f.sucrose / 2 + (f.sorbitol or 0.0)
+    return (f.amount("fructose") or 0.0) + (f.amount("sucrose") or 0.0) / 2 + (f.amount("sorbitol") or 0.0)
 
 
 @cache

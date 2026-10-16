@@ -90,16 +90,20 @@ one is checked in this order:
 Labels list ingredients by weight, most first, so the nth ingredient is at most 1/n of the product, anything after
 "contains 2% or less of" is at most 2%, and a declared percentage ("tomatoes 45%") is used as given. A measured
 ingredient counts at its amount per 100 g times that share: paprika in the 2% part adds at most 0.14 g fructose load
-per 100 g of the product. The Small amounts setting weighs those bounds like any other measured food.
+per 100 g of the product. Values a table reports only as under a detection limit count as 0.
 
-When a USDA branded product's label lists 0 g total sugars per serving, which US labels allow for anything under 0.5 g,
-its fructose and sucrose sources are Caution rather than Avoid, unless the Small amounts limit is 0 (flag any amount).
-Sorbitol and other sugar alcohols aren't counted in total sugars, so they still count in full.
+For a USDA branded product, the label's serving and total sugars bound things further. US labels round sugars to the
+nearest gram and list under 0.5 g as 0 g, so a serving has at most the listed amount plus 0.5 g. That caps fructose
+and sucrose together, including sugars an ingredient list names with no amount. Sorbitol and other sugar alcohols
+aren't counted in total sugars, so they still need their own measurement.
 
-**Small amounts**: a food whose only flags are measured amounts is weighed by its fructose load (fructose + half of
-sucrose + sorbitol, per 100 g, the formula HFI studies use). Under 0.5 g it's OK, the lowest tier in Spanish HFI
-guidance and the strictest cut-off Italian centres use; under your limit (1 g by default) it's Caution. A sugar named
-on a label, or an AI estimate, keeps the food at Avoid.
+**Small amounts**: measured amounts are weighed by fructose load (fructose + half of sucrose + sorbitol, the formula
+HFI studies use), each item by its own amount and the product by all of them together, shown as a "Fructose load"
+line that sets the verdict. Per 100 g, under 0.5 g is OK (the lowest tier in Spanish HFI guidance and the strictest
+cut-off Italian centres use) and under your limit (1 g by default) is Caution. When the label gives a serving size,
+the load is judged per serving instead: under 0.1 g is OK and up to 0.5 g is Caution, against a daily limit of 1 to
+1.5 g in HFI guidance. A sugar with no amount, or an AI estimate, keeps the food at Avoid. A limit of 0 flags any
+amount.
 
 **Food names**: searched in [USDA FoodData Central](https://fdc.nal.usda.gov/), generic and branded foods separately so
 brands don't crowd out generic foods, and in the bundled AFCD and CIQUAL foods. One Jev call picks the USDA result that

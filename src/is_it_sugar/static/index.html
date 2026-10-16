@@ -294,16 +294,17 @@
 
     <div class="card section">
       <h2>Small amounts</h2>
-      <p class="muted">When a food's measured fructose load is under this limit, it shows Caution instead of Avoid.
-        Under 0.5 g it shows OK. Fructose load is fructose + half of sucrose + sorbitol, per 100 g.
-        A product label listing 0 g sugars per serving (under 0.5 g) also shows Caution. Set 0 to flag any amount.</p>
+      <p class="muted">Fructose load is fructose + half of sucrose + sorbitol. When a food's measured load is under
+        this limit per 100 g, it shows Caution instead of Avoid, and under 0.5 g it shows OK. When the label gives a
+        serving size, a serving under 0.1 g is OK and up to 0.5 g is Caution. Set 0 to flag any amount.</p>
       <div class="add-row trace-row">
         <input id="trace-limit" type="number" inputmode="decimal" min="0" max="20" step="0.1"
           aria-label="Fructose load limit, grams per 100 g">
         <span>g per 100 g</span>
       </div>
-      <p class="empty">Only measured amounts count. In an ingredient list, each measured ingredient counts at its
-        full amount per 100 g, the most it could add. A listed sugar or an AI estimate keeps the food at Avoid.</p>
+      <p class="empty">Only measured amounts count: each ingredient at the most it can be of the product, and all of
+        them together at no more than the label's total sugars. A sugar with no amount, or an AI estimate, keeps the food
+        at Avoid.</p>
     </div>
 
     <div class="card section">
@@ -320,13 +321,11 @@
 
   <footer>
     Sugars are judged against the
-	<a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>.
-	<br>
+	<a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>. 
     Foods are looked up in <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>,
     <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>,
     <a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>,
-	and <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>.
-	<br>
+	and <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>. 
 	Other ingredients are classified by an AI model, which can make mistakes. Always read the label, 
 	and check with your doctor or dietitian before relying on a result.
   </footer>
@@ -343,7 +342,7 @@ const STATUS = {
 };
 const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
 const TABLES = { afcd: "Australian Food Composition Database", ciqual: "CIQUAL French food composition table", fdc: "USDA FoodData Central" };
-const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES" };
+const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES", total: "Total" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset

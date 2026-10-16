@@ -6,7 +6,7 @@ import pytest
 from PIL import Image
 
 from is_it_sugar import analyze, foods, images, ingredients, off, prefs, sugars
-from is_it_sugar.models import Food, Item
+from is_it_sugar.models import Food, Item, Serving
 
 
 def test_parse_strips_lead_ins_and_allergens():
@@ -151,7 +151,7 @@ def test_measured_ingredient_counts_at_its_share():
     assert item.grams == pytest.approx((6.71 + 0.81 / 2) * 0.02)
     assert item.reason == (
         "Paprika: 6.7 g fructose, 0.81 g sucrose per 100 g. "
-        "At most 2% of the product (listed under 2% or less), so up to 0.14 g."
+        "At most 2% of the product (listed under 2% or less), so up to 0.14 g per 100 g."
     )
     salt = analyze._measured_item(ingredients.Ingredient("salt"), food("Salt, table, non-iodised"))
     assert (salt.status, salt.grams) == ("tolerated", None)
@@ -539,8 +539,7 @@ def test_trace_rule_downgrades_small_measured_amounts():
     oats = analyze.summarize([measured_item("sucrose", 1.2)])  # load 0.6
     out = prefs.apply(oats, trace_limit=1.0)
     assert (out.verdict, out.headline, out.sugars) == ("caution", "Small amounts of sucrose", ["sucrose"])
-    assert out.items[0].trace and out.items[0].reason == "r"  # explained once, in a note
-    assert "Fructose load about 0.6 g per 100 g, under your 1 g limit." in out.notes
+    assert out.items[0].trace and len(out.items) == 1  # one item: its own status is the product's
     assert prefs.apply(oats, trace_limit=0).verdict == "avoid"  # 0 turns it off
     assert prefs.apply(oats, trace_limit=0.5).verdict == "avoid"
 
@@ -550,31 +549,62 @@ def test_very_low_load_is_tolerated():
     out = prefs.apply(rice, trace_limit=1.0)
     assert (out.verdict, out.headline) == ("ok", "Very low in fructose and sucrose")
     assert all(i.status == "tolerated" and i.trace for i in out.items)
-    assert out.notes == ["Fructose load about 0.4 g per 100 g, under 0.5 g."]
+    assert "Fructose load: up to 0.4 g per 100 g" in [i.name for i in out.items]
     # A stricter personal limit wins: under 0.3 g only.
     assert prefs.apply(rice, trace_limit=0.3).verdict == "avoid"
     assert prefs.apply(rice, trace_limit=0).verdict == "avoid"
 
 
-def test_label_with_zero_sugar_makes_fructose_and_sucrose_sources_caution():
-    sausage = {"servingSize": 85.0, "servingSizeUnit": "GRM", "householdServingFullText": "1 link"}
-    items = [
-        analyze._measured_item(ingredients.Ingredient("RED PEPPER"), food("Sweet pepper, red, raw", "ciqual")),
-        analyze._bu_decide("sugar"),
-        analyze._bu_decide("sorbitol"),
-        analyze._measured_item(ingredients.Ingredient("SALT"), food("Salt, table, non-iodised")),
-        *analyze.measured_sugars({"Total Sugars": 0.0}, None)[0],
-    ]
-    marked = analyze.label_zero_sugar([i for i in items if i], sausage)
-    assert prefs.apply(analyze.summarize(marked), trace_limit=0).verdict == "avoid"  # 0 flags any amount
-    out, note = prefs.apply_label_cap(marked)
-    assert note and note.startswith("The label lists 0 g total sugars per serving")
-    by_name = {i.name: i for i in out}
-    assert by_name["RED PEPPER"].status == by_name["sugar"].status == "caution"
-    assert by_name["sorbitol"].status == "not_tolerated"  # not counted in total sugars
-    assert by_name["Total sugars: 0 g per serving (1 link, 85 g)"].status == "tolerated"
-    r = analyze.summarize([i for i in out if i.name != "sorbitol"])
-    assert (r.verdict, r.headline) == ("caution", "Small amounts of fructose and sucrose")
+def test_each_item_by_its_own_amount_and_the_product_by_the_total():
+    # 0.4 + 0.4 g: each under 0.5 g alone, 0.8 g together.
+    items = [measured_item("fructose", 0.4), measured_item("sorbitol", 0.4)]
+    r = prefs.apply(analyze.summarize(items), trace_limit=1.0)
+    status = {i.name: i.status for i in r.items}
+    assert status == {
+        "Fructose load: up to 0.8 g per 100 g": "caution",  # listed first: it sets the verdict
+        "fructose: 0.4 g": "tolerated",
+        "sorbitol: 0.4 g": "tolerated",
+    }
+    assert r.verdict == "caution"
+
+
+DIJON = Serving(grams=5, label="1 tsp (5 g)", max_sugars=0.5)
+
+
+def test_dijon_per_serving():
+    text = "WATER, MUSTARD SEED, DISTILLED VINEGAR, SALT, WHITE WINE, CITRIC ACID, TURMERIC, TARTARIC ACID, SPICES"
+    parts = {i.name: i for i in ingredients.parse(text)}
+    seed = analyze._measured_item(parts["MUSTARD SEED"], food("Spices, mustard seed, ground"), DIJON)
+    assert seed.reason.endswith("At most 50% of a 5 g serving (listed 2nd): 2.5 g, so up to 0.047 g.")
+    vinegar = analyze._measured_item(parts["DISTILLED VINEGAR"], food("Vinegar", "ciqual"), DIJON)
+    assert vinegar.status == "tolerated"  # under the detection limit: none found
+    turmeric = analyze._measured_item(parts["TURMERIC"], food("Turmeric, powder", "ciqual"), DIJON)
+    result = analyze.summarize([seed, vinegar, turmeric], serving=DIJON)
+    r = prefs.apply(result, trace_limit=1.0)
+    assert r.verdict == "ok" and all(i.status == "tolerated" for i in r.items)
+    total = next(i for i in r.items if i.basis == "total")
+    assert total.name.startswith("Fructose load: up to 0.0") and total.reason == "Per 1 tsp (5 g)."
+    assert prefs.apply(result, trace_limit=0).verdict == "avoid"
+
+
+def test_label_total_sugars_caps_named_sugars():
+    sugar, sorbitol = analyze._bu_decide("sugar"), analyze._bu_decide("sorbitol")
+    assert sugar is not None and sorbitol is not None
+    zero = Serving(grams=85, label="1 link (85 g)", max_sugars=0.5)
+    r = prefs.apply(analyze.summarize([sugar], serving=zero), trace_limit=1.0)
+    assert (r.items[0].status, r.verdict) == ("caution", "caution")  # at most 0.5 g a serving
+    assert prefs.apply(analyze.summarize([sugar]), trace_limit=1.0).verdict == "avoid"  # no label: no amount
+    # Sorbitol isn't counted in total sugars.
+    assert prefs.apply(analyze.summarize([sugar, sorbitol], serving=zero), trace_limit=1.0).verdict == "avoid"
+
+
+def test_serving_from_usda_label():
+    label = {"servingSize": 5.0, "servingSizeUnit": "GRM", "householdServingFullText": "1 tsp"}
+    assert analyze._serving(label, {"Total Sugars": 0.0}) == DIJON
+    # 3 g on the label (60 g per 100 g of a 5 g serving) means under 3.5 g.
+    assert analyze._serving(label, {"Total Sugars": 60.0}).max_sugars == 3.5
+    assert analyze._serving(label, {}).max_sugars is None
+    assert analyze._serving(label | {"servingSizeUnit": "g"}, {}) is not None  # some records use plain units
 
 
 def test_trace_rule_sums_the_load_and_ignores_unmeasured():
