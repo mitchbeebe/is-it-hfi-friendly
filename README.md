@@ -98,8 +98,9 @@ and sucrose together, including sugars an ingredient list names with no amount. 
 aren't counted in total sugars, so they still need their own measurement.
 
 **Small amounts**: measured amounts are weighed by fructose load (fructose + half of sucrose + sorbitol, the formula
-HFI studies use), each item by its own amount and the product by all of them together, shown as a "Fructose load"
-line that sets the verdict. Per 100 g, under 0.5 g is OK (the lowest tier in Spanish HFI guidance and the strictest
+HFI studies use), each item by its own amount and the product by all of them together. The product's load is shown
+under the verdict ("Up to 0.062 g fructose load per 1 tsp (5 g)") and counts toward it. Ingredients are listed in
+label order. Per 100 g, under 0.5 g is OK (the lowest tier in Spanish HFI guidance and the strictest
 cut-off Italian centres use) and under your limit (1 g by default) is Caution. When the label gives a serving size,
 the load is judged per serving instead: under 0.1 g is OK and up to 0.5 g is Caution, against a daily limit of 1 to
 1.5 g in HFI guidance. A sugar with no amount, or an AI estimate, keeps the food at Avoid. A limit of 0 flags any

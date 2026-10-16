@@ -21,7 +21,7 @@ from typesafe_sdk import AsyncTypeSafeClient, Choice, Image, Noul
 from . import afcd, foods, off, sugars
 from . import ingredients as ing
 from .cache import Cache
-from .models import Alternative, Basis, Food, Item, MeasuredMatch, OffMatch, Result, Serving, Verdict
+from .models import Alternative, Basis, Food, Item, Load, MeasuredMatch, OffMatch, Result, Serving, Verdict
 from .sugars import TABLE, Sugar, SugarEntry
 
 FDC_SEARCH = "https://api.nal.usda.gov/fdc/v1/foods/search"
@@ -563,7 +563,9 @@ def _serving(food: dict[str, Any], nutrients: dict[str, float]) -> Serving | Non
     size, unit = food.get("servingSize"), (food.get("servingSizeUnit") or "").lower()
     if not size or unit not in UNITS:
         return None  # ml is close enough to g for the drinks and sauces that use it
-    household = food.get("householdServingFullText")
+    household = (food.get("householdServingFullText") or "").strip()
+    if household.lower() in ("none", "null", "n/a"):
+        household = ""  # some USDA records store a missing description as text
     label = f"{household} ({size:g} {UNITS[unit]})" if household else f"{size:g} {UNITS[unit]}"
     max_sugars = None
     if (total := nutrients.get("Total Sugars")) is not None:
@@ -995,17 +997,17 @@ def _effective(i: Item) -> str:
     return "not_tolerated" if i.avoided_by else i.status
 
 
-def summarize(items: list[Item], verdict: Verdict | None = None, **kw: Any) -> Result:
+def summarize(items: list[Item], verdict: Verdict | None = None, load: Load | None = None, **kw: Any) -> Result:
+    """The verdict is the worst of the items and the product's fructose load. Items keep their order,
+    which for an ingredient list is the label's, except that lines your Settings add come first."""
     counted = [i for i in items if i.avoided_by or not i.allowed_by]
     found = [s for s in SUGAR_ORDER if any(s in i.sugars and _effective(i) == "not_tolerated" for i in counted)]
+    if load is not None and load.status == "not_tolerated":
+        found = [s for s in SUGAR_ORDER if s in found or s in load.sugars]
     avoided = list(dict.fromkeys(i.avoided_by for i in items if i.avoided_by))
+    statuses = [_effective(i) for i in counted] + ([load.status] if load else [])
     if verdict is None:
-        if any(_effective(i) == "not_tolerated" for i in counted):
-            verdict = "avoid"
-        elif any(i.status == "caution" for i in counted):
-            verdict = "caution"
-        else:
-            verdict = "ok"
+        verdict = "avoid" if "not_tolerated" in statuses else "caution" if "caution" in statuses else "ok"
     if verdict == "avoid":
         if found:
             headline = f"Contains {_join(found)}"
@@ -1015,22 +1017,25 @@ def summarize(items: list[Item], verdict: Verdict | None = None, **kw: Any) -> R
             headline = "Contains sugars not tolerated with HFI"
     elif verdict == "caution":
         cautions = [i for i in counted if i.status == "caution"]
-        if cautions and all(i.trace for i in cautions):
-            found = [s for s in SUGAR_ORDER if any(s in i.sugars for i in cautions)]
+        small = load is not None and load.status == "caution"
+        if (cautions or small) and all(i.trace for i in cautions):
+            load_sugars = load.sugars if load is not None and small else []
+            found = [s for s in SUGAR_ORDER if any(s in i.sugars for i in cautions) or s in load_sugars]
             headline = f"Small amounts of {_join(found)}"
         else:
             headline = "Unclear: may contain fructose, sucrose, or sorbitol"
-    elif low := [s for s in SUGAR_ORDER if any(i.trace and s in i.sugars for i in counted)]:
+    elif low := [
+        s
+        for s in SUGAR_ORDER
+        if any(i.trace and s in i.sugars for i in counted) or load and load.grams and s in load.sugars
+    ]:
         headline = f"Very low in {_join(low)}"
     elif len(counted) < len(items) and any(i.status != "tolerated" for i in items):
         headline = "OK with your allowed foods"
     else:
         headline = "No fructose, sucrose, or sorbitol found"
-    # Avoided first, then by status; allowed items last.
-    items = sorted(
-        items, key=lambda i: (bool(i.allowed_by and not i.avoided_by), not i.avoided_by, STATUS_ORDER.index(i.status))
-    )
-    return Result(verdict=verdict, headline=headline, sugars=found, items=items, **kw)
+    items = sorted(items, key=lambda i: i.basis != "settings")
+    return Result(verdict=verdict, headline=headline, sugars=found, items=items, load=load, **kw)
 
 
 def _midsentence(term: str) -> str:

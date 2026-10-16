@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from .sugars import Status, Sugar
 
 Verdict = Literal["avoid", "caution", "ok"]
-Basis = Literal["bu_table", "jev", "fdc", "afcd", "ciqual", "label", "settings", "total"]
+Basis = Literal["bu_table", "jev", "fdc", "afcd", "ciqual", "label", "settings"]
 
 
 class Item(BaseModel):
@@ -49,6 +49,16 @@ class Serving(BaseModel):
     max_sugars: float | None = None
 
 
+class Load(BaseModel):
+    """The product's fructose load: the most its measured ingredients, and its label's total sugars, allow."""
+
+    grams: float
+    per: str  # "1 tsp (5 g)", or "100 g" when there's no serving size
+    status: Status
+    sugars: list[Sugar]
+    capped: bool = False  # by the label's total sugars
+
+
 class OffMatch(BaseModel):
     """The Open Food Facts product whose ingredient list was used."""
 
@@ -77,5 +87,6 @@ class Result(BaseModel):
     off_product: OffMatch | None = None
     ingredients_text: str | None = None
     serving: Serving | None = None
+    load: Load | None = None
     alternatives: list[Alternative] = []
     notes: list[str] = []

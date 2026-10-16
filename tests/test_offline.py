@@ -271,7 +271,7 @@ def test_verdicts():
     assert analyze.summarize([item("tolerated"), item("caution")]).verdict == "caution"
     r = analyze.summarize([item("caution"), item("not_tolerated", ["sucrose", "fructose"])])
     assert (r.verdict, r.headline, r.sugars) == ("avoid", "Contains fructose and sucrose", ["fructose", "sucrose"])
-    assert r.items[0].status == "not_tolerated"
+    assert [i.status for i in r.items] == ["caution", "not_tolerated"]  # in the order given, as on the label
 
 
 def jpeg(w, h):
@@ -316,8 +316,12 @@ def test_allow_ingredient_by_containment_and_plural():
     )
     out = prefs.apply(r, ["Tomatoes", "onion"])
     assert out.verdict == "avoid" and out.headline == "Contains fructose"  # raisins still count
-    assert [(i.name, i.allowed_by) for i in out.items][:2] == [("RAISINS", None), ("SALT", None)]  # unallowed first
-    assert {i.allowed_by for i in out.items[2:]} == {"Tomatoes", "onion"}
+    assert [(i.name, i.allowed_by) for i in out.items] == [  # label order
+        ("TOMATO CONCENTRATE FROM RED RIPE TOMATOES", "Tomatoes"),
+        ("ONION POWDER", "onion"),
+        ("SALT", None),
+        ("RAISINS", None),
+    ]
     out = prefs.apply(r, ["Tomatoes", "onion", "raisin"])
     assert (out.verdict, out.headline) == ("ok", "OK with your allowed foods")
     assert "3 items" in out.notes[-1]
@@ -356,8 +360,8 @@ def test_allow_whole_food_ignored_when_food_has_ingredients():
 
 def test_allow_empty_or_blank_is_a_no_op():
     r = analyze.summarize([judged("raisins")], ingredients_text="raisins")
-    assert prefs.apply(r, []) is r
-    assert prefs.apply(r, ["  ", "!!"]) is r
+    assert prefs.apply(r, []) == r
+    assert prefs.apply(r, ["  ", "!!"]) == r
 
 
 # ---- avoid list
@@ -549,7 +553,7 @@ def test_very_low_load_is_tolerated():
     out = prefs.apply(rice, trace_limit=1.0)
     assert (out.verdict, out.headline) == ("ok", "Very low in fructose and sucrose")
     assert all(i.status == "tolerated" and i.trace for i in out.items)
-    assert "Fructose load: up to 0.4 g per 100 g" in [i.name for i in out.items]
+    assert out.load is not None and (out.load.grams, out.load.per, out.load.status) == (0.4, "100 g", "tolerated")
     # A stricter personal limit wins: under 0.3 g only.
     assert prefs.apply(rice, trace_limit=0.3).verdict == "avoid"
     assert prefs.apply(rice, trace_limit=0).verdict == "avoid"
@@ -559,12 +563,8 @@ def test_each_item_by_its_own_amount_and_the_product_by_the_total():
     # 0.4 + 0.4 g: each under 0.5 g alone, 0.8 g together.
     items = [measured_item("fructose", 0.4), measured_item("sorbitol", 0.4)]
     r = prefs.apply(analyze.summarize(items), trace_limit=1.0)
-    status = {i.name: i.status for i in r.items}
-    assert status == {
-        "Fructose load: up to 0.8 g per 100 g": "caution",  # listed first: it sets the verdict
-        "fructose: 0.4 g": "tolerated",
-        "sorbitol: 0.4 g": "tolerated",
-    }
+    assert [i.status for i in r.items] == ["tolerated", "tolerated"]
+    assert r.load is not None and (r.load.grams, r.load.status) == (0.8, "caution")  # sets the verdict
     assert r.verdict == "caution"
 
 
@@ -582,9 +582,17 @@ def test_dijon_per_serving():
     result = analyze.summarize([seed, vinegar, turmeric], serving=DIJON)
     r = prefs.apply(result, trace_limit=1.0)
     assert r.verdict == "ok" and all(i.status == "tolerated" for i in r.items)
-    total = next(i for i in r.items if i.basis == "total")
-    assert total.name.startswith("Fructose load: up to 0.0") and total.reason == "Per 1 tsp (5 g)."
+    assert r.load is not None and r.load.per == "1 tsp (5 g)" and r.load.grams < 0.1
     assert prefs.apply(result, trace_limit=0).verdict == "avoid"
+
+
+def test_load_without_a_serving_or_with_nothing_to_weigh():
+    oats = prefs.apply(analyze.summarize([measured_item("sucrose", 1.2)]), trace_limit=1.0)
+    assert oats.load is not None and (oats.load.grams, oats.load.per) == (0.6, "100 g")  # sucrose counts half
+    named = prefs.apply(analyze.summarize([measured_item("fructose", 0.1), judged("Sucrose")]), trace_limit=1.0)
+    assert named.load is None  # a sugar with no amount: no total to show
+    strict = prefs.apply(analyze.summarize([measured_item("fructose", 0.1)]), trace_limit=0)
+    assert strict.load is not None and strict.load.status == "not_tolerated"  # 0 flags any amount
 
 
 def test_label_total_sugars_caps_named_sugars():
@@ -605,6 +613,7 @@ def test_serving_from_usda_label():
     assert analyze._serving(label, {"Total Sugars": 60.0}).max_sugars == 3.5
     assert analyze._serving(label, {}).max_sugars is None
     assert analyze._serving(label | {"servingSizeUnit": "g"}, {}) is not None  # some records use plain units
+    assert analyze._serving(label | {"householdServingFullText": "None"}, {}).label == "5 g"  # as Cheetos has it
 
 
 def test_trace_rule_sums_the_load_and_ignores_unmeasured():

@@ -79,6 +79,7 @@
   .verdict { border-radius: var(--radius); padding: 18px 16px; }
   .verdict .label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
   .verdict h2 { margin: 2px 0 0; font-size: 1.35rem; line-height: 1.25; }
+  .verdict .load { margin: 4px 0 0; font-size: .85rem; opacity: .85; }
   .v-avoid { background: var(--avoid-bg); color: var(--avoid); }
   .v-caution { background: var(--caution-bg); color: var(--caution); }
   .v-ok { background: var(--ok-bg); color: var(--ok); }
@@ -342,7 +343,7 @@ const STATUS = {
 };
 const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
 const TABLES = { afcd: "Australian Food Composition Database", ciqual: "CIQUAL French food composition table", fdc: "USDA FoodData Central" };
-const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES", total: "Total" };
+const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
@@ -561,6 +562,7 @@ function render(r) {
     <div class="verdict v-${r.verdict}">
       <div class="label">${VERDICT[r.verdict]}</div>
       <h2>${esc(r.headline)}</h2>
+      ${r.load ? `<p class="load">Up to ${Number(r.load.grams.toPrecision(2))} g fructose load per ${esc(r.load.per)}${r.load.capped ? ", capped by the label's total sugars" : ""}</p>` : ""}
       ${chips ? `<div class="chips">${chips}</div>` : ""}
     </div>`;
 

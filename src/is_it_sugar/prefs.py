@@ -18,7 +18,7 @@ import math
 from collections.abc import Sequence
 
 from . import analyze, sugars
-from .models import Item, Result, Serving
+from .models import Item, Load, Result, Serving
 from .sugars import Status, Sugar, key
 
 MAX_TERMS, MAX_TERM_LEN = 200, 80
@@ -73,16 +73,16 @@ def _tier(load: float, limit: float, serving: Serving | None) -> Status:
     return "tolerated" if load < min(LOW_LOAD, limit) else "caution" if load < limit else "not_tolerated"
 
 
-def apply_amounts(items: list[Item], limit: float, serving: Serving | None) -> list[Item]:
+def apply_amounts(items: list[Item], limit: float, serving: Serving | None) -> tuple[list[Item], Load | None]:
     """Weigh measured amounts: each item by its own amount, and the product by all of them together.
 
     Fructose and sucrose together can't exceed the label's total sugars, so that caps them, including
     sugars an ingredient list names with no amount. Sorbitol isn't counted in total sugars, so it needs
-    its own measurement. When the product total can be weighed and more than one thing adds to it, a
-    "Fructose load" line shows it and sets the verdict; otherwise anything without an amount stays Avoid.
+    its own measurement. Returns the items and the product's load, or None when something flagged has
+    no amount to weigh. A limit of 0 flags any amount, so nothing is downgraded.
     """
     cap = serving.max_sugars * 100 / serving.grams if serving and serving.max_sugars is not None else None
-    flagged = [i for i in items if i.status == "not_tolerated"]
+    flagged = [i for i in items if i.status == "not_tolerated" and not i.allowed_by]
     fs = [i for i in flagged if i.sugars and set(i.sugars) <= FRUCTOSE_SUCROSE]
     sorbitol = [i for i in flagged if "sorbitol" in i.sugars]
 
@@ -90,38 +90,29 @@ def apply_amounts(items: list[Item], limit: float, serving: Serving | None) -> l
         load = fructose_load([i]) if i.grams is not None else math.inf
         return min(load, cap) if cap is not None and i in fs else load
 
+    def tier(load: float) -> Status:
+        return _tier(load, limit, serving) if limit > 0 else "not_tolerated" if load > 0 else "tolerated"
+
     weighed = [i for i in fs + sorbitol if own(i) < math.inf]
     out = []
     for i in items:
-        if i in weighed and (status := _tier(own(i), limit, serving)) != "not_tolerated":
+        if i in weighed and not i.avoided_by and (status := tier(own(i))) != "not_tolerated":
             i = i.model_copy(update={"status": status, "trace": True})
         out.append(i)
 
     fs_load = math.inf if any(i.grams is None for i in fs) else fructose_load(fs)
     total = (min(fs_load, cap) if cap is not None else fs_load) + fructose_load(sorbitol)
-    blocked = len(flagged) > len(fs) + len([i for i in sorbitol if i not in fs]) or any(
-        i.grams is None for i in sorbitol
+    unweighable = [i for i in flagged if i not in fs and i not in sorbitol] + [i for i in sorbitol if i.grams is None]
+    if unweighable or not weighed or total == math.inf:
+        return out, None
+    sugars: list[Sugar] = [s for s in analyze.SUGAR_ORDER if any(s in i.sugars for i in weighed)]
+    return out, Load(
+        grams=round(total * serving.grams / 100 if serving else total, 4),
+        per=serving.label if serving else "100 g",
+        status=tier(total),
+        sugars=sugars,
+        capped=cap is not None and fs_load > cap,
     )
-    if blocked or total == math.inf or len(weighed) < 2 and (cap is None or fs_load <= cap):
-        return out  # nothing to weigh, or one item whose own status already is the product's
-    status = _tier(total, limit, serving)
-    per = total * serving.grams / 100 if serving else total
-    capped = cap is not None and fs_load > cap
-    reason = f"Per {serving.label}." if serving else ""
-    if capped:
-        reason += " Capped by the label's total sugars."
-    found: list[Sugar] = [s for s in analyze.SUGAR_ORDER if any(s in i.sugars for i in fs + sorbitol)]
-    out.append(
-        Item(
-            name=f"Fructose load: up to {per:.2g} g per {'serving' if serving else '100 g'}",
-            status=status,
-            sugars=found,
-            basis="total",
-            reason=reason.strip(),
-            trace=status != "not_tolerated",
-        )
-    )
-    return out
 
 
 def apply(
@@ -132,10 +123,6 @@ def apply(
     trace_limit: float = 0,
 ) -> Result:
     allow_terms, avoid_terms = terms(allow), terms(avoid)
-    # A limit of 0 means flag any amount.
-    traced = apply_amounts(result.items, trace_limit, result.serving) if trace_limit > 0 else result.items
-    if not allow_terms and not avoid_terms and traced == result.items:
-        return result
 
     # What the food itself is called, when the check was for a food rather than a pasted list.
     if result.food:
@@ -158,15 +145,15 @@ def apply(
                 "avoided_by": _avoided(i, avoid_terms),
             }
         )
-        for i in traced
+        for i in result.items
     ]
     term = food_name and (_contains(food_name, avoid_terms) or _contains(query or "", avoid_terms))
     if term and not any(i.avoided_by == term for i in items):
         reason = "This food is on your avoid list."
         items.append(Item(name=food_name, status="not_tolerated", basis="settings", avoided_by=term, reason=reason))
 
-    if traced == result.items and not any(i.allowed_by or i.avoided_by for i in items):
-        return result
+    # Amounts are weighed after the lists, so allowed items don't count toward the load.
+    items, load = apply_amounts(items, trace_limit, result.serving)
     notes = list(result.notes)
     if allowed := [i for i in items if i.allowed_by and not i.avoided_by and i.status != "tolerated"]:
         notes.append(f"Not counting {_count(allowed)} you've allowed in Settings.")
@@ -176,7 +163,7 @@ def apply(
         k: getattr(result, k)
         for k in ("food", "measured_food", "off_product", "ingredients_text", "serving", "alternatives")
     }
-    return analyze.summarize(items, notes=notes, **keep)
+    return analyze.summarize(items, notes=notes, load=load, **keep)
 
 
 def _count(items: list[Item]) -> str:
