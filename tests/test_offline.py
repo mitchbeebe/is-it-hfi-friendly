@@ -5,7 +5,7 @@ import io
 import pytest
 from PIL import Image
 
-from is_it_sugar import analyze, images, ingredients, known, off, prefs, sugars
+from is_it_sugar import analyze, foods, images, ingredients, off, prefs, sugars
 from is_it_sugar.models import Food, Item
 
 
@@ -42,60 +42,58 @@ def test_split_separates_what_brackets_say():
     assert ingredients.split("salt") == ("salt", [])
 
 
-@pytest.mark.parametrize(
-    ("ingredient", "status", "basis"),
-    [
-        ("chocolate chips (sugar, cocoa butter)", "not_tolerated", "bu_table"),  # sugar inside brackets counts
-        ("vegetable oil (includes one of the following: canola, soybean)", "tolerated", "afcd"),
-        ("enriched flour (wheat flour, niacin, reduced iron)", "not_tolerated", "afcd"),  # measured sucrose
-        ("Wholewheat Flour (80%)", "not_tolerated", "afcd"),
-        ("ONIONS", "not_tolerated", "afcd"),
-        ("Organic whole grain oats", "not_tolerated", "afcd"),
-        ("SALT", "tolerated", "afcd"),
-        ("VITAMIN B12", "tolerated", "known"),
-        ("TRIPOTASSIUM PHOSPHATE", "tolerated", "known"),
-        ("sodium acid pyrophosphate", "tolerated", "known"),
-        ("modified corn starch", "tolerated", "bu_table"),
-        ("palm oil", "tolerated", "known"),
-        ("raising agents (ammonium bicarbonate, monocalcium phosphate)", "tolerated", "known"),
-        ("BROCCOLI", "not_tolerated", "afcd"),
-        ("ORGANIC GREEN PEPPER", "not_tolerated", "afcd"),  # bell pepper, not peppercorns
-        ("ORGANIC PAPRIKA", "not_tolerated", "ciqual"),
-        ("VINEGAR", "not_tolerated", "ciqual"),  # under detection limits; the limits count
-        ("ORGANIC CHICKEN", "tolerated", "ciqual"),
-        ("tomato concentrate", "not_tolerated", "ciqual"),
-        ("ORGANIC BLACK PEPPER", "not_tolerated", "ciqual"),
-        ("IN A NATURAL PORK CASING", "tolerated", "known"),
-        ("DISTILLED VINEGAR", "not_tolerated", "ciqual"),
-    ],
-)
-def test_decide_uses_bu_table_then_measured_foods(ingredient, status, basis):
-    item = analyze._decide(ingredients.Ingredient(ingredient))
-    assert item is not None and (item.status, item.basis) == (status, basis)
+def food(name, source=None):
+    return next(f for f in foods._all() if f.name == name and source in (None, f.source))
 
 
 @pytest.mark.parametrize(
-    "ingredient",
+    ("ingredient", "status"),
     [
-        "natural smoke flavor",
-        "natural flavor",
-        "chocolate (dextrose, cocoa butter)",
-        "yeast extract",
-        "dried cranberries",
+        ("chocolate chips (sugar, cocoa butter)", "not_tolerated"),  # a sugar inside brackets counts
+        ("HIGH FRUCTOSE CORN SYRUP", "not_tolerated"),
+        ("modified corn starch", "tolerated"),
+        ("dextrose", "tolerated"),
     ],
 )
-def test_decide_leaves_the_rest_to_jev(ingredient):
-    assert analyze._decide(ingredients.Ingredient(ingredient)) is None
+def test_bu_table_decides_sugar_names(ingredient, status):
+    item = analyze._bu_decide(ingredient)
+    assert item is not None and (item.status, item.basis) == (status, "bu_table")
 
 
-def test_measured_ingredient_is_an_upper_bound_for_the_trace_rule():
-    flour = analyze._decide(ingredients.Ingredient("wheat flour"))
-    assert flour is not None and flour.grams == 0.7 and flour.sugars == ["sucrose"]
-    onion = analyze._decide(ingredients.Ingredient("onion"))
-    assert onion is not None and onion.grams == pytest.approx(1.7 + 1.9 / 2)
-    # Only measured amounts: flour alone is under 0.5 g, flour and onion under neither limit.
-    assert prefs.apply(analyze.summarize([flour]), trace_limit=1.0).verdict == "ok"
-    assert prefs.apply(analyze.summarize([flour, onion]), trace_limit=1.0).verdict == "avoid"
+@pytest.mark.parametrize("ingredient", ["onion", "natural flavor", "chocolate (dextrose, cocoa butter)", "salt"])
+def test_everything_else_goes_to_search_and_jev(ingredient):
+    assert analyze._bu_decide(ingredient) is None
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        ("ORGANIC NON-GMO POPCORN", "Snacks, popcorn"),
+        ("ORGANIC GREEN PEPPER", "Sweet pepper, green, raw"),
+        ("TOMATO CONCENTRATE FROM RED RIPE TOMATOES", "Tomato paste, concentrated"),
+        ("WHOLE GRAIN OATS", "Oats"),
+        ("ENRICHED FLOUR", "Wheat flour"),
+        ("ORGANIC ROASTED GARLIC", "Garlic, roasted"),
+        ("DISTILLED VINEGAR", "Vinegar"),
+        ("onion powder", "Spices, onion powder"),
+        ("sea salt", "sea salt"),
+        ("PAPRIKA", "Paprika"),
+    ],
+)
+def test_search_offers_the_food_among_its_candidates(query, expected):
+    names = [f.name for f in foods.search(query)]
+    assert any(expected.lower() in n.lower() for n in names), names
+
+
+@pytest.mark.parametrize(("query", "expected"), [("bell pepper", "Capsicum"), ("cantaloupe", "Melon, rockmelon")])
+def test_search_finds_afcd_foods_by_us_names(query, expected):
+    assert any(f.name.startswith(expected) for f in foods.search(query, sources=("afcd",)))
+
+
+def test_food_data_has_fructose_and_sucrose_for_every_food():
+    data = foods._all()
+    assert {f.source for f in data} == {"afcd", "ciqual", "fdc"} and len(data) > 5000
+    assert all(f.fructose is not None and f.sucrose is not None for f in data)
 
 
 def test_parse_bounds_each_ingredients_share_of_the_product():
@@ -105,33 +103,87 @@ def test_parse_bounds_each_ingredients_share_of_the_product():
         "POPCORN": (1.0, "the first ingredient"),
         "SUNFLOWER OIL": (0.5, "listed 2nd"),
         "SEA SALT": (0.333, "listed 3rd"),
-        "PAPRIKA": (0.02, "in the 2% or less part of the list"),
-        "tomatoes 45%": (0.45, "declared as 45%"),
+        "PAPRIKA": (0.02, "listed under 2% or less"),
+        "tomatoes 45%": (0.45, "as declared"),
     }
+
+
+@pytest.mark.parametrize(
+    ("ingredient", "expected"),
+    [
+        ("SALT", "Salt"),
+        ("POTATOES", "Potatoes"),
+        ("VEGETABLE OIL (SUNFLOWER, CORN AND/OR CANOLA OIL)", "Vegetable oil"),
+        ("onions", "Onion"),
+        ("tomato paste", "Tomato paste"),
+    ],
+)
+def test_exact_names_match_without_jev(ingredient, expected):
+    f = foods.exact(analyze._base(ingredient))
+    assert f is not None and f.name.startswith(expected)
+
+
+def test_exact_ties_take_the_food_with_most_sugar():
+    onions = foods.exact("onions")
+    assert onions is not None and foods.load(onions) == max(
+        foods.load(f) for f in foods._all() if f.name in ("Onion, raw", "Onions, raw")
+    )
+
+
+@pytest.mark.parametrize(
+    ("ingredient", "expected"),
+    [
+        ("ORGANIC POTATOES", "Potatoes, flesh and skin"),
+        ("ORGANIC NON-GMO POPCORN", "Snacks, popcorn"),
+        ("WHOLE GRAIN OATS", "Oats"),
+        ("ORGANIC ROASTED GARLIC", "Garlic, roasted"),
+    ],
+)
+def test_candidates_put_likely_foods_first(ingredient, expected):
+    assert foods.exact(ingredient) is None
+    assert any(f.name.startswith(expected) for f in foods.candidates(ingredient)[:8])
 
 
 def test_measured_ingredient_counts_at_its_share():
     paprika = ingredients.parse("popcorn, salt, contains 2% or less of: paprika")[2]
-    item = analyze._decide(paprika)
-    assert item is not None and item.basis == "ciqual"
+    item = analyze._measured_item(paprika, food("Paprika", "ciqual"))
+    assert (item.status, item.basis) == ("not_tolerated", "ciqual")
     assert item.grams == pytest.approx((6.71 + 0.81 / 2) * 0.02)
-    assert "in the 2% or less part of the list, so at most 2% of the product" in item.reason
+    assert item.reason == (
+        "Paprika: 6.7 g fructose, 0.81 g sucrose per 100 g. "
+        "At most 2% of the product (listed under 2% or less), so up to 0.14 g."
+    )
+    salt = analyze._measured_item(ingredients.Ingredient("salt"), food("Salt, table, non-iodised"))
+    assert (salt.status, salt.grams) == ("tolerated", None)
     # Popcorn (0.43 g load) and up to 2% paprika (0.14 g): all measured, just over 0.5 g, so small amounts.
-    items = [
-        analyze._decide(i)
-        for i in ingredients.parse("ORGANIC NON-GMO POPCORN, SEA SALT, CONTAINS 2% OR LESS OF: PAPRIKA")
-    ]
-    assert all(items) and items[0].basis == "ciqual"
-    r = prefs.apply(analyze.summarize(items), trace_limit=1.0)
+    popcorn = analyze._measured_item(ingredients.Ingredient("popcorn"), food("Pop-corn or air-popped maize, unsalted"))
+    r = prefs.apply(analyze.summarize([popcorn, salt, item]), trace_limit=1.0)
     assert (r.verdict, r.headline) == ("caution", "Small amounts of fructose and sucrose")
-    assert prefs.apply(analyze.summarize(items[:2]), trace_limit=1.0).verdict == "ok"  # popcorn and salt alone
+    assert prefs.apply(analyze.summarize([popcorn, salt]), trace_limit=1.0).verdict == "ok"
 
 
-def test_known_foods_exist_and_are_measured():
-    for label, name in known.FOODS.items():
-        f = known._afcd(name)
-        if known.is_sorbitol_fruit(f.name):
-            assert f.sorbitol is not None, label
+def test_unmeasured_sorbitol_in_a_sorbitol_fruit_has_no_amount():
+    apples = next(f for f in foods._all() if f.source == "fdc" and f.name.startswith("Apples, raw, with skin"))
+    item = analyze._measured_item(ingredients.Ingredient("apples"), apples)
+    assert "sorbitol" in item.sugars and item.grams is None  # so Small amounts can't downgrade it
+
+
+def test_jev_answer_is_a_food_or_a_description():
+    candidates = [food("Paprika", "ciqual"), food("Vinegar", "ciqual")]
+    describe = {"fructose": 0.6, "none": 0.4}
+    picked = analyze._answer(candidates, {"food_0": 0.1, "food_1": 0.6, "not_listed": 0.3}, describe)
+    assert picked == {"food": "ciqual:11018"}
+    # Near-duplicates together outvote "not listed", even when neither does alone.
+    split = analyze._answer(candidates, {"food_0": 0.3, "food_1": 0.3, "not_listed": 0.4}, describe)
+    assert split == {"food": "ciqual:11049"}
+    described = analyze._answer(candidates, {"food_0": 0.1, "food_1": 0.1, "not_listed": 0.8}, describe)
+    assert described["probs"]["fructose"] == pytest.approx(0.6)
+    assert analyze._answer([], None, describe)["probs"]["none"] == pytest.approx(0.4)
+    item = analyze._answer_item(ingredients.Ingredient("natural flavor"), described)
+    assert (item.basis, item.sugars) == ("jev", ["fructose"])
+    # An answer cached for a food that a data rebuild removed falls back to unsure.
+    gone = analyze._answer_item(ingredients.Ingredient("x"), {"food": "ciqual:0"})
+    assert gone.status == "caution"
 
 
 def test_label_note_needs_confidence():
@@ -139,7 +191,7 @@ def test_label_note_needs_confidence():
         "Dried", {"fructose": 0.05, "sucrose": 0, "sorbitol": 0, "unsure": 0.05, "none": 0.1, "label_note": 0.8}
     )
     assert (note.status, note.sugars) == ("tolerated", [])
-    assert note.reason.startswith("Looks like a note on the label")
+    assert note.reason.startswith("A note on the label")
     # Unsure it's a note: judged as an ingredient instead, and "none" isn't confident enough here.
     item = analyze._jev_item(
         "Dried", {"fructose": 0.1, "sucrose": 0, "sorbitol": 0, "unsure": 0.1, "none": 0.4, "label_note": 0.4}
@@ -382,6 +434,11 @@ def au(name):
     return next(f for f in afcd.foods() if f.name == name)
 
 
+def local(name):
+    """The searchable AFCD food, as measured_sugars takes it."""
+    return food(name, "afcd")
+
+
 def test_afcd_data_is_whole_foods_without_borrowed_rows():
     from is_it_sugar import afcd
 
@@ -391,36 +448,20 @@ def test_afcd_data_is_whole_foods_without_borrowed_rows():
     assert not [f for f in data if f.name.lower().startswith("sauce, tomato")]  # processed: regional recipes
 
 
-@pytest.mark.parametrize(
-    ("query", "expected"),
-    [("apples", "Apple"), ("bell pepper", "Capsicum"), ("cantaloupe", "Melon, rockmelon"), ("arugula", "Rocket")],
-)
-def test_afcd_search_with_us_names(query, expected):
-    from is_it_sugar import afcd
-
-    assert afcd.search(query)[0].name.startswith(expected)
-
-
-def test_afcd_search_skips_processed_foods():
-    from is_it_sugar import afcd
-
-    assert afcd.search("ketchup") == []
-
-
 def test_measured_sugars_shows_variety_ranges_and_beats_usda():
-    items, measured = analyze.measured_sugars({"Fructose": 99.0}, au("Apple, fuji, unpeeled, raw"))
+    items, measured = analyze.measured_sugars({"Fructose": 99.0}, local("Apple, fuji, unpeeled, raw"))
     by_sugar = {i.sugars[0]: i for i in items}
     assert measured == ["fructose", "sucrose", "sorbitol"]
     assert by_sugar["fructose"].name == "Fructose: 5.4–7.7 g per 100 g"
     assert by_sugar["fructose"].basis == "afcd"
     assert by_sugar["fructose"].reason.startswith(
-        "Range across 10 kinds of apple (unpeeled, raw). Closest match: Apple, fuji"
+        "Range across 10 kinds of apple (unpeeled, raw). Closest: Apple, fuji"
     )
     assert by_sugar["sorbitol"].name.startswith("Sorbitol: 0.2–0.5 g")
 
 
 def test_measured_sugars_zero_and_missing_fall_through():
-    items, measured = analyze.measured_sugars({"Sucrose": 2.0}, au("Grape, green, raw"))
+    items, measured = analyze.measured_sugars({"Sucrose": 2.0}, local("Grape, green, raw"))
     # AFCD reports grape sucrose as 0, which wins over USDA's 2 g; zeros are listed as tolerated.
     assert [(i.name, i.status) for i in items] == [
         ("Fructose: 6–9.5 g per 100 g", "not_tolerated"),
@@ -432,15 +473,24 @@ def test_measured_sugars_zero_and_missing_fall_through():
     assert measured == ["sucrose"] and items[0].basis == "fdc"
 
 
-def test_prefs_keeps_afcd_match():
-    from is_it_sugar.models import AfcdMatch
+def test_measured_sugars_from_ciqual():
+    items, measured = analyze.measured_sugars({}, food("Sweet pepper, red, raw", "ciqual"))
+    assert measured == ["fructose", "sucrose"]
+    assert [(i.name, i.basis) for i in items] == [
+        ("Fructose: 2.6 g per 100 g", "ciqual"),
+        ("Sucrose: under 0.2 g per 100 g", "ciqual"),
+    ]
 
-    match = AfcdMatch(id="F1", name="Broccoli, fresh, raw", derivation="Analysed", kinds=1)
+
+def test_prefs_keeps_measured_match():
+    from is_it_sugar.models import MeasuredMatch
+
+    match = MeasuredMatch(source="afcd", id="afcd:F1", name="Broccoli, fresh, raw", note="Analysed", kinds=1)
     items = [
         Item(name="Fructose: 0.7 g per 100 g", status="not_tolerated", sugars=["fructose"], basis="afcd", reason="")
     ]
-    out = prefs.apply(analyze.summarize(items, afcd_food=match), ["broccoli"], query="broccoli")
-    assert out.verdict == "ok" and out.afcd_food == match
+    out = prefs.apply(analyze.summarize(items, measured_food=match), ["broccoli"], query="broccoli")
+    assert out.verdict == "ok" and out.measured_food == match
 
 
 # ---- sugar present but not identified
@@ -459,7 +509,8 @@ def test_unidentified_sugars_skipped_when_explained_or_zero():
     flagged = [judged("Sucrose", sugars_=("sucrose",))]
     assert analyze.unidentified_sugars({"Total Sugars": 5.0}, None, [], flagged) == []
     assert (
-        analyze.unidentified_sugars({}, au("Milk, cow, fluid, regular fat (~3.5%)"), ["fructose", "sucrose"], []) == []
+        analyze.unidentified_sugars({}, local("Milk, cow, fluid, regular fat (~3.5%)"), ["fructose", "sucrose"], [])
+        == []
     )
 
 
@@ -474,7 +525,7 @@ def test_varieties_differ_only_in_variety():
 
 
 def test_zero_total_sugars_is_one_line():
-    items, _ = analyze.measured_sugars({}, au("Chicken, breast, lean flesh, raw"))
+    items, _ = analyze.measured_sugars({}, local("Chicken, breast, lean flesh, raw"))
     assert [(i.name, i.status) for i in items] == [("Total sugars: 0 g per 100 g", "tolerated")]
 
 
@@ -488,9 +539,8 @@ def test_trace_rule_downgrades_small_measured_amounts():
     oats = analyze.summarize([measured_item("sucrose", 1.2)])  # load 0.6
     out = prefs.apply(oats, trace_limit=1.0)
     assert (out.verdict, out.headline, out.sugars) == ("caution", "Small amounts of sucrose", ["sucrose"])
-    assert out.items[0].trace and out.items[0].reason.startswith(
-        "About 0.6 g fructose load per 100 g, under your 1 g limit."
-    )
+    assert out.items[0].trace and out.items[0].reason == "r"  # explained once, in a note
+    assert "Fructose load about 0.6 g per 100 g, under your 1 g limit." in out.notes
     assert prefs.apply(oats, trace_limit=0).verdict == "avoid"  # 0 turns it off
     assert prefs.apply(oats, trace_limit=0.5).verdict == "avoid"
 
@@ -500,7 +550,7 @@ def test_very_low_load_is_tolerated():
     out = prefs.apply(rice, trace_limit=1.0)
     assert (out.verdict, out.headline) == ("ok", "Very low in fructose and sucrose")
     assert all(i.status == "tolerated" and i.trace for i in out.items)
-    assert out.items[0].reason.startswith("About 0.4 g fructose load per 100 g, under 0.5 g.")
+    assert out.notes == ["Fructose load about 0.4 g per 100 g, under 0.5 g."]
     # A stricter personal limit wins: under 0.3 g only.
     assert prefs.apply(rice, trace_limit=0.3).verdict == "avoid"
     assert prefs.apply(rice, trace_limit=0).verdict == "avoid"
@@ -509,22 +559,20 @@ def test_very_low_load_is_tolerated():
 def test_label_with_zero_sugar_makes_fructose_and_sucrose_sources_caution():
     sausage = {"servingSize": 85.0, "servingSizeUnit": "GRM", "householdServingFullText": "1 link"}
     items = [
-        analyze._decide(ingredients.Ingredient("RED PEPPER")),
-        analyze._decide(ingredients.Ingredient("sugar")),
-        analyze._decide(ingredients.Ingredient("sorbitol")),
-        analyze._decide(ingredients.Ingredient("SALT")),
+        analyze._measured_item(ingredients.Ingredient("RED PEPPER"), food("Sweet pepper, red, raw", "ciqual")),
+        analyze._bu_decide("sugar"),
+        analyze._bu_decide("sorbitol"),
+        analyze._measured_item(ingredients.Ingredient("SALT"), food("Salt, table, non-iodised")),
         *analyze.measured_sugars({"Total Sugars": 0.0}, None)[0],
     ]
     marked = analyze.label_zero_sugar([i for i in items if i], sausage)
     assert prefs.apply(analyze.summarize(marked), trace_limit=0).verdict == "avoid"  # 0 flags any amount
-    out = prefs.apply_label_cap(marked)
+    out, note = prefs.apply_label_cap(marked)
+    assert note and note.startswith("The label lists 0 g total sugars per serving")
     by_name = {i.name: i for i in out}
     assert by_name["RED PEPPER"].status == by_name["sugar"].status == "caution"
-    assert by_name["sugar"].reason.startswith(
-        "The label lists 0 g total sugars per serving (1 link, 85 g), so under 0.5 g."
-    )
     assert by_name["sorbitol"].status == "not_tolerated"  # not counted in total sugars
-    assert by_name["Total sugars: 0 g per serving"].status == "tolerated"
+    assert by_name["Total sugars: 0 g per serving (1 link, 85 g)"].status == "tolerated"
     r = analyze.summarize([i for i in out if i.name != "sorbitol"])
     assert (r.verdict, r.headline) == ("caution", "Small amounts of fructose and sucrose")
 

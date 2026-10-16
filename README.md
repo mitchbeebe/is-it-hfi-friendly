@@ -80,13 +80,12 @@ one is checked in this order:
 1. the BU table and common label spellings (`sugars.py`), across the whole ingredient including its brackets, so the
    sugar in "chocolate chips (sugar, cocoa butter)" counts. The longest name wins, so "high fructose corn syrup" isn't
    read as "corn syrup";
-2. known ingredients (`known.py`): about 190 common label words mapped to one AFCD entry each ("onion", "wheat flour",
-   "oats"), then about 975 more names Open Food Facts links to measured foods in [CIQUAL](https://ciqual.anses.fr/), the
-   French food composition table ("paprika", "vinegar", "chicken"), or USDA ("cream cheese", "spelt"). These use
-   measured fructose and sucrose. Words like "organic" and "non-GMO" are ignored when matching. Vitamins, minerals,
-   acids, raising agents and fats match by name pattern as sugar-free;
-3. anything else (onion powder, natural flavor…) goes to TypeSafe's Jev model, one Choice question per ingredient:
-   fructose / sucrose / sorbitol / unsure / none. Jev sees the brackets too.
+2. an earlier answer for the same ingredient name, kept for 90 days;
+3. everything else goes to TypeSafe's Jev model in one call per list, with a question per ingredient. Each question
+   offers up to 12 measured foods that full-text search finds for it (`foods.py`), plus descriptions: contains
+   fructose / sucrose / sorbitol, unsure, none, or a note on the label. Jev picks the food when it's the same
+   ingredient in the same form, so "organic non-GMO popcorn" becomes "Snacks, popcorn, air-popped" with measured
+   sugars, and "natural flavor" is described instead.
 
 Labels list ingredients by weight, most first, so the nth ingredient is at most 1/n of the product, anything after
 "contains 2% or less of" is at most 2%, and a declared percentage ("tomatoes 45%") is used as given. A measured
@@ -103,16 +102,17 @@ guidance and the strictest cut-off Italian centres use; under your limit (1 g by
 on a label, or an AI estimate, keeps the food at Avoid.
 
 **Food names**: searched in [USDA FoodData Central](https://fdc.nal.usda.gov/), generic and branded foods separately so
-brands don't crowd out generic foods. Jev picks the result that matches what you typed (you can pick another under "Not
-it?"), preferring entries with measured sugars. Then the app uses, in order of preference:
+brands don't crowd out generic foods, and in the bundled AFCD and CIQUAL foods. One Jev call picks the USDA result that
+matches what you typed (you can pick another under "Not it?") and the AFCD or CIQUAL food that is the same whole food.
+Then the app uses, in order of preference:
 
 1. the product's ingredient list (branded foods), checked as above;
 2. for whole foods, measured sugars from the
    [Australian Food Composition Database](https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd)
-   (AFCD). Jev picks the matching entry in the same step as the USDA match. AFCD is mostly lab-analysed and, unlike
-   USDA, reports sorbitol. Where it lists several kinds of a food (11 raw apples), amounts are shown as a range, for
-   example "Fructose: 5.4–7.7 g per 100 g";
-3. measured fructose and sucrose from USDA, for any sugar AFCD doesn't report;
+   (AFCD) or [CIQUAL](https://ciqual.anses.fr/), the French table. Both are mostly lab-analysed, and AFCD reports
+   sorbitol. Where AFCD lists several kinds of a food (11 raw apples), amounts are shown as a range, for example
+   "Fructose: 5.4–7.7 g per 100 g";
+3. measured fructose and sucrose from USDA, for any sugar those don't report;
 4. for sorbitol in a whole food: present in apples, pears and stone fruits (the only foods AFCD measures it in), and
    otherwise not expected;
 5. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment. A food with no sugar data at all is
@@ -135,10 +135,12 @@ recipes (Australian ketchup uses sucrose, US ketchup uses HFCS), so USDA stays t
 from other countries' tables are left out, since the licence doesn't cover them. AFCD data: Food Standards Australia New
 Zealand, AFCD Release 3, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-`src/is_it_sugar/data/ingredients.json` is built by `uv run python scripts/build_ingredients.py`: the English names and
-synonyms Open Food Facts' ingredient taxonomy (pinned to a commit) links to CIQUAL or USDA foods with both fructose and
-sucrose measured, CIQUAL first. CIQUAL values below a detection limit ("< 0.2") count at the limit. CIQUAL data: ANSES, Ciqual 2020,
-[Licence Ouverte](https://www.etalab.gouv.fr/licence-ouverte-open-licence/).
+`src/is_it_sugar/data/foods.json` is built by `uv run python scripts/build_foods.py`: every AFCD, CIQUAL and USDA SR
+Legacy or Foundation food with fructose and sucrose measured (or total sugars of 0), about 6,900 in all. Open Food
+Facts' ingredient taxonomy (pinned to a commit) adds the English names and synonyms it links to CIQUAL and USDA foods,
+so "red bell pepper" finds "Sweet pepper, red, raw". The app indexes them with SQLite full-text search at startup.
+CIQUAL values below a detection limit ("< 0.2") count at the limit. CIQUAL data: ANSES, Ciqual 2020,
+[Licence Ouverte](https://www.etalab.gouv.fr/licence-ouverte-open-licence/). USDA data is public domain.
 
 Open Food Facts data is under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), credited in
 the page footer. Products are queried per request. Open Food Facts rate-limits product reads, so a name search lets Jev
@@ -168,11 +170,11 @@ the client address from `Fly-Client-IP` (set by `CLIENT_IP_HEADER`), since `X-Fo
 src/is_it_sugar/
   app.py          FastAPI routes: GET /, POST /api/check/text, POST /api/check/image, GET /api/sugars
   prefs.py        applies the Settings lists (tolerate / avoid) to a result
-  afcd.py         Australian Food Composition Database search and variety ranges
+  afcd.py         Australian Food Composition Database variety ranges
   off.py          Open Food Facts product lookup (barcode) and search (name)
-  known.py        common label ingredients matched to AFCD and CIQUAL measurements
+  foods.py        full-text search over measured foods (AFCD, CIQUAL, USDA)
   data/afcd.json  the AFCD subset, built by scripts/build_afcd.py
-  data/ingredients.json  CIQUAL and USDA sugars by ingredient name, built by scripts/build_ingredients.py
+  data/foods.json measured foods for search, built by scripts/build_foods.py
   cache.py        SQLite cache for results and ingredient ratings
   ratelimit.py    per-IP limits
   analyze.py      FoodData Central lookups, TypeSafe questions, verdicts

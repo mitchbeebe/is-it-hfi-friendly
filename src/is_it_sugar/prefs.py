@@ -57,9 +57,9 @@ def fructose_load(items: Sequence[Item]) -> float:
 LOW_LOAD = 0.5
 
 
-def apply_trace(items: list[Item], limit: float) -> list[Item]:
+def apply_trace(items: list[Item], limit: float) -> tuple[list[Item], str | None]:
     """Measured amounts whose combined fructose load is under `limit` become Caution instead of Avoid,
-    and Tolerated when also under LOW_LOAD.
+    and Tolerated when also under LOW_LOAD. Returns the items and a note saying why.
 
     Only measured values qualify. If any sugar is unmeasured but judged likely, or an ingredient
     list names a sugar, the food stays Avoid: there's no amount to weigh.
@@ -68,29 +68,32 @@ def apply_trace(items: list[Item], limit: float) -> list[Item]:
     unmeasured = [i for i in items if i.grams is None and i.status == "not_tolerated"]
     load = fructose_load(measured)
     if not measured or unmeasured or load >= limit:
-        return items
+        return items, None
     if load < min(LOW_LOAD, limit):
-        status, note = "tolerated", f"About {load:.2g} g fructose load per 100 g, under {LOW_LOAD:g} g. "
+        status, note = "tolerated", f"Fructose load about {load:.2g} g per 100 g, under {LOW_LOAD:g} g."
     else:
-        status, note = "caution", f"About {load:.2g} g fructose load per 100 g, under your {limit:g} g limit. "
-    return [
-        i.model_copy(update={"status": status, "trace": True, "reason": note + i.reason})
+        status, note = "caution", f"Fructose load about {load:.2g} g per 100 g, under your {limit:g} g limit."
+    changed = [
+        i.model_copy(update={"status": status, "trace": True})
         if i.grams is not None and i.status == "not_tolerated"
         else i
         for i in items
     ]
+    return changed, note
 
 
-def apply_label_cap(items: list[Item]) -> list[Item]:
+def apply_label_cap(items: list[Item]) -> tuple[list[Item], str | None]:
     """Fructose and sucrose sources in a product whose label lists 0 g sugars become Caution: at most a trace."""
     if not any(i.label_cap and i.status == "not_tolerated" for i in items):
-        return items
-    return [
-        i.model_copy(update={"status": "caution", "trace": True, "reason": f"{i.label_cap} {i.reason}"})
-        if i.label_cap and i.status == "not_tolerated"
-        else i
+        return items, None
+    changed = [
+        i.model_copy(update={"status": "caution", "trace": True}) if i.label_cap and i.status == "not_tolerated" else i
         for i in items
     ]
+    return (
+        changed,
+        "The label lists 0 g total sugars per serving, so its fructose and sucrose sources are at most traces.",
+    )
 
 
 def apply(
@@ -102,7 +105,11 @@ def apply(
 ) -> Result:
     allow_terms, avoid_terms = terms(allow), terms(avoid)
     # A limit of 0 means flag any amount, including the traces a label allows.
-    traced = apply_label_cap(apply_trace(result.items, trace_limit)) if trace_limit > 0 else result.items
+    traced, rule_notes = result.items, []
+    if trace_limit > 0:
+        for rule in (lambda i: apply_trace(i, trace_limit), apply_label_cap):
+            traced, note = rule(traced)
+            rule_notes += [note] if note else []
     if not allow_terms and not avoid_terms and traced is result.items:
         return result
 
@@ -136,12 +143,12 @@ def apply(
 
     if traced is result.items and not any(i.allowed_by or i.avoided_by for i in items):
         return result
-    notes = list(result.notes)
+    notes = list(result.notes) + rule_notes
     if allowed := [i for i in items if i.allowed_by and not i.avoided_by and i.status != "tolerated"]:
         notes.append(f"Not counting {_count(allowed)} you've allowed in Settings.")
     if avoided := [i for i in items if i.avoided_by]:
         notes.append(f"Flagging {_count(avoided)} on your avoid list.")
-    keep = {k: getattr(result, k) for k in ("food", "afcd_food", "off_product", "ingredients_text", "alternatives")}
+    keep = {k: getattr(result, k) for k in ("food", "measured_food", "off_product", "ingredients_text", "alternatives")}
     return analyze.summarize(items, notes=notes, **keep)
 
 

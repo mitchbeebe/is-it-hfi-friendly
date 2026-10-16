@@ -89,11 +89,11 @@ def parse(text: str) -> list[Ingredient]:
         n = len(found) + 1
         share, why = 1 / n, "the first ingredient" if n == 1 else f"listed {_ordinal(n)}"
         if at_most is not None and at_most / 100 < share:
-            share, why = at_most / 100, f"in the {at_most:g}% or less part of the list"
+            share, why = at_most / 100, f"listed under {at_most:g}% or less"
         base, inner = split(name)
         declared = _DECLARED.match(base) or (len(inner) == 1 and _DECLARED.match(f"({inner[0]})"))
         if declared:
-            share, why = float(declared.group(1)) / 100, f"declared as {float(declared.group(1)):g}%"
+            share, why = float(declared.group(1)) / 100, "as declared"
         found[name] = Ingredient(name, min(share, 1.0), why)
     return list(found.values())
 

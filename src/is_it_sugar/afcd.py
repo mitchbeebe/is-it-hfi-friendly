@@ -4,38 +4,11 @@ Built by scripts/build_afcd.py. Source: Food Standards Australia New Zealand, AF
 """
 
 import json
-import re
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 
-from .sugars import key
-
 DATA = Path(__file__).parent / "data" / "afcd.json"
-
-# US names -> the Australian names AFCD uses, applied to the query before searching.
-SYNONYMS = {
-    "bell pepper": "capsicum",
-    "cantaloupe": "rockmelon",
-    "arugula": "rocket",
-    "cilantro": "coriander",
-    "garbanzo": "chickpea",
-    "shrimp": "prawn",
-    "rutabaga": "swede",
-    "beet": "beetroot",
-    "romaine": "cos lettuce",
-    "golden raisin": "sultana",
-    "kiwi": "kiwifruit",
-    "courgette": "zucchini",
-    "aubergine": "eggplant",
-    "swiss chard": "silverbeet",
-    "chard": "silverbeet",
-    "ground beef": "beef mince",
-    "butternut squash": "pumpkin butternut",
-    "kumara": "sweet potato",
-    "honeydew": "honey dew melon",
-    "papaya": "pawpaw papaya",
-}
 
 
 @dataclass(frozen=True)
@@ -74,25 +47,13 @@ def foods() -> tuple[AfcdFood, ...]:
 
 
 @cache
-def _tokens(name: str) -> frozenset[str]:
-    return frozenset(key(name).split())
+def _by_id() -> dict[str, AfcdFood]:
+    return {f.id: f for f in foods()}
 
 
-def search(query: str, limit: int = 20) -> list[AfcdFood]:
-    """Foods sharing words with `query`, best first. Jev picks the actual match from these."""
-    q = key(query)
-    for us, au in SYNONYMS.items():
-        q = re.sub(rf"\b{us}\b", au, q)
-    words = set(q.split())
-    if not words:
-        return []
-    scored = []
-    for f in foods():
-        hits = len(words & _tokens(f.name))
-        if hits:
-            # More shared words first, then foods whose main name matches, then raw, then shorter names.
-            scored.append((-hits, not (words & _tokens(f.first)), f.last != "raw", len(f.name), f))
-    return [s[-1] for s in sorted(scored, key=lambda s: s[:-1])[:limit]]
+def by_id(food_id: str) -> AfcdFood | None:
+    """The AFCD food for an id from foods.py ("afcd:F000110") or AFCD itself ("F000110")."""
+    return _by_id().get(food_id.removeprefix("afcd:"))
 
 
 def varieties(food: AfcdFood) -> list[AfcdFood]:

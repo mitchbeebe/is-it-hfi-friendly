@@ -125,7 +125,7 @@
   details summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
   details p { font-size: .88rem; overflow-wrap: anywhere; }
   .notes { margin: 0; padding-left: 18px; color: var(--muted); font-size: .88rem; }
-  .items + .notes { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .items + .notes { margin-top: 6px; padding-top: 12px; border-top: 1px solid var(--line); }
   .error { background: var(--caution-bg); color: var(--caution); border-radius: var(--radius); padding: 14px 16px; }
   .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; margin-right: 6px; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -191,7 +191,7 @@
   .recent-list .ok .dot { background: var(--ok); }
   .recent-list .what { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .recent-list .when { color: var(--muted); font-size: .8rem; white-space: nowrap; }
-  footer { margin-top: 28px; color: var(--muted); font-size: .8rem; }
+  footer { margin-top: 14px; color: var(--muted); font-size: .8rem; }
   footer a { color: inherit; }
 </style>
 </head>
@@ -319,17 +319,16 @@
   </section>
 
   <footer>
-    Sugars are judged using the
-    <a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>,
-    foods are looked up in <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>,
-    packaged foods also in <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>
-    (<a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener">ODbL</a>),
-    and, for whole foods, the <a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>
-    (Food Standards Australia New Zealand, Release 3, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>)
-    and the <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>
-    (2020, <a href="https://www.etalab.gouv.fr/licence-ouverte-open-licence/" target="_blank" rel="noopener">Licence Ouverte</a>),
-    and anything else is classified by an AI model, which can make mistakes.
-    Always read the label, and check with your doctor or dietitian before relying on a result.
+    Sugars are judged against the
+	<a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>.
+	<br>
+    Foods are looked up in <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>,
+    <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener">Open Food Facts</a>,
+    <a href="https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd" target="_blank" rel="noopener">Australian Food Composition Database</a>,
+	and <a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>.
+	<br>
+	Other ingredients are classified by an AI model, which can make mistakes. Always read the label, 
+	and check with your doctor or dietitian before relying on a result.
   </footer>
 </main>
 
@@ -343,7 +342,8 @@ const STATUS = {
   tolerated: "Tolerated",
 };
 const VERDICT = { avoid: "Avoid", caution: "Caution", ok: "Looks OK" };
-const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA data", label: "From photo", settings: "Your settings", afcd: "Australian data", ciqual: "French data", known: "Known additive" };
+const TABLES = { afcd: "Australian Food Composition Database", ciqual: "CIQUAL French food composition table", fdc: "USDA FoodData Central" };
+const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
@@ -353,7 +353,7 @@ const LISTS = {
   allow: {
     storage: "is-it-sugar.allow",
     label: "your tolerated foods",
-    suggestions: ["Onion", "Garlic", "Peas", "Broccoli", "Spinach", "Lettuce", "Celery",
+    suggestions: ["Onion", "Garlic", "Broccoli", "Spinach", "Lettuce", "Celery",
       "Potato", "Natural flavor", "Spice", "Sucralose", "Glucose syrup"],
   },
   avoid: {
@@ -565,21 +565,21 @@ function render(r) {
       ${chips ? `<div class="chips">${chips}</div>` : ""}
     </div>`;
 
-  if (r.food || r.afcd_food || r.off_product) {
+  if (r.food || r.measured_food || r.off_product) {
     // One line, "Matched: Apple, raw", with sources, the ingredient list and other matches behind it.
     const f = r.food;
-    const au = r.afcd_food;
+    const m = r.measured_food;
     const p = r.off_product;
     const brandOf = (name, brand) => brand && !name.toLowerCase().includes(brand.toLowerCase()) ? ` (${titleCase(brand)})` : "";
     const name = f ? titleCase(f.description) + brandOf(f.description, f.brand)
       : p ? titleCase(p.name) + brandOf(p.name, p.brand)
-      : au.name;
+      : m.name;
     const sources = [
       f && ["USDA", `${titleCase(f.description)} · ${f.data_type}`],
       p && ["Open Food Facts",
         `${titleCase(p.name)} · barcode ${p.code}${p.countries.length ? ` · sold in ${p.countries.join(", ")}` : ""}`, p.url],
-      au && [f ? "Sugar values" : "Australian data",
-        `${au.name} · Australian Food Composition Database, ${au.derivation.toLowerCase()}${au.kinds > 1 ? ` · ${au.kinds} kinds` : ""}`],
+      m && [f ? "Sugar values" : TABLES[m.source],
+        `${m.name} · ${TABLES[m.source]}${m.note ? `, ${m.note.toLowerCase()}` : ""}${m.kinds > 1 ? ` · ${m.kinds} kinds` : ""}`],
     ].filter(Boolean);
     html += `
       <details class="card section match">

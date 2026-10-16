@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from typesafe_sdk import AsyncTypeSafeClient, TypeSafeBadRequestError, TypeSafeError
 
-from . import analyze, images, prefs, sugars
+from . import analyze, foods, images, prefs, sugars
 from .cache import Cache
 from .models import Result
 from .ratelimit import RateLimiter
@@ -32,13 +32,13 @@ RESULT_VERSION = hashlib.sha256(
         for f in (
             "analyze.py",
             "afcd.py",
-            "known.py",
+            "foods.py",
             "off.py",
             "sugars.py",
             "ingredients.py",
             "models.py",
             "data/afcd.json",
-            "data/ingredients.json",
+            "data/foods.json",
         )
     )
 ).hexdigest()[:12]
@@ -53,6 +53,7 @@ async def lifespan(app: FastAPI):
     app.state.cache.drop_other_versions(("text", "image"), RESULT_VERSION)
     app.state.cache.drop_other_versions(("ingredient",), analyze.INGREDIENT_VERSION)
     app.state.limiter = RateLimiter(LIMITS)
+    foods.search("warm up")  # builds the full-text index now rather than on the first check
     async with AsyncTypeSafeClient() as ts, httpx.AsyncClient(timeout=20) as http:
         app.state.ts, app.state.http = ts, http
         yield
