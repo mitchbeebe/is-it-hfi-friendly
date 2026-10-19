@@ -52,26 +52,21 @@ def fructose_load(items: Sequence[Item]) -> float:
     return sum((i.grams or 0) * (0.5 if i.sugars == ["sucrose"] else 1) for i in items)
 
 
-# Under this fructose load per 100 g, a food is tolerated: the lowest vegetable tier in HFI guidance and
-# the strictest cut-off Italian centres use for vegetables (Izquierdo-García 2026, doi:10.3390/nu18050771;
-# Bruni 2026, doi:10.3390/nu18162609).
+# Under this fructose load in the amount eaten, a food is tolerated: the lowest vegetable tier in HFI
+# guidance, 0.5 g per 100 g, and the strictest cut-off Italian centres use for vegetables
+# (Izquierdo-García 2026, doi:10.3390/nu18050771; Bruni 2026, doi:10.3390/nu18162609). It's half the low
+# end of the 1 to 1.5 g daily limit guidance gives (40 mg/kg).
 LOW_LOAD = 0.5
-# Per serving, when the label gives one. Guidance puts the daily limit at 40 mg/kg, at most 1 to 1.5 g
-# fructose load (Izquierdo-García 2026), so a serving under a tenth of the low end is tolerated, and up to
-# half of it is Caution. No guidance gives a per-serving limit; these are this app's own.
-SERVING_LOW = 0.1
-SERVING_MAX = 0.5
+# Where Avoid starts unless the person sets their own limit: the low end of that daily limit in one serving.
+DEFAULT_LIMIT = 1.0
 FRUCTOSE_SUCROSE = {"fructose", "sucrose"}
 
 
 def _tier(load: float, limit: float, serving: Serving | None) -> Status:
-    """Status for a fructose load per 100 g: judged per serving when the serving is known."""
-    if serving is not None:
-        per_serving = load * serving.grams / 100
-        return (
-            "tolerated" if per_serving < SERVING_LOW else "caution" if per_serving <= SERVING_MAX else "not_tolerated"
-        )
-    return "tolerated" if load < min(LOW_LOAD, limit) else "caution" if load < limit else "not_tolerated"
+    """Status for a fructose load per 100 g, judged in the amount eaten: the serving when it's known,
+    else 100 g. Under 0.5 g is OK and under the person's limit Caution; a limit under 0.5 g lowers OK to it."""
+    eaten = load * serving.grams / 100 if serving is not None else load
+    return "tolerated" if eaten < min(LOW_LOAD, limit) else "caution" if eaten < limit else "not_tolerated"
 
 
 def apply_amounts(items: list[Item], limit: float, serving: Serving | None) -> tuple[list[Item], Load | None]:
@@ -97,8 +92,9 @@ def apply_amounts(items: list[Item], limit: float, serving: Serving | None) -> t
     weighed = [i for i in fs + sorbitol if own(i) < math.inf]
     out = []
     for i in items:
-        if i in weighed and not i.avoided_by and (status := tier(own(i))) != "not_tolerated":
-            i = i.model_copy(update={"status": status, "trace": True})
+        if i in weighed and not i.avoided_by and tier(own(i)) != "not_tolerated":
+            # It has the sugar, so it's never Tolerated itself; whether the product is depends on the load.
+            i = i.model_copy(update={"status": "caution", "trace": True})
         out.append(i)
 
     fs_load = math.inf if any(i.grams is None for i in fs) else fructose_load(fs)
@@ -122,7 +118,9 @@ def apply(
     avoid: Sequence[str] = (),
     query: str | None = None,
     trace_limit: float = 0,
+    portion: int | None = None,
 ) -> Result:
+    """`portion` picks one of a whole food's household measures to judge it by, like a label's serving."""
     allow_terms, avoid_terms = terms(allow), terms(avoid)
 
     # What the food itself is called, when the check was for a food rather than a pasted list.
@@ -153,8 +151,12 @@ def apply(
         reason = "This food is on your avoid list."
         items.append(Item(name=food_name, status="not_tolerated", basis="settings", avoided_by=term, reason=reason))
 
+    serving = result.serving
+    if serving is None and portion is not None and 0 <= portion < len(result.portions):
+        p = result.portions[portion]
+        serving = Serving(grams=p.grams, label=p.label)
     # Amounts are weighed after the lists, so allowed items don't count toward the load.
-    items, load = apply_amounts(items, trace_limit, result.serving)
+    items, load = apply_amounts(items, trace_limit, serving)
     notes = list(result.notes)
     if allowed := [i for i in items if i.allowed_by and not i.avoided_by and i.status != "tolerated"]:
         notes.append(f"Not counting {_count(allowed)} you've allowed in Settings.")
@@ -162,9 +164,9 @@ def apply(
         notes.append(f"Flagging {_count(avoided)} on your avoid list.")
     keep = {
         k: getattr(result, k)
-        for k in ("food", "measured_food", "off_product", "ingredients_text", "serving", "alternatives")
+        for k in ("food", "measured_food", "off_product", "ingredients_text", "portions", "alternatives")
     }
-    return analyze.summarize(items, notes=notes, load=load, **keep)
+    return analyze.summarize(items, notes=notes, load=load, serving=serving, **keep)
 
 
 def _count(items: list[Item]) -> str:

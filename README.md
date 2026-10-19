@@ -21,10 +21,12 @@ rating.
   tolerated. Matching errs toward flagging: any ingredient or food whose name contains the term, BU sugars included. For
   photos, each avoided term becomes an extra question about the label.
 
-- **Small amounts.** When a food's measured fructose load (fructose + half of sucrose + sorbitol, per 100 g, using the
-  top of each range) is under a limit, it shows Caution instead of Avoid. The default is 1 g, so cheddar (0.2), oats
-  (0.6) and broccoli (0.6) are Caution while tomato (1.9) and apple (10.5) stay Avoid. Set 0 to flag any amount. Only
-  measured amounts count: ingredient lists and AI estimates are never downgraded, and the avoid list still wins.
+- **Small amounts.** A food is judged by the measured fructose load (fructose + half of sucrose + sorbitol, using the
+  top of each range) in a serving: the label's, an amount you pick for a whole food ("Judged per 1 clove"), or else 100
+  g. Under 0.5 g is OK, and from 0.5 g up to the limit, in g per serving, is Caution instead of Avoid. The default is 1
+  g, so 100 g of cheddar (0.2) is OK, oats (0.6) and broccoli (0.8) are Caution, and tomato (1.9) and apple (10.5) are
+  Avoid. A limit under 0.5 g makes it the cut-off for OK. Set 0 to flag any amount. Only measured amounts count:
+  ingredient lists and AI estimates are never downgraded, and the avoid list still wins.
 
 **Recent** lists the last 10 food names and barcodes checked, under the Type and Scan tabs. Tapping one re-runs it
 (answered from the cache, with your current lists), and "‹ Back" above a result returns to the list. Photos aren't
@@ -71,6 +73,18 @@ truth. Its tolerance column maps to a status:
 | Tolerated depending on purity, Caution, Tolerance Varies | **Caution** |
 | Tolerated, Tolerated (Questionable safety) | tolerated |
 
+Where published research disagrees with BU or gives an amount, the table follows the research instead, and those
+results are marked "Research" with a link to it:
+
+| Sweetener | BU | Here | Source |
+| --- | --- | --- | --- |
+| Maltitol, mannitol | Tolerated depending on purity | not tolerated | prohibited by all 15 (maltitol) and 14 of 15 (mannitol) Italian metabolic centres; maltitol releases sorbitol, and the liver turns some mannitol into fructose ([Bruni 2026](https://doi.org/10.3390/nu18162609)) |
+| Isomalt | not listed | not tolerated | prohibited by 14 of 15 centres; releases sorbitol (Bruni 2026) |
+| Isomaltulose (Palatinose) | not listed | not tolerated | digested into glucose and fructose ([Health Canada](https://www.canada.ca/en/health-canada/services/food-nutrition/genetically-modified-foods-other-novel-foods/approved-products/isomaltulose-palatinose.html)) |
+| Stevia | Not Tolerated | caution | steviol glycosides don't involve fructose; centres differ over the purity of blends (Bruni 2026) |
+| Steviol glycosides, stevia leaf extract, Reb A/M | (under Stevia) | tolerated | as above |
+| Polydextrose, Litesse | Not Tolerated | not tolerated, weighed at up to 6 g sorbitol per 100 g | the sorbitol is mostly bound into the polymer, free glucose and sorbitol are at most 6% combined ([JECFA](https://www.fao.org/fileadmin/user_upload/jecfa_additives/docs/Monograph1/Additive-314.pdf)), and polydextrose is barely absorbed (Bruni 2026) |
+
 The worst status among the ingredients sets the verdict.
 
 **Ingredient lists** (any text with a comma, or starting with "Ingredients"): split on top-level commas in code
@@ -95,32 +109,57 @@ per 100 g of the product. Values a table reports only as under a detection limit
 For a USDA branded product, the label's serving and total sugars bound things further. US labels round sugars to the
 nearest gram and list under 0.5 g as 0 g, so a serving has at most the listed amount plus 0.5 g. That caps fructose
 and sucrose together, including sugars an ingredient list names with no amount. Sorbitol and other sugar alcohols
-aren't counted in total sugars, so they still need their own measurement.
+aren't counted in total sugars, so they still need their own measurement. Open Food Facts products use the serving
+size their page records, when it gives one in grams.
 
-**Small amounts**: measured amounts are weighed by fructose load (fructose + half of sucrose + sorbitol, the formula
-HFI studies use), each item by its own amount and the product by all of them together. The product's load is shown
-under the verdict ("Up to 0.062 g fructose load per 1 tsp (5 g)") and counts toward it. Ingredients are listed in
-label order. Per 100 g, under 0.5 g is OK (the lowest tier in Spanish HFI guidance and the strictest
-cut-off Italian centres use) and under your limit (1 g by default) is Caution. When the label gives a serving size,
-the load is judged per serving instead: under 0.1 g is OK and up to 0.5 g is Caution, against a daily limit of 1 to
-1.5 g in HFI guidance. A sugar with no amount, or an AI estimate, keeps the food at Avoid. A limit of 0 flags any
-amount.
+**Small amounts**: measured amounts are weighed by fructose load (fructose + half of sucrose + sorbitol, the formula HFI
+studies use), each item by its own amount and the product by all of them together. The product's load is shown under the
+verdict ("Up to 0.062 g fructose load per 1 tsp (5 g)") and decides the verdict for them: each item with a measured
+sugar shows Caution, since it has the sugar, even when the product as a whole is OK. Ingredients are listed in label
+order. One rule judges the load in the amount eaten: the label's serving, or an amount you pick, or else 100 g. Under
+0.5 g is OK: the lowest tier in Spanish HFI guidance (0.5 g per 100 g) and the strictest cut-off Italian centres use,
+and half the low end of the 1 to 1.5 g daily limit guidance gives. From 0.5 g up to your limit (1 g per serving by
+default, the low end of that daily limit) is Caution, and above it Avoid. So a 42 g pouch of Cheez-It (up to 0.19 g) and
+100 g of guacamole (0.28 g) are both OK, 100 g of chili with meat and beans (0.73 g) is Caution, and a 250 g serving of
+a food with 0.5 g per 100 g (1.25 g) is Avoid. A sugar with no amount, or an AI estimate, keeps the food at Avoid.
+Polydextrose has a known most (6 g free sorbitol per 100 g), so on an ingredient list it's weighed by its share like a
+measured food: 7th on the label of a 10 g serving, it adds at most 0.086 g. A limit of 0 flags any amount.
 
 **Food names**: searched in [USDA FoodData Central](https://fdc.nal.usda.gov/), generic and branded foods separately so
 brands don't crowd out generic foods, and in the bundled AFCD and CIQUAL foods. One Jev call picks the USDA result that
 matches what you typed (you can pick another under "Not it?") and the AFCD or CIQUAL food that is the same whole food.
+
+A whole food matched to an SR Legacy or Foundation food offers that food's household measures in a "Judged per"
+dropdown: garlic has 1 tsp (2.8 g), 1 clove (3 g), 3 cloves (9 g) and 1 cup (136 g). Picking one judges the load per
+that amount, like a label's serving, so a clove of garlic or a tablespoon of chives is OK. Search results don't
+include the measures, so they take one more USDA request. RACC is left out: it's FDA's amount for a whole category,
+85 g for any vegetable, garlic included. Per 100 g stays the default, since nothing says which measure is usual.
+
+In results, USDA's data types are named for what they are: Foundation is "USDA lab-tested", SR Legacy "USDA reference
+values", Survey (FNDDS) "USDA typical recipe", and Branded "Manufacturer's label".
+
 Then the app uses, in order of preference:
 
 1. the product's ingredient list (branded foods), checked as above;
-2. for whole foods, measured sugars from the
+2. for a dish, USDA's typical recipe (Survey, FNDDS), which gives each ingredient's weight. Each ingredient is
+   checked like one on a label, but at its known share rather than the "listed 3rd, so at most a third" limit: Pad
+   Thai with chicken is 2.5% brown sugar, about 1.2 g fructose load per 100 g. Unlike on a label, a sugar in a recipe
+   is weighed by its measured amount rather than deciding the verdict by name, so chili with 0.49% sugar comes to
+   about 0.73 g. The weights are before cooking, so water lost in cooking isn't counted. A recipe of one food is
+   judged as that food, and so is a whole food Jev matches to measured data: USDA's "Apple, raw" is a recipe of five
+   apple varieties, but the measured apple has its sorbitol. Search results include the recipe, so it costs no extra
+   request. Survey foods "not further specified" ("Taco, NFS") are left out of the search: their recipes list other
+   dishes ("Taco, fish", "Taco, meat, no cheese") rather than ingredients, so a specific dish is matched instead, and
+   can be changed under "Not the right food?";
+3. for whole foods, measured sugars from the
    [Australian Food Composition Database](https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd)
    (AFCD) or [CIQUAL](https://ciqual.anses.fr/), the French table. Both are mostly lab-analysed, and AFCD reports
    sorbitol. Where AFCD lists several kinds of a food (11 raw apples), amounts are shown as a range, for example
    "Fructose: 5.4–7.7 g per 100 g";
-3. measured fructose and sucrose from USDA, for any sugar those don't report;
-4. for sorbitol in a whole food: present in apples, pears and stone fruits (the only foods AFCD measures it in), and
+4. measured fructose and sucrose from USDA, for any sugar those don't report;
+5. for sorbitol in a whole food: present in apples, pears and stone fruits (the only foods AFCD measures it in), and
    otherwise not expected;
-5. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment. A food with no sugar data at all is
+6. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment. A food with no sugar data at all is
    Caution, not OK.
 
 When Jev says the name is a brand and USDA has no ingredient list for it (common for non-US products such as Twiglets
@@ -195,7 +234,7 @@ tests/            offline tests: uv run pytest
 
 - TypeSafe image support is marked "dreamer-ready" (preview). It worked on the printed labels and Open Food Facts photos I
   tested, but blurry or curved text can cause misses. The app warns when the text looks hard to read.
-- Generic foods in FoodData Central (Survey/FNDDS) usually have no ingredient list or per-sugar breakdown, so their result is
-  an estimate. Packaged versions vary.
+- Generic foods in FoodData Central have no ingredient list, and Survey (FNDDS) foods no per-sugar breakdown, so a
+  dish is judged by USDA's typical recipe and a plain food partly by estimate. Recipes and packaged versions vary.
 - HFI tolerance depends on the amount. When USDA reports under 1 g per 100 g, the app says so but still reports the
   sugar as present.

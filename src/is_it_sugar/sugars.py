@@ -5,6 +5,10 @@ Source: https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm
 Each entry keeps BU's name, description and tolerance. `contains` records which of
 fructose / sucrose / sorbitol the entry is (or carries), read from BU's description.
 `aliases` are other spellings found on real labels.
+
+Where published research disagrees with BU or adds an amount, the entry follows the research
+and `source` links to it: the 2026 survey of 15 Italian metabolic centres (BRUNI), JECFA's
+polydextrose specification and Health Canada's isomaltulose assessment.
 """
 
 import re
@@ -12,6 +16,14 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 SOURCE_URL = "https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm"
+# Bruni G, et al. Current dietary practices in hereditary fructose intolerance. Nutrients 2026;18(16):2609.
+BRUNI = "https://doi.org/10.3390/nu18162609"
+# JECFA polydextrose specification, FNP 52 Add 6 (1998).
+JECFA_POLYDEXTROSE = "https://www.fao.org/fileadmin/user_upload/jecfa_additives/docs/Monograph1/Additive-314.pdf"
+HEALTH_CANADA_ISOMALTULOSE = (
+    "https://www.canada.ca/en/health-canada/services/food-nutrition/genetically-modified-foods-other-novel-foods/"
+    "approved-products/isomaltulose-palatinose.html"
+)
 
 Status = Literal["not_tolerated", "caution", "tolerated"]
 Sugar = Literal["fructose", "sucrose", "sorbitol"]
@@ -25,18 +37,22 @@ SOR: list[Sugar] = ["sorbitol"]
 @dataclass(frozen=True)
 class SugarEntry:
     name: str
-    tolerance: str  # BU's wording
+    tolerance: str  # BU's wording, or the research's where `source` is set
     status: Status
     description: str
     contains: list[Sugar] = field(default_factory=list)
     aliases: tuple[str, ...] = ()
+    source: str | None = None  # research the entry follows instead of BU
+    # The most of each sugar per 100 g of the ingredient that the body can take up, from `source`, so a
+    # listed ingredient can be weighed by its share of the product.
+    max_grams: dict[Sugar, float] = field(default_factory=dict)
 
     @property
     def names(self) -> tuple[str, ...]:
         return (self.name, *self.aliases)
 
 
-def _e(name, tolerance, description, contains=(), aliases=()) -> SugarEntry:
+def _e(name, tolerance, description, contains=(), aliases=(), source=None, max_grams=None) -> SugarEntry:
     t = tolerance.lower()
     if t.startswith("not tolerated"):
         status: Status = "not_tolerated"
@@ -44,7 +60,7 @@ def _e(name, tolerance, description, contains=(), aliases=()) -> SugarEntry:
         status = "tolerated"
     else:  # "depending on purity", "caution", "varies"
         status = "caution"
-    return SugarEntry(name, tolerance, status, description, list(contains), tuple(aliases))
+    return SugarEntry(name, tolerance, status, description, list(contains), tuple(aliases), source, max_grams or {})
 
 
 NT = "Not Tolerated"
@@ -174,16 +190,55 @@ TABLE: list[SugarEntry] = [
         ("invert sugar syrup", "inverted sugar", "invert syrup"),
     ),
     _e("Isoglucose", NT, "Another name for HFCS.", F),
+    _e(
+        "Isomalt",
+        NT,
+        "Sugar alcohol mix made from isomaltulose. About 10% is digested, releasing sorbitol. Prohibited by 14 of "
+        "15 Italian HFI centres; not in BU's table.",
+        SOR,
+        ("isomaltitol", "hydrogenated isomaltulose"),
+        source=BRUNI,
+    ),
     _e("Isomaltose", T, "Linked glucose molecules."),
+    _e(
+        "Isomaltulose",
+        NT,
+        "Glucose and fructose linked; fully digested into both. Not in BU's table.",
+        F,
+        ("palatinose",),
+        source=HEALTH_CANADA_ISOMALTULOSE,
+    ),
     _e("Jaggery", NT, "35% sucrose, 15% glucose plus fructose. Contains molasses.", SF),
     _e("Lactitol", PURITY, "Sugar alcohol form of lactose."),
     _e("Lactose", T, "Milk sugar."),
     _e("Levulose", NT, "Contains fructose.", F),
-    _e("Litesse", NT, "Polydextrose: sugar substitute containing sorbitol and glucose.", SOR),
-    _e("Maltitol", PURITY, "Sugar alcohol form of maltose.", (), ("maltitol syrup",)),
+    _e(
+        "Litesse",
+        NT,
+        "Polydextrose: fibre made from glucose and sorbitol. Most of the sorbitol is bound into fibre that isn't "
+        "digested; free sorbitol is at most 6 g per 100 g.",
+        SOR,
+        source=JECFA_POLYDEXTROSE,
+        max_grams={"sorbitol": 6.0},
+    ),
+    _e(
+        "Maltitol",
+        NT,
+        "Sugar alcohol form of maltose. About 40% is digested, releasing sorbitol. Prohibited by all 15 Italian HFI "
+        "centres; BU says tolerated depending on purity.",
+        SOR,
+        ("maltitol syrup",),
+        source=BRUNI,
+    ),
     _e("Maltose", T, "Linked glucose molecules."),
     _e("Maltodextrin", T, "Dextrose processed from cornstarch."),
-    _e("Mannitol", PURITY, "Sugar alcohol form of mannose."),
+    _e(
+        "Mannitol",
+        NT,
+        "Sugar alcohol form of mannose. About 25% is absorbed, and the liver turns 7-10% of that into fructose. "
+        "Prohibited by 14 of 15 Italian HFI centres; BU says tolerated depending on purity.",
+        source=BRUNI,
+    ),
     _e("Mannose", T, "Simple sugar, not common."),
     _e("Maple Syrup", NT, "Mostly sucrose, with some invert sugar.", SF),
     _e("Maple Sugar", NT, "Mostly sucrose, with some invert sugar.", SF),
@@ -197,7 +252,15 @@ TABLE: list[SugarEntry] = [
     _e("Polincillo", NT, "Mexican brown sugar.", S, ("piloncillo",)),
     _e("Polycose", T, "Chains of dextrose."),
     _e("Polydextrin", T, "Chains of glucose molecules."),
-    _e("Polydextrose", NT, "Made from dextrose plus about 10% sorbitol.", SOR),
+    _e(
+        "Polydextrose",
+        NT,
+        "Fibre made from dextrose plus about 10% sorbitol. Most of the sorbitol is bound into fibre that isn't "
+        "digested; free sorbitol is at most 6 g per 100 g.",
+        SOR,
+        source=JECFA_POLYDEXTROSE,
+        max_grams={"sorbitol": 6.0},
+    ),
     _e("Raffinose", "Tolerance Varies", "A trisaccharide in grains, legumes and some vegetables."),
     _e("Rapadura", NT, "35% sucrose, 15% glucose plus fructose. Contains molasses.", SF),
     _e("Raw Sugar", NT, "Sucrose.", S),
@@ -209,10 +272,27 @@ TABLE: list[SugarEntry] = [
     _e("Splenda", PURITY, "Sucralose; a modified sucrose molecule that cannot be digested."),
     _e(
         "Stevia",
-        NT,
-        "Natural sweetener from a South American plant (stevioside).",
+        PURITY,
+        "Sweetener from a South American plant. Its sweet compounds contain no fructose, but blends may add "
+        "sugars; BU says not tolerated.",
+        source=BRUNI,
+    ),
+    _e(
+        "Steviol Glycosides",
+        T,
+        "The purified sweet compounds of stevia. Gut bacteria break them down to steviol, which is excreted "
+        "without involving fructose.",
         (),
-        ("stevia leaf extract", "stevia extract", "stevioside", "steviol glycosides", "rebaudioside a", "reb a"),
+        (
+            "stevia leaf extract",
+            "stevia extract",
+            "stevioside",
+            "rebaudioside a",
+            "reb a",
+            "rebaudioside m",
+            "reb m",
+        ),
+        source=BRUNI,
     ),
     _e("Sucanat", NT, "Raw sugar, sometimes cane sugar plus molasses.", SF),
     _e("Sucralose", PURITY, "Chemical name for Splenda. Not digested."),

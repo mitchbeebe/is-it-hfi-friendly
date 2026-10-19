@@ -80,6 +80,13 @@
   .verdict .label { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
   .verdict h2 { margin: 2px 0 0; font-size: 1.35rem; line-height: 1.25; }
   .verdict .load { margin: 4px 0 0; font-size: .85rem; opacity: .85; }
+  .verdict .amount { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: .9rem; }
+  .verdict .amount select {
+    min-width: 0; max-width: 100%; font: inherit; color: inherit; padding: 5px 8px; border-radius: 8px;
+    border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+    background: color-mix(in srgb, currentColor 8%, var(--card));
+  }
+  .verdict .amount select:focus-visible { outline: 3px solid color-mix(in srgb, currentColor 40%, transparent); outline-offset: 2px; }
   .v-avoid { background: var(--avoid-bg); color: var(--avoid); }
   .v-caution { background: var(--caution-bg); color: var(--caution); }
   .v-ok { background: var(--ok-bg); color: var(--ok); }
@@ -297,17 +304,19 @@
 
     <div class="card section">
       <h2>Small amounts</h2>
-      <p class="muted">Fructose load is fructose + half of sucrose + sorbitol. When a food's measured load is under
-        this limit per 100 g, it shows Caution instead of Avoid, and under 0.5 g it shows OK. When the label gives a
-        serving size, a serving under 0.1 g is OK and up to 0.5 g is Caution. Set 0 to flag any amount.</p>
+      <p class="muted">Fructose load is fructose + half of sucrose + sorbitol, in a serving: the label's, an amount
+        you pick on a result such as “1 clove”, or else 100 g. Under 0.5 g is OK, and from 0.5 g up to this limit
+        (1 g by default) is Caution instead of Avoid; a limit under 0.5 g makes it the cut-off for OK. Each ingredient with
+        the sugar still shows Caution, since only the total decides. Set 0 to flag any amount.</p>
       <div class="add-row trace-row">
         <input id="trace-limit" type="number" inputmode="decimal" min="0" max="20" step="0.1"
-          aria-label="Fructose load limit, grams per 100 g">
-        <span>g per 100 g</span>
+          aria-label="Fructose load limit, grams per serving">
+        <span>g per serving</span>
       </div>
 	  <details class="section">
 		<summary>Measurement</summary>
-      <p class="empty">Only measured amounts count, each ingredient at the most it can be of the product. When the
+      <p class="empty">Only measured amounts count, each ingredient at the most it can be of the product. Polydextrose
+        counts at its most free sorbitol, 6 g per 100 g. When the
         label gives a serving size and total sugars, fructose and sucrose count at no more than those sugars, even a
         listed sugar or an AI estimate with no amount. Otherwise, a sugar with no amount or an AI estimate keeps the
         food at Avoid. Sorbitol always needs a measured amount.</p>
@@ -331,7 +340,9 @@
     <h3>Sugar ratings</h3>
     <ul>
       <li><a href="https://www.bu.edu/aldolase/HFI/treatment/sugar_table.htm" target="_blank" rel="noopener">Boston University HFI sugar table</a>:
-        whether each sugar and sweetener is tolerated.</li>
+        whether each sugar and sweetener is tolerated, except where the research below disagrees.</li>
+      <li>Maltitol, mannitol and isomalt are not tolerated, stevia needs caution and purified steviol glycosides are
+        tolerated, following the Italian survey below. Items rated this way are marked “Research”.</li>
     </ul>
     <h3>Measured sugars</h3>
     <ul>
@@ -340,8 +351,9 @@
       <li><a href="https://ciqual.anses.fr/" target="_blank" rel="noopener">ANSES-CIQUAL French food composition table</a>,
         2020 (Licence Ouverte): fructose and sucrose in about 2,100 foods.</li>
       <li><a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener">USDA FoodData Central</a>:
-        SR Legacy and Foundation foods for fructose and sucrose, and branded foods for ingredient lists, serving
-        sizes and total sugars.</li>
+        lab-tested (Foundation) and reference (SR Legacy) foods for fructose and sucrose, typical recipes (Survey,
+        FNDDS) for the weight of each ingredient in a dish, and manufacturers' labels (Branded) for ingredient lists, serving sizes and total
+        sugars.</li>
     </ul>
     <h3>Products</h3>
     <ul>
@@ -359,7 +371,13 @@
         <a href="https://doi.org/10.3390/nu18162609" target="_blank" rel="noopener">Current dietary practices in
         hereditary fructose intolerance: results from a national survey across 15 Italian metabolic centres</a>.
         <i>Nutrients</i> 2026;18(16):2609. Of 14 centres, 5 allow vegetables under 0.5 g fructose per 100 g and
-        9 under 1 g; centres disagree on many sweeteners.</li>
+        9 under 1 g. All 15 prohibit sorbitol and maltitol, and 14 mannitol and isomalt; polydextrose is barely
+        absorbed, and steviol glycosides don't involve fructose.</li>
+      <li>JECFA. <a href="https://www.fao.org/fileadmin/user_upload/jecfa_additives/docs/Monograph1/Additive-314.pdf" target="_blank" rel="noopener">Polydextrose
+        specification</a> (1998). Made from about 90 parts glucose and 10 parts sorbitol, mostly bound into the
+        polymer; free glucose and sorbitol at most 6% combined.</li>
+      <li>Health Canada. <a href="https://www.canada.ca/en/health-canada/services/food-nutrition/genetically-modified-foods-other-novel-foods/approved-products/isomaltulose-palatinose.html" target="_blank" rel="noopener">Isomaltulose
+        (Palatinose)</a>: digested into glucose and fructose.</li>
       <li>The per-serving tiers (under 0.1 g OK, up to 0.5 g Caution) are this app's own, set well under the daily
         limit. No paper gives one.</li>
     </ul>
@@ -392,9 +410,17 @@ const BASIS_URL = {
   afcd: "https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd",
   ciqual: "https://ciqual.anses.fr/",
 };
-const BASIS = { bu_table: "BU table", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES" };
+// What each USDA FoodData Central data type is, in plain words.
+const DATA_TYPE = {
+  Foundation: "USDA lab-tested",
+  "SR Legacy": "USDA reference values",
+  "Survey (FNDDS)": "USDA typical recipe",
+  Branded: "Manufacturer's label",
+};
+const BASIS = { bu_table: "BU table", research: "Research", jev: "AI judgment", fdc: "USDA", label: "From photo", settings: "Your settings", afcd: "AFCD", ciqual: "ANSES" };
 let lastQuery = "";
 let lastRun = null; // re-runs the last check after Settings change
+let lastCheck = null; // the text check on screen, so picking an amount can re-run it
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
 
 // ---- your lists: foods you tolerate (allow) and ingredients you avoid. Kept in this browser only.
@@ -434,9 +460,11 @@ function saveList(kind) {
 }
 const lists = { allow: loadList("allow"), avoid: loadList("avoid") };
 
-// Fructose load (g per 100 g) under which measured amounts show Caution, not Avoid.
-const TRACE_KEY = "is-it-sugar.trace";
-let traceLimit = 1;
+// Fructose load (g per serving) under which measured amounts show Caution, not Avoid. A new key, since the
+// old one was per 100 g.
+const TRACE_KEY = "is-it-sugar.trace-serving";
+const TRACE_DEFAULT = 1;
+let traceLimit = TRACE_DEFAULT;
 try {
   const v = parseFloat(localStorage.getItem(TRACE_KEY));
   if (Number.isFinite(v) && v >= 0 && v <= 20) traceLimit = v;
@@ -445,7 +473,7 @@ const traceInput = $("#trace-limit");
 traceInput.value = traceLimit;
 traceInput.addEventListener("change", () => {
   const v = parseFloat(traceInput.value);
-  traceLimit = Number.isFinite(v) ? Math.min(20, Math.max(0, v)) : 1;
+  traceLimit = Number.isFinite(v) ? Math.min(20, Math.max(0, v)) : TRACE_DEFAULT;
   traceInput.value = traceLimit;
   try { localStorage.setItem(TRACE_KEY, String(traceLimit)); } catch {}
   prefsChanged = true;
@@ -612,6 +640,12 @@ function render(r) {
       <div class="label">${VERDICT[r.verdict]}</div>
       <h2>${esc(r.headline)}</h2>
       ${r.load ? `<p class="load">Up to ${Number(r.load.grams.toPrecision(2))} g fructose load per ${esc(r.load.per)}${r.load.capped ? ", capped by the label's total sugars" : ""}</p>` : ""}
+      ${r.portions.length ? `
+      <p class="amount"><label for="portion">Judged per</label>
+        <select id="portion">
+          <option value="">100 g</option>
+          ${r.portions.map((p, i) => `<option value="${i}"${r.serving?.label === p.label ? " selected" : ""}>${esc(p.label)}</option>`).join("")}
+        </select></p>` : ""}
       ${chips ? `<div class="chips">${chips}</div>` : ""}
     </div>`;
 
@@ -625,23 +659,24 @@ function render(r) {
       : p ? titleCase(p.name) + brandOf(p.name, p.brand)
       : m.name;
     const sources = [
-      f && ["USDA", `${titleCase(f.description)} · ${f.data_type}`],
+      f && ["USDA", `${titleCase(f.description)} · ${(DATA_TYPE[f.data_type] || f.data_type).replace(/^USDA (\w)/, (_, c) => c.toUpperCase())}`, f.url],
       p && ["Open Food Facts",
         `${titleCase(p.name)} · barcode ${p.code}${p.countries.length ? ` · sold in ${p.countries.join(", ")}` : ""}`, p.url],
       m && [f ? "Sugar values" : TABLES[m.source],
-        `${m.name} · ${TABLES[m.source]}${m.note ? `, ${m.note.toLowerCase()}` : ""}${m.kinds > 1 ? ` · ${m.kinds} kinds` : ""}`],
+        `${m.name} · ${TABLES[m.source]}${m.note ? `, ${m.note.toLowerCase()}` : ""}${m.kinds > 1 ? ` · ${m.kinds} kinds` : ""}`, m.url],
+      r.serving && !r.portions.length && ["Serving", `${r.serving.label} · from the label`],
     ].filter(Boolean);
     html += `
       <details class="card section match">
         <summary><span><span class="muted-label">Matched</span> ${esc(name)}</span><span class="more">Details</span></summary>
         <dl class="sources">
           ${sources.map(([k, v, url]) => `<div><dt>${k}</dt><dd>${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v)}</a>` : esc(v)}</dd></div>`).join("")}
-          ${r.ingredients_text ? `<div><dt>Ingredients</dt><dd>${esc(r.ingredients_text)}</dd></div>` : ""}
+          ${r.ingredients_text ? `<div><dt>${f && f.data_type === "Survey (FNDDS)" ? "Recipe" : "Ingredients"}</dt><dd>${esc(r.ingredients_text)}</dd></div>` : ""}
         </dl>
         ${r.alternatives.length ? `
         <h3>Not the right food?</h3>
         <ul class="alts">
-          ${r.alternatives.map((a) => `<li><button ${a.fdc_id != null ? `data-fdc="${a.fdc_id}"` : `data-barcode="${esc(a.barcode)}"`}>${esc(a.label.split(" | ").map(titleCase).join(" · "))}</button></li>`).join("")}
+          ${r.alternatives.map((a) => `<li><button ${a.fdc_id != null ? `data-fdc="${a.fdc_id}"` : `data-barcode="${esc(a.barcode)}"`}>${esc(a.label.split(" | ").map((x) => DATA_TYPE[x] || titleCase(x)).join(" · "))}</button></li>`).join("")}
         </ul>` : ""}
       </details>`;
   }
@@ -672,6 +707,9 @@ function render(r) {
   out.innerHTML = html;
   out.scrollIntoView({ behavior: "smooth", block: "start" });
 
+  $("#portion")?.addEventListener("change", (e) => {
+    if (lastCheck) checkText(lastCheck.text, lastCheck.fdcId, e.target.value === "" ? null : Number(e.target.value));
+  });
   for (const b of out.querySelectorAll("[data-fdc]")) {
     b.addEventListener("click", () => checkText(lastQuery, Number(b.dataset.fdc)));
   }
@@ -684,9 +722,10 @@ function render(r) {
 const textForm = $("#pane-text");
 const textBtn = $("#text-go");
 const textClear = $("#text-clear");
-async function checkText(text, fdcId = null) {
+async function checkText(text, fdcId = null, portion = null) {
   const id = ++runId;
-  lastRun = () => checkText(text, fdcId);
+  lastRun = () => checkText(text, fdcId, portion);
+  lastCheck = { text, fdcId };
   // Scanned barcodes and their "Not it?" choices show progress on the Scan button.
   const scan = !$("#pane-scan").hidden;
   const [button, label] = scan ? [scanBtn, "Scan another"] : [textBtn, "Check"];
@@ -697,7 +736,7 @@ async function checkText(text, fdcId = null) {
     const result = await post("/api/check/text", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, fdc_id: fdcId, allow: lists.allow, avoid: lists.avoid, trace_limit: traceLimit }),
+      body: JSON.stringify({ text, fdc_id: fdcId, allow: lists.allow, avoid: lists.avoid, trace_limit: traceLimit, portion }),
     });
     if (id === runId) {
       render(result);

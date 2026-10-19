@@ -21,10 +21,11 @@ from typesafe_sdk import AsyncTypeSafeClient, Choice, Image, Noul
 from . import afcd, foods, off, sugars
 from . import ingredients as ing
 from .cache import Cache
-from .models import Alternative, Basis, Food, Item, Load, MeasuredMatch, OffMatch, Result, Serving, Verdict
+from .models import Alternative, Basis, Food, Item, Load, MeasuredMatch, OffMatch, Portion, Result, Serving, Verdict
 from .sugars import TABLE, Sugar, SugarEntry
 
 FDC_SEARCH = "https://api.nal.usda.gov/fdc/v1/foods/search"
+FDC_FOOD = "https://api.nal.usda.gov/fdc/v1/food"
 IMAGES_HEADER = {"TypeSafe-Danger-Zone-Images": "true"}
 SUGAR_ORDER: list[Sugar] = ["fructose", "sucrose", "sorbitol"]
 STATUS_ORDER = ["not_tolerated", "caution", "tolerated"]
@@ -80,19 +81,64 @@ def _bu_item(entry: SugarEntry, name: str, basis: Basis = "bu_table") -> Item:
     named = sugars.norm(name) in {sugars.norm(n) for n in (entry.name, *entry.names)}
     tolerance = entry.tolerance[0] + entry.tolerance[1:].lower()
     what = tolerance if named else f"Contains {entry.name.split(' (')[0].lower()}: {tolerance.lower()}"
+    # Entries that follow research rather than BU link to it.
+    research = basis == "bu_table" and entry.source is not None
     return Item(
         name=name,
         status=entry.status,
         sugars=entry.contains,
-        basis=basis,
+        basis="research" if research else basis,
         reason=f"{what}. {entry.description}",
         bu_name=entry.name,
+        url=entry.source if research else None,
     )
+
+
+def _bounded_item(entry: SugarEntry, i: ing.Ingredient, serving: Serving | None) -> Item:
+    """A listed sugar whose maximum amount research gives, weighed at the most the ingredient can be of
+    the product, like a measured food."""
+    # Per 100 g of the product. Sucrose alone is halved by fructose_load; anything else counts in full.
+    grams = sum(entry.max_grams.values()) * i.share
+    item = _bu_item(entry, i.name)
+    return item.model_copy(update={"grams": grams, "reason": item.reason + _share_text(i, grams, serving)})
 
 
 def _short(name: str) -> str:
     """A table's food name for display: "Salt, white (sea, igneous or rock), iodine added" -> "Salt, white, iodine added"."""
     return ", ".join(re.sub(r"\s*\([^)]*\)", "", name).split(", ")[:3])
+
+
+def _num(x: float) -> str:
+    """Two significant figures, without the exponent .2g gives 99.8: "0.086", "2.4", "33", "100"."""
+    return f"{x:.2g}" if abs(x) < 99.5 else f"{x:.0f}"
+
+
+def _pct(share: float) -> str:
+    """0.025 -> "2.5%", 1/3 -> "33%"."""
+    return f"{_num(share * 100)}%"
+
+
+def _share_text(i: ing.Ingredient, load: float, serving: Serving | None) -> str:
+    """What the ingredient adds to the product's fructose load (`load`, per 100 g of the product), and the
+    share that's from: "5.1% of the dish (in USDA's recipe), so it adds 0.043 g fructose load per 100 g
+    of the dish." Per serving when the serving is known."""
+    per = f"per {serving.grams:g} g serving" if serving else f"per 100 g of the {i.whole}"
+    amount = f"{'' if i.exact else 'up to '}{_num(load * serving.grams / 100 if serving else load)} g fructose load"
+    if i.share >= 1:
+        # The whole product, so per 100 g it's the food's own amounts, already given.
+        return f" It adds {amount} {per}." if serving else ""
+    share = f"{_pct(i.share)} of the {i.whole} ({i.why})"
+    return f" {share if i.exact else 'At most ' + share}, so it adds {amount} {per}."
+
+
+def _matched(i: ing.Ingredient, f: foods.Food) -> str:
+    """The matched food's name to start the reason with, unless it's the ingredient's own."""
+    name = _short(f.name)
+    return "" if name.lower() == _base(i.name).lower() else f"{name}: "
+
+
+def _capitalize(text: str) -> str:
+    return text[:1].upper() + text[1:]
 
 
 def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = None) -> Item:
@@ -107,21 +153,14 @@ def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = N
             name=i.name,
             status="tolerated",
             basis=f.source,
-            reason=f"{_short(f.name)}: no fructose or sucrose.",
+            reason=_capitalize(f"{_matched(i, f)}no fructose or sucrose."),
             url=foods.url(f.id),
         )
-    amounts = ", ".join(f"{values[s]:.2g} g {s}" for s in found)
+    amounts = _join([f"{_num(values[s])} g {s}" for s in found]) if found else "no fructose or sucrose"
     load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found) * i.share
-    reason = f"{_short(f.name)}: {amounts or 'no fructose or sucrose'} per 100 g."
-    if found and serving:
-        part = (
-            f"At most {i.share:.0%} of a {serving.grams:g} g serving ({i.why}): {i.share * serving.grams:.2g} g, "
-            if i.share < 1
-            else f"In a {serving.grams:g} g serving, "
-        )
-        reason += f" {part}so up to {load * serving.grams / 100:.2g} g."
-    elif found and i.share < 1:
-        reason += f" At most {i.share:.0%} of the product ({i.why}), so up to {load:.2g} g per 100 g."
+    reason = _capitalize(f"{_matched(i, f)}{amounts} per 100 g.")
+    if found:
+        reason += _share_text(i, load, serving)
     if unmeasured_sorbitol:
         found.append("sorbitol")
         reason += " Sorbitol not measured, but this fruit contains it."
@@ -174,10 +213,13 @@ def _jev_item(name: str, probs: dict[str, float]) -> Item:
     )
 
 
-def _bu_decide(name: str) -> Item | None:
-    """The BU table's verdict on an ingredient, if it names a sugar."""
+def _bu_decide(name: str, part: ing.Ingredient | None = None, serving: Serving | None = None) -> Item | None:
+    """The BU table's verdict on an ingredient, if it names a sugar. Given the ingredient's place on the
+    label (`part`), a sugar with a known maximum amount is weighed by its share of the product."""
     # A sugar anywhere counts, including inside brackets: "chocolate chips (sugar, cocoa butter)".
     flagged = [e for e in sugars.match(name) if e.status != "tolerated"]
+    if part is not None and len(flagged) == 1 and flagged[0].max_grams:
+        return _bounded_item(flagged[0], part, serving)
     if flagged:
         # The worst match decides; e.g. "glucose-fructose syrup" beats "glucose".
         return _bu_item(min(flagged, key=lambda e: STATUS_ORDER.index(e.status)), name)
@@ -214,19 +256,28 @@ def _answer(candidates: list[foods.Food], match: dict[str, float] | None, descri
 
 
 async def classify_ingredients(
-    ts: AsyncTypeSafeClient, text: str, cache: Cache | None = None, serving: Serving | None = None
+    ts: AsyncTypeSafeClient,
+    text: str | Sequence[ing.Ingredient],
+    cache: Cache | None = None,
+    serving: Serving | None = None,
 ) -> list[Item]:
-    """Each ingredient, first match wins: a BU sugar name, a food named exactly that in the measured data,
-    an earlier answer for the same name, then one Jev call for the rest.
+    """Each ingredient of a label's list (`text`), or of a recipe whose shares are known, first match wins:
+    a BU sugar name, a food named exactly that in the measured data, an earlier answer for the same name,
+    then one Jev call for the rest.
 
     In that call Jev picks which of a few likely foods each ingredient is. It describes the ingredient
     instead only when it rules out every one, as for "natural flavor" or "vitamin B12".
     """
-    parsed = ing.parse(text)
+    parsed = ing.parse(text) if isinstance(text, str) else list(text)
+    # A recipe gives each ingredient's weight, so a sugar it names is weighed by its measured amount
+    # ("Sugars, granulated" at 0.49% of a chili). A label gives none, so a sugar it names decides.
+    weighed = not isinstance(text, str)
     items: list[Item | None] = []
     unknown: dict[str, tuple[ing.Ingredient, list[foods.Food]]] = {}
     for n, part in enumerate(parsed):
-        if item := _bu_decide(part.name):
+        if weighed and (f := foods.exact(_base(part.name))):
+            items.append(_measured_item(part, f, serving))
+        elif item := _bu_decide(part.name, part, serving):
             items.append(item)
         elif f := foods.exact(_base(part.name)):
             items.append(_measured_item(part, f, serving))
@@ -305,7 +356,14 @@ async def _search(http: httpx.AsyncClient, query: str) -> list[dict[str, Any]]:
         _search_type(http, query, sorted(GENERIC_TYPES), 20),
         _search_type(http, query, ["Branded"], 10),
     )
-    return generic + branded
+    return [f for f in generic if not _unspecified(f)] + branded
+
+
+def _unspecified(food: dict[str, Any]) -> bool:
+    """A Survey food "not further specified" ("Taco, NFS"): a blend of, or pointer to, specific dishes
+    ("Taco, fish", "Taco, meat, no cheese"), so its recipe lists other dishes rather than ingredients.
+    Leaving these out matches a specific dish, with its own recipe, that the person can change."""
+    return re.search(r"\bNFS\b", food["description"]) is not None
 
 
 WHOLE_FOOD_PICK = (
@@ -554,9 +612,9 @@ async def check_food(
     ts: AsyncTypeSafeClient, http: httpx.AsyncClient, query: str, fdc_id: int | None = None, cache: Cache | None = None
 ) -> Result:
     picked = None
+    usda = await _search(http, query)
     if fdc_id is not None:
         # The person chose this USDA food under "Not it?"; match measured data to it rather than to what they typed.
-        usda = await _search(http, query)
         picked = next((f for f in usda if f["fdcId"] == fdc_id), None)
     if picked is not None:
         chosen = picked
@@ -565,7 +623,7 @@ async def check_food(
     else:
         # Measured whole foods are bundled, so they're found instantly and picked in the same Jev call.
         local_candidates = foods.search(query, sources=("afcd", "ciqual"), limit=10)
-        chosen, others, is_food, is_brand, local = await _pick(ts, query, await _search(http, query), local_candidates)
+        chosen, others, is_food, is_brand, local = await _pick(ts, query, usda, local_candidates)
         if not is_food:
             raise NotAFood(f"“{query}” doesn't look like a food. Try a food name or paste an ingredient list.")
         if is_brand and local is None and not (chosen or {}).get("ingredients"):
@@ -573,7 +631,53 @@ async def check_food(
             if (result := await _off_by_name(ts, http, query, usda, cache)) is not None:
                 return result
     alternatives = [Alternative(fdc_id=f["fdcId"], label=_food_label(f)) for f in others]
-    return await _fdc_result(ts, query, chosen, local, alternatives, cache)
+    has_measures = chosen is not None and chosen["dataType"] in ("SR Legacy", "Foundation")
+    portions = await _fetch_portions(http, chosen["fdcId"]) if has_measures else []
+    return await _fdc_result(ts, query, chosen, local, alternatives, cache, portions)
+
+
+def _portions(food: dict[str, Any]) -> list[Portion]:
+    """A USDA food's household measures, smallest first: "1 tsp (2.8 g)", "1 clove (3 g)". RACC is left out:
+    it's FDA's amount for the food's whole category, 85 g for any vegetable, garlic included."""
+    found: dict[str, Portion] = {}
+    for p in food.get("foodPortions") or []:
+        unit = (p.get("measureUnit") or {}).get("name") or ""
+        grams = p.get("gramWeight")
+        if unit == "RACC" or not grams:
+            continue
+        # SR Legacy names the measure in `modifier` ("clove"), Foundation in the unit ("cup", modifier "chopped").
+        words = [f"{p.get('amount') or 1:g}", "" if unit == "undetermined" else unit]
+        words.append(p.get("modifier") or p.get("portionDescription") or "")
+        name = " ".join(w for w in words if w)
+        found.setdefault(name, Portion(label=f"{name} ({grams:g} g)", grams=grams))
+    return sorted(found.values(), key=lambda p: p.grams)
+
+
+async def _fetch_portions(http: httpx.AsyncClient, fdc_id: int) -> list[Portion]:
+    """An SR Legacy or Foundation food's household measures. Search results don't include them, so this
+    is one more request; a failure just means no measures to pick from."""
+    try:
+        r = await http.get(f"{FDC_FOOD}/{fdc_id}", params={"api_key": os.environ["FOODDATA_CENTRAL_API_KEY"]})
+        r.raise_for_status()
+    except httpx.HTTPError:
+        log.warning("FoodData Central portions lookup failed", exc_info=True)
+        return []
+    return _portions(r.json())
+
+
+def _recipe(food: dict[str, Any]) -> list[ing.Ingredient]:
+    """A Survey (FNDDS) food's recipe, by weight, most first. Its ingredients are SR Legacy foods or other
+    Survey foods. The weights are before cooking, so water lost in cooking isn't counted."""
+    weights: dict[str, float] = {}
+    for f in food.get("finalFoodInputFoods") or food.get("inputFoods") or []:
+        # Search results and food details name the fields differently.
+        name = (f.get("foodDescription") or f.get("ingredientDescription") or "").strip()
+        grams = f.get("gramWeight") or f.get("ingredientWeight") or 0
+        if name and grams > 0:
+            weights[name] = weights.get(name, 0) + grams
+    total = sum(weights.values())
+    ranked = sorted(weights.items(), key=lambda kv: kv[1], reverse=True)
+    return [ing.Ingredient(name, grams / total, "in USDA's recipe", exact=True, whole="dish") for name, grams in ranked]
 
 
 # USDA writes units as codes or plain: "GRM" or "g", "MLT" or "ml".
@@ -607,7 +711,9 @@ async def _fdc_result(
     local: foods.Food | None,
     alternatives: list[Alternative],
     cache: Cache | None,
+    portions: Sequence[Portion] = (),
 ) -> Result:
+    """`portions` are a whole food's household measures, offered when it has no ingredient list."""
     if chosen is None and local is None:
         items = await _estimate(ts, query, list(SUGAR_ORDER))
         if not items:
@@ -638,10 +744,16 @@ async def _fdc_result(
     nutrients = _nutrients(chosen) if chosen else {}
     serving = _serving(chosen, nutrients) if chosen is not None and chosen["dataType"] == "Branded" else None
     ingredients_text = ((chosen or {}).get("ingredients") or "").strip() or None
+    # A dish made of other foods; a recipe of one food is just that food. A whole food matched to measured
+    # data keeps it: USDA's "Apple, raw" is a recipe of five apple varieties, without their sorbitol.
+    recipe = _recipe(chosen) if chosen is not None and not ingredients_text and local is None else []
     if ingredients_text:
         # A packaged product's own label beats generic data about the food it's made from.
         local = None
         items += await classify_ingredients(ts, ingredients_text, cache, serving)
+    elif len(recipe) > 1:
+        ingredients_text = "; ".join(f"{i.name} ({_pct(i.share)})" for i in recipe)
+        items += await classify_ingredients(ts, recipe, cache)
 
     fdc_id = food.fdc_id if food is not None else None
     measured_items, measured = measured_sugars(nutrients, local, fdc_id)
@@ -650,6 +762,8 @@ async def _fdc_result(
         measured_items = [i for i in measured_items if not i.name.startswith("Total sugars: 0 g")]
     items += measured_items
     notes: list[str] = []
+    if len(recipe) > 1:
+        notes.append("Worked out from USDA's typical recipe for this dish. Recipes vary, so ask how it was made.")
     if not ingredients_text:
         if local is not None:
             name = local.name
@@ -685,6 +799,7 @@ async def _fdc_result(
         measured_food=measured_food,
         ingredients_text=ingredients_text,
         serving=serving,
+        portions=[] if ingredients_text else list(portions),
         alternatives=alternatives,
         notes=notes,
     )
@@ -806,9 +921,10 @@ async def _off_result(
     notes: Sequence[str] = (),
 ) -> Result:
     match = OffMatch(code=p.code, name=p.name, brand=p.brand, countries=p.countries, url=p.url)
+    serving = Serving(grams=p.serving_grams, label=p.serving_label) if p.serving_grams else None
     notes = list(notes)
     if p.ingredients:
-        items = await classify_ingredients(ts, p.ingredients, cache)
+        items = await classify_ingredients(ts, p.ingredients, cache, serving)
         if not p.english:
             notes.append(
                 "The ingredient list isn't in English, so some sugars may not match the BU table by name. "
@@ -824,7 +940,12 @@ async def _off_result(
             )
         ]
     return summarize(
-        items, off_product=match, ingredients_text=p.ingredients, alternatives=list(alternatives), notes=notes
+        items,
+        off_product=match,
+        ingredients_text=p.ingredients,
+        serving=serving,
+        alternatives=list(alternatives),
+        notes=notes,
     )
 
 
@@ -851,7 +972,6 @@ LABEL_FOODS: list[tuple[str, list[Sugar]]] = [
     ("sweet potatoes", ["fructose", "sucrose"]),
     ("beets", ["sucrose"]),
     ("chocolate", ["sucrose"]),
-    ("isomalt", ["sorbitol"]),
 ]
 FOUND_MIN = 0.5
 
@@ -1026,13 +1146,16 @@ def _effective(i: Item) -> str:
 
 def summarize(items: list[Item], verdict: Verdict | None = None, load: Load | None = None, **kw: Any) -> Result:
     """The verdict is the worst of the items and the product's fructose load. Items keep their order,
-    which for an ingredient list is the label's, except that lines your Settings add come first."""
+    which for an ingredient list is the label's, except that lines your Settings add come first.
+
+    Items weighed into the load (`trace`) count through it, not one by one: each is Caution for having
+    the sugar, but the product is OK when all of them together are under the limit."""
     counted = [i for i in items if i.avoided_by or not i.allowed_by]
     found = [s for s in SUGAR_ORDER if any(s in i.sugars and _effective(i) == "not_tolerated" for i in counted)]
     if load is not None and load.status == "not_tolerated":
         found = [s for s in SUGAR_ORDER if s in found or s in load.sugars]
     avoided = list(dict.fromkeys(i.avoided_by for i in items if i.avoided_by))
-    statuses = [_effective(i) for i in counted] + ([load.status] if load else [])
+    statuses = [_effective(i) for i in counted if not (i.trace and load)] + ([load.status] if load else [])
     if verdict is None:
         verdict = "avoid" if "not_tolerated" in statuses else "caution" if "caution" in statuses else "ok"
     if verdict == "avoid":

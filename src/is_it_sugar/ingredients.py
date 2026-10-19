@@ -23,6 +23,8 @@ class Ingredient:
     name: str
     share: float = 1.0  # the most this ingredient can be of the product, from 0 to 1
     why: str = ""  # how `share` is known, e.g. "listed 3rd"
+    exact: bool = False  # `share` is the ingredient's own, as declared or in a recipe, not a bound
+    whole: str = "product"  # what it's a share of: "product", or "dish" for a recipe
 
 
 def _ordinal(n: int) -> str:
@@ -94,7 +96,7 @@ def parse(text: str) -> list[Ingredient]:
         declared = _DECLARED.match(base) or (len(inner) == 1 and _DECLARED.match(f"({inner[0]})"))
         if declared:
             share, why = float(declared.group(1)) / 100, "as declared"
-        found[name] = Ingredient(name, min(share, 1.0), why)
+        found[name] = Ingredient(name, min(share, 1.0), why, exact=bool(declared))
     return list(found.values())
 
 

@@ -1,11 +1,12 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 
+from . import foods
 from .sugars import Status, Sugar
 
 Verdict = Literal["avoid", "caution", "ok"]
-Basis = Literal["bu_table", "jev", "fdc", "afcd", "ciqual", "label", "settings"]
+Basis = Literal["bu_table", "research", "jev", "fdc", "afcd", "ciqual", "label", "settings"]
 
 
 class Item(BaseModel):
@@ -30,6 +31,11 @@ class Food(BaseModel):
     brand: str | None = None
     data_type: str
 
+    @computed_field
+    @property
+    def url(self) -> str:
+        return foods.url(f"fdc:{self.fdc_id}")
+
 
 class MeasuredMatch(BaseModel):
     """The food composition table entry used for sugar values."""
@@ -40,6 +46,11 @@ class MeasuredMatch(BaseModel):
     note: str  # how AFCD derived the values, or the USDA dataset
     kinds: int  # how many varieties the ranges span
 
+    @computed_field
+    @property
+    def url(self) -> str:
+        return foods.url(self.id)
+
 
 class Serving(BaseModel):
     """A packaged product's serving, from its label."""
@@ -48,6 +59,13 @@ class Serving(BaseModel):
     label: str  # "1 tsp (5 g)"
     # The most total sugars a serving can have: labels round to the nearest gram and list under 0.5 g as 0 g.
     max_sugars: float | None = None
+
+
+class Portion(BaseModel):
+    """A household measure of a whole food, from USDA, that the person can judge it by."""
+
+    label: str  # "1 clove (3 g)"
+    grams: float
 
 
 class Load(BaseModel):
@@ -89,5 +107,6 @@ class Result(BaseModel):
     ingredients_text: str | None = None
     serving: Serving | None = None
     load: Load | None = None
+    portions: list[Portion] = []  # a whole food's household measures; the person picks one to judge by
     alternatives: list[Alternative] = []
     notes: list[str] = []

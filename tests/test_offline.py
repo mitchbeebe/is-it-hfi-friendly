@@ -150,9 +150,9 @@ def test_measured_ingredient_counts_at_its_share():
     assert (item.status, item.basis) == ("not_tolerated", "ciqual")
     assert item.grams == pytest.approx((6.71 + 0.81 / 2) * 0.02)
     assert item.reason == (
-        "Paprika: 6.7 g fructose, 0.81 g sucrose per 100 g. "
-        "At most 2% of the product (listed under 2% or less), so up to 0.14 g per 100 g."
-    )
+        "6.7 g fructose and 0.81 g sucrose per 100 g. At most 2% of the product (listed under 2% or less), "
+        "so it adds up to 0.14 g fructose load per 100 g of the product."
+    )  # the matched food's name only when it differs from the ingredient's
     salt = analyze._measured_item(ingredients.Ingredient("salt"), food("Salt, table, non-iodised"))
     assert (salt.status, salt.grams) == ("tolerated", None)
     # Popcorn (0.43 g load) and up to 2% paprika (0.14 g): all measured, just over 0.5 g, so small amounts.
@@ -265,7 +265,56 @@ def test_table_statuses_follow_bu_wording():
     assert by_name["Dextrose"].status == "tolerated"
     # Every entry BU marks not tolerated, apart from a few non-sugar sweeteners, carries a sugar.
     no_sugar = {e.name for e in sugars.TABLE if e.status == "not_tolerated" and not e.contains}
-    assert no_sugar == {"Dulcitol", "Stevia", "Sugar Alcohol"}
+    assert no_sugar == {"Dulcitol", "Mannitol", "Sugar Alcohol"}
+
+
+@pytest.mark.parametrize(
+    ("ingredient", "entry", "status"),
+    [
+        ("maltitol syrup", "Maltitol", "not_tolerated"),  # BU: tolerated depending on purity
+        ("mannitol", "Mannitol", "not_tolerated"),
+        ("isomalt", "Isomalt", "not_tolerated"),  # not in BU's table
+        ("isomaltulose", "Isomaltulose", "not_tolerated"),
+        ("stevia", "Stevia", "caution"),  # BU: not tolerated
+        ("stevia leaf extract", "Steviol Glycosides", "tolerated"),
+        ("rebaudioside M", "Steviol Glycosides", "tolerated"),
+    ],
+)
+def test_research_overrides_bu(ingredient, entry, status):
+    item = analyze._bu_decide(ingredient)
+    assert item is not None and (item.bu_name, item.status, item.basis) == (entry, status, "research")
+    assert item.url is not None and item.url.startswith("https://")
+
+
+def test_isomalt_is_not_isomaltose():
+    assert [e.name for e in sugars.match("isomaltose")] == ["Isomaltose"]
+    assert [e.name for e in sugars.match("isomalt")] == ["Isomalt"]
+    assert sugars.BY_NAME["Isomalt"].contains == ["sorbitol"]
+    assert sugars.BY_NAME["Isomaltulose"].contains == ["fructose"]
+
+
+def test_polydextrose_counts_at_its_most_free_sorbitol():
+    # 7th on the label of a 10 g serving: at most 1.4 g of polydextrose, so at most 0.086 g free sorbitol.
+    part = ingredients.parse("rice, water, salt, oil, yeast, starch, polydextrose")[6]
+    serving = Serving(grams=10, label="10 g")
+    item = analyze._bu_decide(part.name, part, serving)
+    assert item is not None and (item.basis, item.sugars) == ("research", ["sorbitol"])
+    assert item.grams == pytest.approx(6 / 7)
+    assert item.reason.endswith(
+        "At most 14% of the product (listed 7th), so it adds up to 0.086 g fructose load per 10 g serving."
+    )
+    r = prefs.apply(analyze.summarize([item], serving=serving), trace_limit=1.0)
+    assert r.verdict == "ok" and r.load is not None and r.load.grams == pytest.approx(0.0857, abs=1e-4)
+    # Per 100 g without a serving: up to 0.86 g, so Caution under the default 1 g limit.
+    unserved = analyze._bu_decide(part.name, part)
+    assert unserved is not None
+    assert prefs.apply(analyze.summarize([unserved]), trace_limit=1.0).verdict == "caution"
+    # With no place on a label (a photo), or beside another sugar, there's nothing to weigh it by.
+    for unweighed in (
+        analyze._bu_decide("polydextrose"),
+        analyze._bu_decide("fiber blend (polydextrose, sugar)", part),
+    ):
+        assert unweighed is not None and unweighed.grams is None
 
 
 def test_overlap_names():
@@ -565,7 +614,8 @@ def test_very_low_load_is_tolerated():
     rice = analyze.summarize([measured_item("fructose", 0.1), measured_item("sucrose", 0.6)])  # load 0.4
     out = prefs.apply(rice, trace_limit=1.0)
     assert (out.verdict, out.headline) == ("ok", "Very low in fructose and sucrose")
-    assert all(i.status == "tolerated" and i.trace for i in out.items)
+    # Each has the sugar, so it's Caution; together they're under the limit, so the product is OK.
+    assert all(i.status == "caution" and i.trace for i in out.items)
     assert out.load is not None and (out.load.grams, out.load.per, out.load.status) == (0.4, "100 g", "tolerated")
     # A stricter personal limit wins: under 0.3 g only.
     assert prefs.apply(rice, trace_limit=0.3).verdict == "avoid"
@@ -576,7 +626,7 @@ def test_each_item_by_its_own_amount_and_the_product_by_the_total():
     # 0.4 + 0.4 g: each under 0.5 g alone, 0.8 g together.
     items = [measured_item("fructose", 0.4), measured_item("sorbitol", 0.4)]
     r = prefs.apply(analyze.summarize(items), trace_limit=1.0)
-    assert [i.status for i in r.items] == ["tolerated", "tolerated"]
+    assert [i.status for i in r.items] == ["caution", "caution"]
     assert r.load is not None and (r.load.grams, r.load.status) == (0.8, "caution")  # sets the verdict
     assert r.verdict == "caution"
 
@@ -588,13 +638,21 @@ def test_dijon_per_serving():
     text = "WATER, MUSTARD SEED, DISTILLED VINEGAR, SALT, WHITE WINE, CITRIC ACID, TURMERIC, TARTARIC ACID, SPICES"
     parts = {i.name: i for i in ingredients.parse(text)}
     seed = analyze._measured_item(parts["MUSTARD SEED"], food("Spices, mustard seed, ground"), DIJON)
-    assert seed.reason.endswith("At most 50% of a 5 g serving (listed 2nd): 2.5 g, so up to 0.047 g.")
+    assert seed.reason == (
+        "Spices, mustard seed, ground: 0.02 g fructose and 3.7 g sucrose per 100 g. "
+        "At most 50% of the product (listed 2nd), so it adds up to 0.047 g fructose load per 5 g serving."
+    )
     vinegar = analyze._measured_item(parts["DISTILLED VINEGAR"], food("Vinegar", "ciqual"), DIJON)
     assert vinegar.status == "tolerated"  # under the detection limit: none found
     turmeric = analyze._measured_item(parts["TURMERIC"], food("Turmeric, powder", "ciqual"), DIJON)
     result = analyze.summarize([seed, vinegar, turmeric], serving=DIJON)
     r = prefs.apply(result, trace_limit=1.0)
-    assert r.verdict == "ok" and all(i.status == "tolerated" for i in r.items)
+    assert r.verdict == "ok"
+    assert [(i.name, i.status) for i in r.items] == [
+        ("MUSTARD SEED", "caution"),
+        ("DISTILLED VINEGAR", "tolerated"),
+        ("TURMERIC", "caution"),
+    ]
     assert r.load is not None and r.load.per == "1 tsp (5 g)" and r.load.grams < 0.1
     assert prefs.apply(result, trace_limit=0).verdict == "avoid"
 
@@ -627,6 +685,109 @@ def test_serving_from_usda_label():
     assert analyze._serving(label, {}).max_sugars is None
     assert analyze._serving(label | {"servingSizeUnit": "g"}, {}) is not None  # some records use plain units
     assert analyze._serving(label | {"householdServingFullText": "None"}, {}).label == "5 g"  # as Cheetos has it
+
+
+def sr(amount, modifier, grams, unit="undetermined", **kw):
+    return {"amount": amount, "modifier": modifier, "gramWeight": grams, "measureUnit": {"name": unit}, **kw}
+
+
+def test_portions_from_usda_household_measures():
+    garlic = [sr(1.0, "tsp", 2.8), sr(1.0, "clove", 3.0), sr(3.0, "cloves", 9.0), sr(1.0, "cup", 136.0)]
+    assert [p.label for p in analyze._portions({"foodPortions": garlic})] == [
+        "1 tsp (2.8 g)",
+        "1 clove (3 g)",
+        "3 cloves (9 g)",
+        "1 cup (136 g)",
+    ]
+    # Foundation names the unit and leaves out RACC, FDA's amount for the whole category.
+    broccoli = [
+        sr(1.0, "chopped", 76.0, unit="cup"),
+        {"amount": 1.0, "gramWeight": 85.0, "measureUnit": {"name": "RACC"}},
+    ]
+    assert [p.label for p in analyze._portions({"foodPortions": broccoli})] == ["1 cup chopped (76 g)"]
+    cheddar = [{"amount": 1.0, "portionDescription": "shredded", "gramWeight": 105.0, "measureUnit": {"name": "cup"}}]
+    assert [p.label for p in analyze._portions({"foodPortions": cheddar})] == ["1 cup shredded (105 g)"]
+    assert analyze._portions({}) == []
+
+
+def test_whole_food_judged_per_picked_portion():
+    from is_it_sugar.models import Portion
+
+    items, _ = analyze.measured_sugars({}, local("Chives, raw"))
+    portions = [Portion(label="1 tbsp chopped (3 g)", grams=3.0), Portion(label="1 cup (48 g)", grams=48.0)]
+    result = analyze.summarize(items, portions=portions)
+    assert prefs.apply(result, trace_limit=0.5).verdict == "avoid"  # about 2 g fructose load per 100 g
+    tbsp = prefs.apply(result, trace_limit=0.5, portion=0)
+    assert tbsp.verdict == "ok" and tbsp.load is not None and tbsp.load.per == "1 tbsp chopped (3 g)"
+    assert tbsp.serving is not None and tbsp.portions == portions  # still offered, with the pick shown
+    assert prefs.apply(result, trace_limit=0.5, portion=1).verdict == "avoid"  # about 1 g in a cup
+    assert prefs.apply(result, trace_limit=0.5, portion=9).verdict == "avoid"  # out of range: per 100 g
+
+
+def test_survey_dish_judged_by_its_recipe():
+    import asyncio
+
+    dish = {
+        "fdcId": 1,
+        "description": "Limeade",
+        "dataType": "Survey (FNDDS)",
+        "foodNutrients": [{"nutrientName": "Total Sugars", "value": 9.0}],
+        "finalFoodInputFoods": [
+            {"foodDescription": "Salt, table", "gramWeight": 1},
+            {"foodDescription": "Lime juice, raw", "gramWeight": 60},
+            {"foodDescription": "Beverages, water, tap, drinking", "gramWeight": 139},
+            {"foodDescription": "Iron as ingredient", "gramWeight": 0},
+        ],
+    }
+    recipe = analyze._recipe(dish)
+    assert [(i.name, i.share) for i in recipe] == [
+        ("Beverages, water, tap, drinking", 0.695),
+        ("Lime juice, raw", 0.3),
+        ("Salt, table", 0.005),
+    ]
+
+    def check(food):
+        # Every ingredient is a measured food, so no Jev call is needed.
+        return asyncio.run(analyze._fdc_result(None, "limeade", food, None, [], None))  # ty: ignore[invalid-argument-type]
+
+    result = check(dish)
+    assert result.ingredients_text == "Beverages, water, tap, drinking (70%); Lime juice, raw (30%); Salt, table (0.5%)"
+    lime = next(i for i in result.items if i.name == "Lime juice, raw")
+    assert lime.reason == (
+        "0.61 g fructose and 0.48 g sucrose per 100 g. "
+        "30% of the dish (in USDA's recipe), so it adds 0.26 g fructose load per 100 g of the dish."
+    )
+    assert any("typical recipe" in n for n in result.notes)
+    assert result.food is not None and result.food.url == "https://fdc.nal.usda.gov/food-details/1/nutrients"
+    sweet = {
+        **dish,
+        "finalFoodInputFoods": [
+            *dish["finalFoodInputFoods"],
+            {"foodDescription": "Sugars, granulated", "gramWeight": 1},
+        ],
+    }
+    sugar = next(i for i in check(sweet).items if i.name == "Sugars, granulated")
+    assert sugar.basis == "fdc" and sugar.grams is not None and sugar.grams < 0.5  # weighed, not just named
+    single = {**dish, "finalFoodInputFoods": dish["finalFoodInputFoods"][1:2]}
+    assert len(analyze._recipe(single)) == 1  # just the food itself, judged as a whole food
+
+
+def test_unspecified_survey_foods_are_left_out():
+    assert analyze._unspecified({"description": "Taco, NFS"})
+    assert analyze._unspecified({"description": "Pasta with sauce, NFS"})
+    assert not analyze._unspecified({"description": "Taco, fish"})
+    assert not analyze._unspecified({"description": "Sauce, Nfsomething"})
+
+
+def test_one_rule_for_the_amount_eaten():
+    pouch = Serving(grams=42, label="1 Pouch (42 g)")
+    cheez_it, guacamole = 0.19 * 100 / 42, 0.28  # per 100 g: 0.19 g in a pouch; guacamole has no serving
+    limit = prefs.DEFAULT_LIMIT
+    assert prefs._tier(cheez_it, limit, pouch) == prefs._tier(guacamole, limit, None) == "tolerated"
+    assert prefs._tier(0.6, limit, None) == "caution"  # 0.5 to 1 g
+    assert prefs._tier(0.5, limit, Serving(grams=250, label="1 cup (250 g)")) == "not_tolerated"  # 1.25 g in the cup
+    assert prefs._tier(0.6, 0.6, None) == "not_tolerated"  # a lower limit brings Avoid closer
+    assert prefs._tier(cheez_it, 0.15, pouch) == "not_tolerated"  # and under 0.5 g, it's the cut-off for OK
 
 
 def test_trace_rule_sums_the_load_and_ignores_unmeasured():
@@ -696,6 +857,17 @@ def test_off_product_prefers_english_ingredients():
     p = off._product({"code": "1", "product_name": "Compote", "ingredients_text": "Pommes, sucre", "lang": "fr"})
     assert (p.ingredients, p.english) == ("Pommes, sucre", False)
     assert off._product({"code": "2", "lang": "en"}).ingredients is None
+
+
+def test_off_product_serving():
+    p = off._product({"code": "1", "serving_quantity": "28.349", "serving_size": "1 portion (28.349 g)"})
+    assert (p.serving_grams, p.serving_label) == (28.349, "1 portion (28.349 g)")
+    assert (
+        off._product({"code": "2", "serving_quantity": 2, "serving_size": "1 biscuit"}).serving_label
+        == "1 biscuit (2 g)"
+    )
+    assert off._product({"code": "3", "serving_quantity_unit": "g"}).serving_grams is None  # as Nutella has it
+    assert off._product({"code": "4", "serving_quantity": 1, "serving_quantity_unit": "oz"}).serving_grams is None
 
 
 def test_prefs_avoid_matches_off_product_name():
