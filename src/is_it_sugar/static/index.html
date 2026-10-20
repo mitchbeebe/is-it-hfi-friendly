@@ -708,7 +708,8 @@ function loadLine(load) {
   return `<p class="load">${text}</p>`;
 }
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
-const titleCase = (s) => (s === s.toUpperCase() ? s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) : s);
+// A letter after an apostrophe doesn't start a word: "HERSHEY'S" -> "Hershey's".
+const titleCase = (s) => (s === s.toUpperCase() ? s.toLowerCase().replace(/(^|[^\w'’])(\w)/g, (_, a, c) => a + c.toUpperCase()) : s);
 
 function setBusy(button, busy, label) {
   if (busy) out.innerHTML = ""; // don't leave the previous answer showing under a new question
