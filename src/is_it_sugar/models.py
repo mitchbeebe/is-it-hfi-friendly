@@ -21,6 +21,8 @@ class Item(BaseModel):
     allowed_by: str | None = None  # the Settings term that allowed it
     avoided_by: str | None = None  # the Settings term that flagged it; wins over allowed_by
     grams: float | None = None  # measured amount per 100 g (top of the range), for the trace rule
+    # On a label without declared shares: the most this ingredient can be of the product, from its position.
+    share: float | None = None
     url: str | None = None  # the source's page for the food the amounts come from
     trace: bool = False  # measured, but under the person's fructose-load limit
 
@@ -57,7 +59,7 @@ class Serving(BaseModel):
 
     grams: float
     label: str  # "1 tsp (5 g)"
-    # The most total sugars a serving can have: labels round to the nearest gram and list under 0.5 g as 0 g.
+    # Total sugars in a serving are under this: labels round to the nearest gram and list under 0.5 g as 0 g.
     max_sugars: float | None = None
 
 
@@ -76,6 +78,9 @@ class Load(BaseModel):
     status: Status
     sugars: list[Sugar]
     capped: bool = False  # by the label's total sugars
+    # The load counting foods the person tolerates too, when that's more; `allowed` are their Settings terms.
+    with_allowed: Load | None = None
+    allowed: list[str] = []
 
 
 class OffMatch(BaseModel):

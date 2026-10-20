@@ -13,7 +13,8 @@ rating.
 **Settings** (`#settings`) keeps two lists, since people with HFI differ, especially with vegetables:
 
 - **Foods you tolerate.** Matching items still appear in results, marked "Allowed by you", but don't count toward the
-  verdict. Matching errs toward not allowing: an ingredient is allowed when its name contains the term, ignoring plurals
+  verdict. The fructose load line gives both amounts ("Up to 0.62 g …; up to 0.37 g not counting potato, which you
+  tolerate"), and the headline says "OK with your allowed foods" when counting them would have changed the verdict. Matching errs toward not allowing: an ingredient is allowed when its name contains the term, ignoring plurals
   ("onion" covers "onion powder"). A whole food without an ingredient list is allowed only by its main name ("broccoli"
   covers "Broccoli, raw", but "tomato" doesn't cover "Tomato soup"). A BU table sugar is allowed only by one of its own
   names, so "corn" never allows "corn syrup". Adding a sugar BU marks not tolerated shows a warning.
@@ -23,9 +24,10 @@ rating.
 
 - **Small amounts.** A food is judged by the measured fructose load (fructose + half of sucrose + sorbitol, using the
   top of each range) in a serving: the label's, an amount you pick for a whole food ("Judged per 1 clove"), or else 100
-  g. Under 0.5 g is OK, and from 0.5 g up to the limit, in g per serving, is Caution instead of Avoid. The default is 1
-  g, so 100 g of cheddar (0.2) is OK, oats (0.6) and broccoli (0.8) are Caution, and tomato (1.9) and apple (10.5) are
-  Avoid. A limit under 0.5 g makes it the cut-off for OK. Set 0 to flag any amount. Only measured amounts count:
+  g. A slider with two handles sets the tiers, in g per serving: under the first is OK, between them Caution, and from
+  the second up Avoid. The defaults are 0.5 g and 1 g, so 100 g of cheddar (0.2) is OK, oats (0.6) and broccoli (0.8)
+  are Caution, and tomato (1.9) and apple (10.5) are Avoid. A handle pushes the other along when they meet; both at 0
+  flags any amount. Only measured amounts count:
   ingredient lists and AI estimates are never downgraded, and the avoid list still wins.
 
 **Recent** lists the last 10 food names and barcodes checked, under the Type and Scan tabs. Tapping one re-runs it
@@ -99,18 +101,32 @@ one is checked in this order:
    offers up to 12 measured foods that full-text search finds for it (`foods.py`), plus descriptions: contains
    fructose / sucrose / sorbitol, unsure, none, or a note on the label. Jev picks the food when it's the same
    ingredient in the same form, so "organic non-GMO popcorn" becomes "Snacks, popcorn, air-popped" with measured
-   sugars, and "natural flavor" is described instead.
+   sugars, and "natural flavor" is described instead. Its likeliest answer wins, "not listed" included; candidates'
+   probabilities aren't added up, since different foods aren't one answer. Foods each table groups as prepared from
+   other ingredients (dishes, meals, baked goods and baby food: `PREPARED` in `foods.py`) aren't offered, so potato
+   starch isn't matched to a roll made with it. A food named exactly like the ingredient still matches ("bread
+   crumbs" is "Breadcrumbs"), and food names typed in still find dishes.
 
 Labels list ingredients by weight, most first, so the nth ingredient is at most 1/n of the product, anything after
 "contains 2% or less of" is at most 2%, and a declared percentage ("tomatoes 45%") is used as given. A measured
 ingredient counts at its amount per 100 g times that share: paprika in the 2% part adds at most 0.14 g fructose load
 per 100 g of the product. Values a table reports only as under a detection limit count as 0.
 
+Those bounds can't all hold at once: for the 8th ingredient to be 1/8 of the product, so are the seven before it. Any
+shares that fall down the list and add up to 1 are a mix of "the first m ingredients in equal parts", so the product's
+load is at most the largest average of the first m ingredients' loads (with a "2% or less" part, of mixes of two such
+recipes that have that part at its most). Potato gnocchi with flakes 2nd and turmeric 8th comes to 0.51 g per 100 g
+rather than the 1.01 g its ingredients' own bounds add up to. Each ingredient still shows its own bound. Lists with
+a declared percentage, and labels that don't fit (a "2% or less" part from the first ingredient), add up the
+ingredients' own bounds instead.
+
 For a USDA branded product, the label's serving and total sugars bound things further. US labels round sugars to the
 nearest gram and list under 0.5 g as 0 g, so a serving has at most the listed amount plus 0.5 g. That caps fructose
 and sucrose together, including sugars an ingredient list names with no amount. Sorbitol and other sugar alcohols
 aren't counted in total sugars, so they still need their own measurement. Open Food Facts products use the serving
-size their page records, when it gives one in grams.
+size their page records, when it gives one in grams, and its total sugars the same way: per serving for a product sold
+only in the US, whose label gives them per serving, and otherwise per 100 g, as EU and Australian labels give them. A
+label's "0 g" means under 0.5 g, so a load capped there is OK at the default 0.5 g cut-off.
 
 **Small amounts**: measured amounts are weighed by fructose load (fructose + half of sucrose + sorbitol, the formula HFI
 studies use), each item by its own amount and the product by all of them together. The product's load is shown under the
@@ -157,10 +173,10 @@ Then the app uses, in order of preference:
    sorbitol. Where AFCD lists several kinds of a food (11 raw apples), amounts are shown as a range, for example
    "Fructose: 5.4–7.7 g per 100 g";
 4. measured fructose and sucrose from USDA, for any sugar those don't report;
-5. for sorbitol in a whole food: present in apples, pears and stone fruits (the only foods AFCD measures it in), and
-   otherwise not expected;
-6. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment. A food with no sugar data at all is
-   Caution, not OK.
+5. otherwise, a Jev estimate for each remaining sugar, labelled as an AI judgment. A food with no sugar data at all is
+   Caution, not OK. Sorbitol is the exception: without a measurement, a whole food is taken to have none. It's mostly
+   added to prepared foods, and the whole foods that have it (apples, pears, stone fruits) have far more fructose.
+   CIQUAL reports polyols together, so only AFCD's sorbitol is used.
 
 When Jev says the name is a brand and USDA has no ingredient list for it (common for non-US products such as Twiglets
 or Jaffa Cakes), the app searches [Open Food Facts](https://world.openfoodfacts.org/) for products that have one, and
@@ -180,7 +196,8 @@ from other countries' tables are left out, since the licence doesn't cover them.
 Zealand, AFCD Release 3, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
 `src/is_it_sugar/data/foods.json` is built by `uv run python scripts/build_foods.py`: every AFCD, CIQUAL and USDA SR
-Legacy or Foundation food with fructose and sucrose measured (or total sugars of 0), about 6,900 in all. Open Food
+Legacy or Foundation food with fructose and sucrose measured (or total sugars of 0), about 6,900 in all, with each
+table's food group (USDA's category comes from its search endpoint, since the list endpoint leaves it out). Open Food
 Facts' ingredient taxonomy (pinned to a commit) adds the English names and synonyms it links to CIQUAL and USDA foods,
 so "red bell pepper" finds "Sweet pepper, red, raw". The app indexes them with SQLite full-text search at startup.
 CIQUAL values below a detection limit ("< 0.2") count at the limit. CIQUAL data: ANSES, Ciqual 2020,

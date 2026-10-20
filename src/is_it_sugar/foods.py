@@ -16,24 +16,32 @@ from typing import Literal
 from . import sugars
 
 DATA = Path(__file__).parent / "data" / "foods.json"
-VERSION = hashlib.sha256(DATA.read_bytes()).hexdigest()[:12]
 Source = Literal["afcd", "ciqual", "fdc"]
 SOURCE_NAMES: dict[str, str] = {
     "afcd": "Australian data",
     "ciqual": "French data",
     "fdc": "USDA data",
 }
-# AFCD measures sorbitol above zero only in these fruits and foods made from them (apples, pears and
-# stone fruits, all in the rose family). Other whole foods aren't expected to contain it.
-SORBITOL_FRUITS = {"apple", "pear", "nashi", "cherry", "plum", "prune", "apricot", "peach", "nectarine"}
 _STOP = {"and", "or", "of", "with", "from", "in", "the", "a", "an", "to", "added", "for", "as"}
-
-
-def is_sorbitol_fruit(name: str) -> bool:
-    """Whether a food's main name is a fruit that contains sorbitol: "Apples, raw", "Apple juice",
-    "Prune (dried plum)", but not "Pineapple"."""
-    main = re.split(r"[,(]", name)[0]
-    return bool(SORBITOL_FRUITS & set(sugars.key(main).split()))
+# Each table's groups of foods prepared from other ingredients: dishes, meals and baked goods. An ingredient on a
+# label isn't one of these, so they aren't offered for it: potato starch isn't a roll made with potato starch.
+# (AFCD's data keeps only whole and minimally processed foods already.)
+PREPARED = {
+    "Baby Foods",
+    "Baked Products",
+    "Fast Foods",
+    "Meals, Entrees, and Side Dishes",
+    "Restaurant Foods",
+    "baby food",
+    "starters and dishes",
+    "cereal products / breads and similar",
+    "cereal products / savoury biscuits",
+    "sugar and confectionery / Viennese pastries",
+    "sugar and confectionery / cakes and pastry",
+    "sugar and confectionery / sweet biscuits",
+}
+# Retires cached ingredient answers when the data or what counts as prepared changes.
+VERSION = hashlib.sha256(DATA.read_bytes() + repr(sorted(PREPARED)).encode()).hexdigest()[:12]
 
 
 @dataclass(frozen=True)
@@ -47,6 +55,7 @@ class Food:
     total_sugars: float | None
     below: tuple[str, ...]  # sugars reported only as under a detection limit; the limit is used
     note: str  # AFCD derivation or USDA dataset
+    group: str = ""  # the table's food group: "Baked Products", "starters and dishes / soups"
 
     def amount(self, sugar: str) -> float | None:
         """Grams per 100 g, or None if not measured. A value only reported as under a detection limit
@@ -58,11 +67,15 @@ class Food:
     def label(self) -> str:
         return f"{self.name}"
 
+    @property
+    def prepared(self) -> bool:
+        """Made from other ingredients, as a dish, meal or baked good."""
+        return self.group in PREPARED or self.group.split(" / ")[0] in PREPARED
+
 
 def _food(f: dict) -> Food:
-    sorbitol = f.get("sorbitol")
-    if f["source"] == "ciqual" and not is_sorbitol_fruit(f["name"]):
-        sorbitol = None  # CIQUAL reports all polyols together; only in these fruits are they mostly sorbitol
+    # CIQUAL reports all polyols together, not sorbitol alone.
+    sorbitol = None if f["source"] == "ciqual" else f.get("sorbitol")
     return Food(
         f["id"],
         f["source"],
@@ -73,6 +86,7 @@ def _food(f: dict) -> Food:
         f.get("total_sugars"),
         tuple(f.get("below", ())),
         f.get("note", ""),
+        f.get("group", ""),
     )
 
 
@@ -113,18 +127,23 @@ def get(food_id: str) -> Food | None:
     return _by_id().get(food_id)
 
 
-def _match(expr: str, sources: tuple[Source, ...], limit: int) -> list[Food]:
+def _match(expr: str, sources: tuple[Source, ...], limit: int, prepared: bool = True) -> list[Food]:
     rows = (
         _index()
         .execute("select rowid from f where f match ? order by bm25(f, 2.0, 1.0) limit ?", (expr, limit * 10))
         .fetchall()
     )
     foods = _all()
-    return [foods[r[0]] for r in rows if foods[r[0]].source in sources][:limit]
+    return [foods[r[0]] for r in rows if foods[r[0]].source in sources and (prepared or not foods[r[0]].prepared)][
+        :limit
+    ]
 
 
-def search(query: str, sources: tuple[Source, ...] = ("afcd", "ciqual", "fdc"), limit: int = 12) -> list[Food]:
+def search(
+    query: str, sources: tuple[Source, ...] = ("afcd", "ciqual", "fdc"), limit: int = 12, prepared: bool = True
+) -> list[Food]:
     """Candidate foods for `query`. Jev picks the actual match, so this aims to include it, not to rank it first.
+    `prepared=False` leaves out dishes, meals and baked goods, for an ingredient on a label.
 
     Candidates are the best matches for each pair of adjacent words ("tomato concentrate"), then for all
     the words, then for each word alone. The last keeps a label's extra words from crowding out the food:
@@ -135,13 +154,13 @@ def search(query: str, sources: tuple[Source, ...] = ("afcd", "ciqual", "fdc"), 
     if not words:
         return []
     if len(words) == 1:
-        return _match(f'"{words[0]}"', sources, limit)
+        return _match(f'"{words[0]}"', sources, limit, prepared)
     found: list[Food] = []
     for a, b in itertools.pairwise(words):
-        found += _match(f'"{a} {b}"', sources, 2)
-    found += _match(" OR ".join(f'"{w}"' for w in words), sources, 4)
+        found += _match(f'"{a} {b}"', sources, 2, prepared)
+    found += _match(" OR ".join(f'"{w}"' for w in words), sources, 4, prepared)
     for w in words:
-        found += _match(f'"{w}"', sources, 2)
+        found += _match(f'"{w}"', sources, 2, prepared)
     return list(dict.fromkeys(found))[:limit]
 
 
@@ -176,12 +195,13 @@ def exact(name: str) -> Food | None:
 def candidates(name: str, limit: int = 12) -> list[Food]:
     """Likely foods for an ingredient with no exact match, most likely first: foods with `name` as their
     main name ("garlic" -> "Garlic, roasted/baked"), foods named like the end of `name` ("organic non-GMO
-    popcorn" -> popcorn), then full-text matches."""
+    popcorn" -> popcorn), then full-text matches. Dishes, meals and baked goods aren't ingredients, so
+    they're left out."""
     exact_names, main_names = _names()
     words = sugars.key(name).split()
     rows: list[int] = list(main_names.get(" ".join(words), ())[:6])
     for i in range(1, len(words)):
         end = " ".join(words[i:])
         rows += exact_names.get(end, ()) + main_names.get(end, ())[:4]
-    found = [_all()[r] for r in rows] + search(name, limit=limit)
+    found = [f for f in (_all()[r] for r in rows) if not f.prepared] + search(name, limit=limit, prepared=False)
     return list(dict.fromkeys(found))[:limit]

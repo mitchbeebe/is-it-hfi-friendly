@@ -65,10 +65,13 @@ DESCRIBE_QUESTION = (
     "Which best describes the food ingredient `ingredient`? Anything in brackets describes it or lists what "
     "it's made of."
 )
-# Answers are cached per ingredient, so changing the questions, the criteria or the food data retires them.
+# How _answer decides from Jev's probabilities; part of the cache version, since the decision is what's cached.
+ANSWER_RULE = "likeliest answer, not listed included"
+# Answers are cached per ingredient, so changing the questions, the criteria, the rule or the food data retires them.
 INGREDIENT_VERSION = hashlib.sha256(
     json.dumps(
-        [INGREDIENT_CRITERIA, MATCH_QUESTION, NOT_LISTED, DESCRIBE_QUESTION, foods.VERSION], sort_keys=True
+        [INGREDIENT_CRITERIA, MATCH_QUESTION, NOT_LISTED, DESCRIBE_QUESTION, ANSWER_RULE, foods.VERSION],
+        sort_keys=True,
     ).encode()
 ).hexdigest()[:12]
 INGREDIENT_NS = f"ingredient:{INGREDIENT_VERSION}"
@@ -146,9 +149,7 @@ def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = N
     product, and per serving when the product's serving size is known."""
     values = {s: f.amount(s) or 0.0 for s in SUGAR_ORDER}
     found = [s for s in SUGAR_ORDER if values[s] > 0]
-    # Sorbitol fruits whose entry didn't measure it: present, but with no amount to weigh.
-    unmeasured_sorbitol = f.sorbitol is None and foods.is_sorbitol_fruit(f.name)
-    if not found and not unmeasured_sorbitol:
+    if not found:
         return Item(
             name=i.name,
             status="tolerated",
@@ -156,22 +157,17 @@ def _measured_item(i: ing.Ingredient, f: foods.Food, serving: Serving | None = N
             reason=_capitalize(f"{_matched(i, f)}no fructose or sucrose."),
             url=foods.url(f.id),
         )
-    amounts = _join([f"{_num(values[s])} g {s}" for s in found]) if found else "no fructose or sucrose"
+    amounts = _join([f"{_num(values[s])} g {s}" for s in found])
     load = sum(values[s] * (0.5 if s == "sucrose" else 1) for s in found) * i.share
-    reason = _capitalize(f"{_matched(i, f)}{amounts} per 100 g.")
-    if found:
-        reason += _share_text(i, load, serving)
-    if unmeasured_sorbitol:
-        found.append("sorbitol")
-        reason += " Sorbitol not measured, but this fruit contains it."
+    reason = _capitalize(f"{_matched(i, f)}{amounts} per 100 g.") + _share_text(i, load, serving)
     return Item(
         name=i.name,
         status="not_tolerated",
         sugars=found,
         basis=f.source,
         reason=reason,
-        # Per 100 g of the product, an upper bound; fructose_load halves sucrose itself. None when sorbitol has no amount.
-        grams=None if unmeasured_sorbitol else values["sucrose"] * i.share if found == ["sucrose"] else load,
+        # Per 100 g of the product, an upper bound; fructose_load halves sucrose itself.
+        grams=values["sucrose"] * i.share if found == ["sucrose"] else load,
         url=foods.url(f.id),
     )
 
@@ -243,15 +239,13 @@ def _answer_item(i: ing.Ingredient, answer: dict[str, Any], serving: Serving | N
 
 
 def _answer(candidates: list[foods.Food], match: dict[str, float] | None, describe: dict[str, float]) -> dict[str, Any]:
-    """{"food": id} unless Jev ruled out every candidate, else {"probs": the description}.
+    """{"food": id} when Jev's likeliest answer is a candidate, else {"probs": the description}.
 
-    The candidates are counted together against "not listed", so near-duplicates ("Potato, raw" in two
-    tables) can't split the vote and lose to it.
+    Probabilities aren't added across candidates: different foods aren't one answer, so together they
+    shouldn't outvote "not listed" (a roll "made with potato starch" for potato starch).
     """
-    if match:
-        foods_p = {k: v for k, v in match.items() if k.startswith("food_")}
-        if foods_p and sum(foods_p.values()) > match.get("not_listed", 0.0):
-            return {"food": candidates[int(max(foods_p, key=foods_p.__getitem__)[5:])].id}
+    if match and (choice := max(match, key=match.__getitem__)).startswith("food_"):
+        return {"food": candidates[int(choice[5:])].id}
     return {"probs": {k: describe.get(k, 0.0) for k in INGREDIENT_CRITERIA}}
 
 
@@ -309,7 +303,10 @@ async def classify_ingredients(
             items[int(k[1:])] = _answer_item(part, answer, serving)
             if cache:
                 cache.set(INGREDIENT_NS, sugars.norm(part.name), answer)
-    return [i for i in items if i is not None]
+    if weighed or any(p.exact for p in parsed):
+        return [i for i in items if i is not None]
+    # Where each is on the label bounds them all together (prefs.most_load); declared shares don't fit that.
+    return [i.model_copy(update={"share": p.share}) for p, i in zip(parsed, items) if i is not None]
 
 
 # ---------------------------------------------------------------- food names (FoodData Central)
@@ -550,24 +547,6 @@ def measured_sugars(
     return items, measured
 
 
-def known_sorbitol(names: Sequence[str]) -> list[Item]:
-    """Sorbitol for a whole food with no sorbitol measurement, from which foods AFCD finds it in.
-
-    `names` are the food's names in each database: AFCD calls apple juice "Juice, apple", USDA "Apple juice".
-    """
-    if not any(foods.is_sorbitol_fruit(n) for n in names):
-        return []
-    return [
-        Item(
-            name="Sorbitol",
-            status="not_tolerated",
-            sugars=["sorbitol"],
-            basis="afcd",
-            reason="Not measured here, but apples, pears and stone fruits contain it.",
-        )
-    ]
-
-
 def unidentified_sugars(
     nutrients: dict[str, float],
     local: foods.Food | None,
@@ -699,9 +678,30 @@ def _serving(food: dict[str, Any], nutrients: dict[str, float]) -> Serving | Non
     label = f"{household} ({size:g} {UNITS[unit]})" if household else f"{size:g} {UNITS[unit]}"
     max_sugars = None
     if (total := nutrients.get("Total Sugars")) is not None:
-        listed = total * size / 100
-        max_sugars = 0.5 if listed < 0.5 else round(listed) + 0.5
+        max_sugars = _under(total * size / 100)
     return Serving(grams=size, label=label, max_sugars=max_sugars)
+
+
+def _under(listed: float) -> float:
+    """What a label's total sugars are under. Labels round to the nearest gram at most, and list under 0.5 g
+    as 0 g, so 3 g means under 3.5 g."""
+    return 0.5 if listed < 0.5 else round(listed) + 0.5
+
+
+def _off_serving(p: off.Product) -> Serving | None:
+    """An Open Food Facts product's serving, and what its total sugars are under.
+
+    US labels give nutrients per serving. Others, as in the EU and Australia, give them per 100 g,
+    so the rounding applies to that.
+    """
+    if not p.serving_grams:
+        return None
+    max_sugars = None
+    if p.countries == ["United States"] and p.sugars_serving is not None:
+        max_sugars = _under(p.sugars_serving)
+    elif p.sugars_100g is not None:
+        max_sugars = _under(p.sugars_100g) * p.serving_grams / 100
+    return Serving(grams=p.serving_grams, label=p.serving_label, max_sugars=max_sugars)
 
 
 async def _fdc_result(
@@ -773,10 +773,9 @@ async def _fdc_result(
         unmeasured = [s for s in SUGAR_ORDER if s not in measured]
         generic = local is not None or (food is not None and food.data_type in GENERIC_TYPES)
         if generic and "sorbitol" in unmeasured:
-            # Whole foods: sorbitol comes from which foods contain it, not from a guess.
+            # Sorbitol is mostly added to prepared foods. The whole foods that have it (apples, pears, stone
+            # fruits) have far more fructose, so its amount wouldn't change the verdict.
             unmeasured.remove("sorbitol")
-            names = ([local.name] if local is not None else []) + ([food.description] if food is not None else [])
-            items += known_sorbitol(names)
         items += await _estimate(ts, name, unmeasured)
         items += unidentified_sugars(nutrients, local, measured, items, fdc_id)
         if generic:
@@ -921,7 +920,7 @@ async def _off_result(
     notes: Sequence[str] = (),
 ) -> Result:
     match = OffMatch(code=p.code, name=p.name, brand=p.brand, countries=p.countries, url=p.url)
-    serving = Serving(grams=p.serving_grams, label=p.serving_label) if p.serving_grams else None
+    serving = _off_serving(p)
     notes = list(notes)
     if p.ingredients:
         items = await classify_ingredients(ts, p.ingredients, cache, serving)
@@ -1174,6 +1173,8 @@ def summarize(items: list[Item], verdict: Verdict | None = None, load: Load | No
             headline = f"Small amounts of {_join(found)}"
         else:
             headline = "Unclear: may contain fructose, sucrose, or sorbitol"
+    elif load is not None and load.with_allowed is not None and load.with_allowed.status != "tolerated":
+        headline = "OK with your allowed foods"
     elif low := [
         s
         for s in SUGAR_ORDER

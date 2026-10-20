@@ -16,7 +16,7 @@ SEARCH = "https://search.openfoodfacts.org/search"
 HEADERS = {"User-Agent": "is-it-hfi-friendly/0.1 (+https://is-it-hfi-friendly.fly.dev)"}
 FIELDS = (
     "code,product_name,product_name_en,brands,countries_tags,ingredients_text,ingredients_text_en,lang,"
-    "serving_size,serving_quantity,serving_quantity_unit"
+    "serving_size,serving_quantity,serving_quantity_unit,nutriments"
 )
 SEARCH_FIELDS = "code,product_name,product_name_en,brands,countries_tags,lang"
 SEARCH_SIZE = 5
@@ -32,6 +32,8 @@ class Product:
     english: bool = True  # whether `ingredients` is in English
     serving_grams: float | None = None
     serving_size: str | None = None  # as written on the label: "1 portion (28.349 g)", "30 g"
+    sugars_100g: float | None = None  # total sugars
+    sugars_serving: float | None = None
 
     @property
     def url(self) -> str:
@@ -64,6 +66,13 @@ def _country(tag: str) -> str:
     return tag.split(":", 1)[-1].replace("-", " ").title()
 
 
+def _number(x: Any) -> float | None:
+    try:
+        return float(x) if x is not None and x != "" else None
+    except TypeError, ValueError:
+        return None
+
+
 def _product(p: dict[str, Any]) -> Product:
     english = (p.get("ingredients_text_en") or "").strip()
     other = (p.get("ingredients_text") or "").strip()
@@ -76,6 +85,7 @@ def _product(p: dict[str, Any]) -> Product:
         grams = None
     if (p.get("serving_quantity_unit") or "g").lower() not in ("g", "ml"):
         grams = None  # ml is close enough to g for the drinks and sauces that use it
+    nutriments = p.get("nutriments") or {}
     return Product(
         code=p["code"],
         name=(p.get("product_name_en") or p.get("product_name") or "").strip() or "Unnamed product",
@@ -85,6 +95,8 @@ def _product(p: dict[str, Any]) -> Product:
         english=bool(english) or p.get("lang") == "en",
         serving_grams=grams,
         serving_size=(p.get("serving_size") or "").strip() or None,
+        sugars_100g=_number(nutriments.get("sugars_100g")),
+        sugars_serving=_number(nutriments.get("sugars_serving")),
     )
 
 

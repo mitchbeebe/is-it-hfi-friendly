@@ -175,10 +175,10 @@ def test_items_link_to_the_food_in_their_source():
     assert analyze.measured_sugars({"Sucrose": 2.0}, None)[0][0].url is None
 
 
-def test_unmeasured_sorbitol_in_a_sorbitol_fruit_has_no_amount():
+def test_unmeasured_sorbitol_is_weighed_by_fructose():
     apples = next(f for f in foods._all() if f.source == "fdc" and f.name.startswith("Apples, raw, with skin"))
     item = analyze._measured_item(ingredients.Ingredient("apples"), apples)
-    assert "sorbitol" in item.sugars and item.grams is None  # so Small amounts can't downgrade it
+    assert item.sugars == ["fructose", "sucrose"] and item.grams is not None and item.grams > 5
 
 
 def test_jev_answer_is_a_food_or_a_description():
@@ -186,9 +186,9 @@ def test_jev_answer_is_a_food_or_a_description():
     describe = {"fructose": 0.6, "none": 0.4}
     picked = analyze._answer(candidates, {"food_0": 0.1, "food_1": 0.6, "not_listed": 0.3}, describe)
     assert picked == {"food": "ciqual:11018"}
-    # Near-duplicates together outvote "not listed", even when neither does alone.
-    split = analyze._answer(candidates, {"food_0": 0.3, "food_1": 0.3, "not_listed": 0.4}, describe)
-    assert split == {"food": "ciqual:11049"}
+    # Different foods don't add up against "not listed": potato starch isn't a roll made with it.
+    split = analyze._answer(candidates, {"food_0": 0.36, "food_1": 0.12, "not_listed": 0.46}, describe)
+    assert split["probs"]["fructose"] == pytest.approx(0.6)
     described = analyze._answer(candidates, {"food_0": 0.1, "food_1": 0.1, "not_listed": 0.8}, describe)
     assert described["probs"]["fructose"] == pytest.approx(0.6)
     assert analyze._answer([], None, describe)["probs"]["none"] == pytest.approx(0.4)
@@ -671,7 +671,9 @@ def test_label_total_sugars_caps_named_sugars():
     assert sugar is not None and sorbitol is not None
     zero = Serving(grams=85, label="1 link (85 g)", max_sugars=0.5)
     r = prefs.apply(analyze.summarize([sugar], serving=zero), trace_limit=1.0)
-    assert (r.items[0].status, r.verdict) == ("caution", "caution")  # at most 0.5 g a serving
+    assert (r.items[0].status, r.verdict) == ("caution", "ok")  # under 0.5 g a serving
+    assert r.load is not None and (r.load.grams, r.load.capped) == (0.5, True)
+    assert prefs.apply(analyze.summarize([sugar], serving=zero), trace_limit=1.0, ok_limit=0.4).verdict == "caution"
     assert prefs.apply(analyze.summarize([sugar]), trace_limit=1.0).verdict == "avoid"  # no label: no amount
     # Sorbitol isn't counted in total sugars.
     assert prefs.apply(analyze.summarize([sugar, sorbitol], serving=zero), trace_limit=1.0).verdict == "avoid"
@@ -782,12 +784,21 @@ def test_unspecified_survey_foods_are_left_out():
 def test_one_rule_for_the_amount_eaten():
     pouch = Serving(grams=42, label="1 Pouch (42 g)")
     cheez_it, guacamole = 0.19 * 100 / 42, 0.28  # per 100 g: 0.19 g in a pouch; guacamole has no serving
-    limit = prefs.DEFAULT_LIMIT
-    assert prefs._tier(cheez_it, limit, pouch) == prefs._tier(guacamole, limit, None) == "tolerated"
-    assert prefs._tier(0.6, limit, None) == "caution"  # 0.5 to 1 g
-    assert prefs._tier(0.5, limit, Serving(grams=250, label="1 cup (250 g)")) == "not_tolerated"  # 1.25 g in the cup
-    assert prefs._tier(0.6, 0.6, None) == "not_tolerated"  # a lower limit brings Avoid closer
-    assert prefs._tier(cheez_it, 0.15, pouch) == "not_tolerated"  # and under 0.5 g, it's the cut-off for OK
+    ok, limit = prefs.DEFAULT_OK, prefs.DEFAULT_LIMIT
+    assert prefs._tier(cheez_it, ok, limit, pouch) == prefs._tier(guacamole, ok, limit, None) == "tolerated"
+    assert prefs._tier(0.6, ok, limit, None) == "caution"  # 0.5 to 1 g
+    assert prefs._tier(0.5, ok, limit, Serving(grams=250, label="1 cup (250 g)")) == "not_tolerated"  # 1.25 g
+    assert prefs._tier(0.6, ok, 0.6, None) == "not_tolerated"  # a lower limit brings Avoid closer
+    assert prefs._tier(cheez_it, ok, 0.15, pouch) == "not_tolerated"  # and under ok, it's the cut-off for OK
+    assert prefs._tier(guacamole, 0.2, limit, None) == "caution"  # a stricter OK cut-off
+    assert prefs._tier(0.6, 0.8, limit, None) == "tolerated"  # or a looser one
+    assert prefs._tier(guacamole, 0, limit, None) == "caution"  # 0: any amount is at least Caution
+
+
+def test_ok_limit_reaches_the_verdict():
+    rice = analyze.summarize([measured_item("fructose", 0.1), measured_item("sucrose", 0.6)])  # load 0.4
+    assert prefs.apply(rice, trace_limit=1.0, ok_limit=0.3).verdict == "caution"
+    assert prefs.apply(rice, trace_limit=1.0, ok_limit=0.5).verdict == "ok"
 
 
 def test_trace_rule_sums_the_load_and_ignores_unmeasured():
@@ -859,6 +870,19 @@ def test_off_product_prefers_english_ingredients():
     assert off._product({"code": "2", "lang": "en"}).ingredients is None
 
 
+def test_off_total_sugars_cap_a_serving():
+    gnocchi = {"code": "1", "serving_quantity": 120, "serving_size": "0.75 cup (120 g)"}
+    zero = gnocchi | {"nutriments": {"sugars_100g": 0, "sugars_serving": 0}}
+    # A US label gives sugars per serving: 0 g means under 0.5 g in the serving.
+    us = analyze._off_serving(off._product(zero | {"countries_tags": ["en:united-states"]}))
+    assert us is not None and us.max_sugars == 0.5
+    # Elsewhere, per 100 g: under 0.5 g in 100 g, so under 0.6 g in 120 g.
+    eu = analyze._off_serving(off._product(zero | {"countries_tags": ["en:france"]}))
+    assert eu is not None and eu.max_sugars == 0.6
+    assert analyze._off_serving(off._product(gnocchi)).max_sugars is None  # no nutrition data
+    assert analyze._off_serving(off._product(zero | {"serving_quantity": None})) is None
+
+
 def test_off_product_serving():
     p = off._product({"code": "1", "serving_quantity": "28.349", "serving_size": "1 portion (28.349 g)"})
     assert (p.serving_grams, p.serving_label) == (28.349, "1 portion (28.349 g)")
@@ -877,3 +901,83 @@ def test_prefs_avoid_matches_off_product_name():
     r = analyze.summarize([item("tolerated")], off_product=match, ingredients_text="wholewheat flour")
     out = prefs.apply(r, avoid=["twiglet"], query="5000137001968")
     assert out.verdict == "avoid" and out.off_product == match
+
+
+def on_label(name, n, load=0.0, share=None):
+    """The nth ingredient on a label, with `load` g fructose load per 100 g of itself."""
+    share = share or 1 / n
+    if not load:
+        return Item(name=name, status="tolerated", basis="ciqual", reason="r", share=share)
+    return Item(
+        name=name,
+        status="not_tolerated",
+        sugars=["fructose"],
+        basis="ciqual",
+        reason="r",
+        grams=load * share,
+        share=share,
+    )
+
+
+# Potato gnocchi: each ingredient's fructose load per 100 g of itself.
+GNOCCHI = [
+    on_label("WATER", 1),
+    on_label("POTATO FLAKES", 2, 1.025),
+    on_label("UNBLEACHED WHEAT FLOUR", 3, 0.35),
+    on_label("POTATO STARCH", 4, 0.35),
+    on_label("RICE FLOUR", 5, 0.45),
+    on_label("SEA SALT", 6),
+    on_label("LACTIC ACID", 7),
+    on_label("TURMERIC (COLOR)", 8, 1.65),
+]
+
+
+def test_label_bounds_ingredients_together():
+    flagged = [i for i in GNOCCHI if i.grams]
+    assert prefs.fructose_load(flagged) == pytest.approx(1.0129, abs=1e-4)  # each at its own most
+    # The most is with water and potato flakes in equal parts: turmeric at 1/8 means all eight are.
+    assert prefs.most_load(GNOCCHI, flagged) == pytest.approx(1.025 / 2)
+    assert prefs.most_load(GNOCCHI, flagged[-1:]) == pytest.approx(1.65 / 8)  # alone, its own bound
+    # A "2% or less" section: B and C can't both be at their most either.
+    label = [on_label("A", 1), on_label("B", 2, 10), on_label("C", 3, 10, share=0.02)]
+    assert prefs.fructose_load(label[1:]) == pytest.approx(5.2)
+    assert prefs.most_load(label, label[1:]) == pytest.approx(5.1)  # C at 2%, A and B at 49%
+    # A section from the first ingredient can't sum to 1: each keeps its own bound.
+    odd = [on_label("A", 1, 10, share=0.02), on_label("B", 2, 10, share=0.02)]
+    assert prefs.most_load(odd, odd) == pytest.approx(0.4)
+
+
+def test_label_bound_reaches_the_verdict():
+    serving = Serving(grams=120, label="0.75 cup (120 g)")
+    r = prefs.apply(analyze.summarize(GNOCCHI, serving=serving), trace_limit=1.0)
+    assert r.load is not None and r.load.grams == pytest.approx(0.615) and r.verdict == "caution"
+
+
+def test_load_counting_tolerated_foods_is_kept():
+    serving = Serving(grams=120, label="0.75 cup (120 g)")
+    result = analyze.summarize(GNOCCHI, serving=serving)
+    r = prefs.apply(result, allow=["potato"], trace_limit=1.0, ok_limit=0.5)
+    assert r.load is not None and r.load.grams == pytest.approx(0.3675)  # flour, rice flour, turmeric
+    assert r.load.with_allowed is not None and r.load.with_allowed.grams == pytest.approx(0.615)
+    assert r.load.allowed == ["potato"]
+    assert (r.verdict, r.headline) == ("ok", "OK with your allowed foods")
+    assert prefs.apply(result, trace_limit=1.0).load.with_allowed is None  # nothing allowed
+    # Everything with sugar allowed: nothing counts, but the amount is still shown.
+    broccoli = prefs.apply(analyze.summarize([measured_item("fructose", 0.8)]), allow=["fructose"], trace_limit=1.0)
+    assert broccoli.load is not None and broccoli.load.grams == 0
+    assert broccoli.load.with_allowed is not None and broccoli.load.with_allowed.grams == 0.8
+
+
+def test_label_ingredients_carry_their_share():
+    items = [
+        Item(name=i.name, status="tolerated", basis="jev", reason="r")
+        for i in ingredients.parse("WATER, SALT, CONTAINS 2% OR LESS OF: TURMERIC")
+    ]
+    assert [i.share for i in items] == [None, None, None]  # set by classify_ingredients
+
+
+def test_ingredients_arent_matched_to_prepared_foods():
+    roll = food("Rolls, gluten-free, white, made with brown rice flour, tapioca starch, and potato starch")
+    assert roll.prepared and not food("Maize/corn starch").prepared
+    assert roll not in foods.candidates("potato starch")
+    assert roll in foods.search("potato starch")  # a food name typed in still finds dishes

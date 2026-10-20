@@ -89,8 +89,10 @@ class TextQuery(BaseModel):
     fdc_id: int | None = None
     allow: list[str] = Field(default=[], max_length=prefs.MAX_TERMS)
     avoid: list[str] = Field(default=[], max_length=prefs.MAX_TERMS)
-    # Measured fructose load (g per 100 g) below which a food is Caution rather than Avoid; 0 turns it off.
+    # Measured fructose load (g per serving) below which a food is Caution rather than Avoid; 0 turns it off.
     trace_limit: float = Field(default=prefs.DEFAULT_LIMIT, ge=0, le=20)
+    # ... and below which it's OK.
+    ok_limit: float = Field(default=prefs.DEFAULT_OK, ge=0, le=20)
     # Which of a whole food's household measures (result.portions) to judge it by; per 100 g when None.
     portion: int | None = Field(default=None, ge=0)
 
@@ -115,7 +117,15 @@ async def check_text(q: TextQuery) -> Result:
     else:
         result = await _run(analyze.check_text(app.state.ts, app.state.http, q.text, q.fdc_id, cache))
         cache.set(f"text:{RESULT_VERSION}", key, result.model_dump(mode="json"))
-    return prefs.apply(result, q.allow, q.avoid, query=q.text, trace_limit=q.trace_limit, portion=q.portion)
+    return prefs.apply(
+        result,
+        q.allow,
+        q.avoid,
+        query=q.text,
+        trace_limit=q.trace_limit,
+        ok_limit=q.ok_limit,
+        portion=q.portion,
+    )
 
 
 @app.post("/api/check/image", dependencies=[Depends(rate_limit)])

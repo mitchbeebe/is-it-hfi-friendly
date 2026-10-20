@@ -37,6 +37,7 @@ TAXONOMY_URL = (
     f"{TAXONOMY_COMMIT}/taxonomies/food/ingredients.txt"
 )
 FDC_LIST = "https://api.nal.usda.gov/fdc/v1/foods/list"
+FDC_SEARCH = "https://api.nal.usda.gov/fdc/v1/foods/search"
 FDC_NUTRIENTS = {"fructose": "212", "sucrose": "210", "total_sugars": "269"}
 # US names for the Australian ones AFCD uses.
 AFCD_ALIASES = {
@@ -60,7 +61,7 @@ AFCD_ALIASES = {
 }
 
 
-def _row(id_: str, source: str, name: str, aliases: list[str], note: str, **values) -> dict | None:
+def _row(id_: str, source: str, name: str, aliases: list[str], note: str, group: str, **values) -> dict | None:
     """A food, or None when its fructose and sucrose aren't known. Total sugars of 0 means none of either."""
     if values["total_sugars"] == 0:
         # No sugar at all, including any reported only as under a detection limit.
@@ -68,7 +69,7 @@ def _row(id_: str, source: str, name: str, aliases: list[str], note: str, **valu
         values["below"] = [s for s in values["below"] if s not in ("fructose", "sucrose")]
     if values["fructose"] is None or values["sucrose"] is None:
         return None
-    return {"id": id_, "source": source, "name": name, "aliases": aliases, "note": note, **values}
+    return {"id": id_, "source": source, "name": name, "aliases": aliases, "note": note, "group": group, **values}
 
 
 def afcd() -> list[dict]:
@@ -76,7 +77,9 @@ def afcd() -> list[dict]:
     for f in json.loads(AFCD.read_text())["foods"]:
         aliases = [us for au, us in AFCD_ALIASES.items() if au in f["name"].lower()]
         values = {k: f[k] for k in ("fructose", "sucrose", "sorbitol", "total_sugars")}
-        rows.append(_row(f"afcd:{f['id']}", "afcd", f["name"], aliases, f["derivation"], below=[], **values))
+        rows.append(
+            _row(f"afcd:{f['id']}", "afcd", f["name"], aliases, f["derivation"], f["group"], below=[], **values)
+        )
     return [r for r in rows if r]
 
 
@@ -103,6 +106,7 @@ def ciqual(data: bytes, aliases: dict[str, list[str]]) -> list[dict]:
     }
     col = {k: header.index(v) for k, v in columns.items()}
     code_col, name_col = header.index("alim_code"), header.index("alim_nom_eng")
+    group_cols = header.index("alim_grp_nom_eng"), header.index("alim_ssgrp_nom_eng")
     rows = []
     for r in range(1, sheet.nrows):
         row = [str(c.value) for c in sheet.row(r)]
@@ -110,8 +114,29 @@ def ciqual(data: bytes, aliases: dict[str, list[str]]) -> list[dict]:
         code = f"ciqual:{int(float(row[code_col]))}"
         below = [k for k, (_, b) in parsed.items() if b and k != "total_sugars"]
         values = {k: v for k, (v, _) in parsed.items()}
-        rows.append(_row(code, "ciqual", row[name_col].strip(), aliases.get(code, []), "", below=below, **values))
+        group = " / ".join(row[c].strip() for c in group_cols if row[c].strip())  # "starters and dishes / soups"
+        rows.append(
+            _row(code, "ciqual", row[name_col].strip(), aliases.get(code, []), "", group, below=below, **values)
+        )
     return [r for r in rows if r]
+
+
+def usda_categories(http: httpx.Client, data_type: str) -> dict[int, str]:
+    """fdcId -> USDA food category ("Baked Products"). The list endpoint leaves categories out; search has them."""
+    found: dict[int, str] = {}
+    page = 1
+    while True:
+        r = http.post(
+            FDC_SEARCH,
+            params={"api_key": os.environ["FOODDATA_CENTRAL_API_KEY"]},
+            json={"query": "*", "dataType": [data_type], "pageSize": 200, "pageNumber": page},
+        )
+        r.raise_for_status()
+        foods = r.json().get("foods", [])
+        if not foods:
+            return found
+        found |= {f["fdcId"]: f.get("foodCategory") or "" for f in foods}
+        page += 1
 
 
 def usda(aliases: dict[str, list[str]]) -> list[dict]:
@@ -119,6 +144,7 @@ def usda(aliases: dict[str, list[str]]) -> list[dict]:
     rows = []
     with httpx.Client(timeout=60) as http:
         for data_type in ("Foundation", "SR Legacy"):
+            categories = usda_categories(http, data_type)
             page = 1
             while True:
                 r = http.post(
@@ -140,6 +166,7 @@ def usda(aliases: dict[str, list[str]]) -> list[dict]:
                         f["description"],
                         aliases.get(code, []),
                         data_type,
+                        categories.get(f["fdcId"], ""),
                         sorbitol=None,
                         below=[],
                         **values,

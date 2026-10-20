@@ -14,12 +14,13 @@ errs toward flagging: any item or food whose name contains the term, BU sugars i
 ("corn" flags "corn syrup"). When a term is on both lists, avoid wins.
 """
 
+import itertools
 import math
 from collections.abc import Sequence
 
 from . import analyze, sugars
 from .models import Item, Load, Result, Serving
-from .sugars import Status, Sugar, key
+from .sugars import Status, key
 
 MAX_TERMS, MAX_TERM_LEN = 200, 80
 
@@ -52,64 +53,143 @@ def fructose_load(items: Sequence[Item]) -> float:
     return sum((i.grams or 0) * (0.5 if i.sugars == ["sucrose"] else 1) for i in items)
 
 
-# Under this fructose load in the amount eaten, a food is tolerated: the lowest vegetable tier in HFI
-# guidance, 0.5 g per 100 g, and the strictest cut-off Italian centres use for vegetables
-# (Izquierdo-García 2026, doi:10.3390/nu18050771; Bruni 2026, doi:10.3390/nu18162609). It's half the low
-# end of the 1 to 1.5 g daily limit guidance gives (40 mg/kg).
-LOW_LOAD = 0.5
+# Unless the person sets their own, under this fructose load in the amount eaten a food is tolerated: the
+# lowest vegetable tier in HFI guidance, 0.5 g per 100 g, and the strictest cut-off Italian centres use for
+# vegetables (Izquierdo-García 2026, doi:10.3390/nu18050771; Bruni 2026, doi:10.3390/nu18162609). It's half
+# the low end of the 1 to 1.5 g daily limit guidance gives (40 mg/kg).
+DEFAULT_OK = 0.5
 # Where Avoid starts unless the person sets their own limit: the low end of that daily limit in one serving.
 DEFAULT_LIMIT = 1.0
 FRUCTOSE_SUCROSE = {"fructose", "sucrose"}
 
 
-def _tier(load: float, limit: float, serving: Serving | None) -> Status:
+def _tier(load: float, ok: float, limit: float, serving: Serving | None, under: bool = False) -> Status:
     """Status for a fructose load per 100 g, judged in the amount eaten: the serving when it's known,
-    else 100 g. Under 0.5 g is OK and under the person's limit Caution; a limit under 0.5 g lowers OK to it."""
-    eaten = load * serving.grams / 100 if serving is not None else load
-    return "tolerated" if eaten < min(LOW_LOAD, limit) else "caution" if eaten < limit else "not_tolerated"
+    else 100 g. Under `ok` is OK and under `limit` Caution; a limit under `ok` lowers OK to it.
+
+    `under`: the true load is under `load`, as with a label's total sugars, so `load` itself reaching a
+    cut-off still counts as under it."""
+    # Rounded, so a label's 0.5 g, converted to per 100 g and back, is 0.5 g again.
+    eaten = round(load * serving.grams / 100 if serving is not None else load, 9)
+
+    def below(cut: float) -> bool:
+        return eaten <= cut if under else eaten < cut
+
+    return "tolerated" if below(min(ok, limit)) else "caution" if below(limit) else "not_tolerated"
 
 
-def apply_amounts(items: list[Item], limit: float, serving: Serving | None) -> tuple[list[Item], Load | None]:
+def most_load(label: Sequence[Item], counted: Sequence[Item]) -> float:
+    """The most fructose load (g per 100 g of the product) `counted` can add up to, given where they are on
+    the `label`, which lists every ingredient with the most it can be of the product (`share`).
+
+    Each ingredient's own bound, "listed 8th, so at most 1/8", can't hold for all of them at once: for the
+    8th to be 1/8, so is each of the seven before it. Shares that fall down the list and sum to 1 are a
+    mix of "the first m in equal parts", so the most is at one of those; with a "2% or less" section, at
+    a mix of two that has the section at its most. Falls back to adding each one's own bound when the
+    label doesn't fit that, as when the section starts with the first ingredient.
+    """
+    alone = fructose_load(counted)
+    loads = [fructose_load([i]) / i.share if i in counted and i.share else 0.0 for i in label]
+    on_label = [i for i in counted if i in label]
+    # Where the "2% or less" section starts (0-based) and its share: a bound tighter than the position gives.
+    caps = {n: i.share for n, i in enumerate(label) if i.share is not None and i.share < 1 / (n + 1) - 1e-9}
+    if not on_label or len(set(caps.values())) > 1:
+        return alone
+    start, cap = next(iter(caps.items()), (len(label), 1.0))
+    prefix = list(itertools.accumulate(loads))  # prefix[m - 1]: the first m together
+
+    # Weights t[m] on "the first m in equal parts" (each 1/m), with sum of m * t[m] = 1, and the section's
+    # share, the sum of t[m] for m past its start, at most `cap`.
+    def value(t: dict[int, float]) -> float:
+        return sum(w * prefix[m - 1] for m, w in t.items())
+
+    n = len(label)
+    found = [prefix[m - 1] / m for m in range(1, n + 1) if m <= start or 1 / m <= cap]
+    for a in range(1, n + 1):
+        for b in range(max(a + 1, start + 1), n + 1):
+            # The section at its most: t[b] (and t[a], when a is in it too) adds up to `cap`.
+            tb = cap if a <= start else (1 - a * cap) / (b - a)
+            ta = (1 - b * tb) / a if a <= start else cap - tb
+            if ta >= 0 and tb >= 0:
+                found.append(value({a: ta, b: tb}))
+    if not found:
+        return alone
+    off_label = fructose_load([i for i in counted if i not in label])
+    return min(alone, max(found) + off_label)
+
+
+def apply_amounts(
+    items: list[Item], ok: float, limit: float, serving: Serving | None
+) -> tuple[list[Item], Load | None]:
     """Weigh measured amounts: each item by its own amount, and the product by all of them together.
 
-    Fructose and sucrose together can't exceed the label's total sugars, so that caps them, including
+    Fructose and sucrose together are under the label's total sugars, so that caps them, including
     sugars an ingredient list names with no amount. Sorbitol isn't counted in total sugars, so it needs
     its own measurement. Returns the items and the product's load, or None when something flagged has
     no amount to weigh. A limit of 0 flags any amount, so nothing is downgraded.
+
+    Foods the person tolerates don't count, but the load counting them is kept too (`with_allowed`).
     """
     cap = serving.max_sugars * 100 / serving.grams if serving and serving.max_sugars is not None else None
-    flagged = [i for i in items if i.status == "not_tolerated" and not i.allowed_by]
+    label = [i for i in items if i.share is not None]
+    every = [i for i in items if i.status == "not_tolerated"]
+    flagged = [i for i in every if not i.allowed_by]
     fs = [i for i in flagged if i.sugars and set(i.sugars) <= FRUCTOSE_SUCROSE]
     sorbitol = [i for i in flagged if "sorbitol" in i.sugars]
+
+    def capped(load: float) -> bool:
+        return cap is not None and load >= cap
 
     def own(i: Item) -> float:
         load = fructose_load([i]) if i.grams is not None else math.inf
         return min(load, cap) if cap is not None and i in fs else load
 
-    def tier(load: float) -> Status:
-        return _tier(load, limit, serving) if limit > 0 else "not_tolerated" if load > 0 else "tolerated"
+    def tier(load: float, under: bool = False) -> Status:
+        if limit <= 0:
+            return "not_tolerated" if load > 0 else "tolerated"
+        return _tier(load, ok, limit, serving, under)
+
+    def total(flagged: list[Item]) -> Load | None:
+        """The product's load from these flagged items, or None when one has no amount to weigh."""
+        fs = [i for i in flagged if i.sugars and set(i.sugars) <= FRUCTOSE_SUCROSE]
+        sorbitol = [i for i in flagged if "sorbitol" in i.sugars]
+        if any(i not in fs and i not in sorbitol for i in flagged) or any(i.grams is None for i in sorbitol):
+            return None
+        fs_load = math.inf if any(i.grams is None for i in fs) else most_load(label, fs)
+        # Each bound holds, so the lower one does: fructose and sucrose under total sugars, plus sorbitol,
+        # or all of them together on the label.
+        with_cap = (min(fs_load, cap) if cap is not None else fs_load) + most_load(label, sorbitol)
+        together = most_load(label, fs + sorbitol) if fs_load < math.inf else math.inf
+        grams = min(with_cap, together)
+        if grams == math.inf:
+            return None
+        under = capped(fs_load) and with_cap <= together
+        return Load(
+            grams=round(grams * serving.grams / 100 if serving else grams, 4),
+            per=serving.label if serving else "100 g",
+            status=tier(grams, under),
+            sugars=[s for s in analyze.SUGAR_ORDER if any(s in i.sugars for i in flagged)],
+            capped=under,
+        )
 
     weighed = [i for i in fs + sorbitol if own(i) < math.inf]
     out = []
     for i in items:
-        if i in weighed and not i.avoided_by and tier(own(i)) != "not_tolerated":
+        if i in weighed and not i.avoided_by and tier(own(i), i in fs and capped(own(i))) != "not_tolerated":
             # It has the sugar, so it's never Tolerated itself; whether the product is depends on the load.
             i = i.model_copy(update={"status": "caution", "trace": True})
         out.append(i)
 
-    fs_load = math.inf if any(i.grams is None for i in fs) else fructose_load(fs)
-    total = (min(fs_load, cap) if cap is not None else fs_load) + fructose_load(sorbitol)
-    unweighable = [i for i in flagged if i not in fs and i not in sorbitol] + [i for i in sorbitol if i.grams is None]
-    if unweighable or not weighed or total == math.inf:
-        return out, None
-    sugars: list[Sugar] = [s for s in analyze.SUGAR_ORDER if any(s in i.sugars for i in weighed)]
-    return out, Load(
-        grams=round(total * serving.grams / 100 if serving else total, 4),
-        per=serving.label if serving else "100 g",
-        status=tier(total),
-        sugars=sugars,
-        capped=cap is not None and fs_load > cap,
-    )
+    load = total(flagged) if weighed else None
+    allowed = [i for i in every if i.allowed_by and not i.avoided_by]
+    if allowed and (full := total(every)) is not None and full.grams > (load.grams if load else 0):
+        if load is None and not flagged:
+            # Everything with sugar is a food they tolerate.
+            load = Load(grams=0, per=full.per, status="tolerated", sugars=[])
+        if load is not None:
+            terms = list(dict.fromkeys(i.allowed_by for i in allowed if i.allowed_by))
+            load = load.model_copy(update={"with_allowed": full, "allowed": terms})
+    return out, load
 
 
 def apply(
@@ -118,6 +198,7 @@ def apply(
     avoid: Sequence[str] = (),
     query: str | None = None,
     trace_limit: float = 0,
+    ok_limit: float = DEFAULT_OK,
     portion: int | None = None,
 ) -> Result:
     """`portion` picks one of a whole food's household measures to judge it by, like a label's serving."""
@@ -156,7 +237,7 @@ def apply(
         p = result.portions[portion]
         serving = Serving(grams=p.grams, label=p.label)
     # Amounts are weighed after the lists, so allowed items don't count toward the load.
-    items, load = apply_amounts(items, trace_limit, serving)
+    items, load = apply_amounts(items, ok_limit, trace_limit, serving)
     notes = list(result.notes)
     if allowed := [i for i in items if i.allowed_by and not i.avoided_by and i.status != "tolerated"]:
         notes.append(f"Not counting {_count(allowed)} you've allowed in Settings.")
