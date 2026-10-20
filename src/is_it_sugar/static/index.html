@@ -157,6 +157,10 @@
     background: var(--card); color: var(--text); font-size: .9rem; font-weight: 600; text-decoration: none; white-space: nowrap;
   }
   .nav-btn .count { color: var(--muted); font-weight: 500; }
+  .nav { display: flex; gap: 8px; }
+  @media (max-width: 400px) { header h1 { font-size: 1.3rem; } }
+  .nav-btn.help { width: 2.4em; padding-inline: 0; text-align: center; }
+  .muted a { color: var(--accent); }
   .s-allowed .dot { border: 2px solid var(--accent); }
   .s-allowed .tag { color: var(--accent); }
   .s-allowed .name { color: var(--muted); }
@@ -251,7 +255,10 @@
 <main>
   <header>
     <h1>Is it HFI-friendly?</h1>
-    <a class="nav-btn" id="nav" href="#settings">Settings</a>
+    <div class="nav">
+      <a class="nav-btn help" id="help" href="#about" aria-label="How it works">?</a>
+      <a class="nav-btn" id="nav" href="#settings">Settings</a>
+    </div>
     <p>Check a food for fructose, sucrose, and sorbitol (FSS) on a hereditary fructose intolerance (HFI) diet.</p>
   </header>
 
@@ -365,7 +372,7 @@
       <p class="muted">Fructose load is fructose + half of sucrose + sorbitol, in a serving: the label's, an amount
         you pick on a result such as “1 clove”, or else 100 g. Drag the handles to set where OK ends and where Avoid
         starts (0.5 g and 1 g by default). Each ingredient with the sugar still shows Caution, since only the total
-        decides. Drag both to 0 to flag any amount.</p>
+        decides. Drag both to 0 to flag any amount. <a href="#about">How it works</a></p>
       <div class="tiers">
         <input id="ok-limit" type="range" min="0" max="3" step="0.1" aria-label="OK under, grams per serving">
         <input id="trace-limit" type="range" min="0" max="3" step="0.1" aria-label="Avoid from, grams per serving">
@@ -387,8 +394,9 @@
 
   </section>
 
-  <details class="card section about">
-    <summary>How it works</summary>
+  <div id="view-about" aria-label="How it works" hidden>
+  <section class="card about">
+    <h2>How it works</h2>
     <ol>
       <li><b>Finding the food.</b> Names and barcodes are looked up in USDA and Open Food Facts. An AI model reads
         photos.</li>
@@ -401,7 +409,7 @@
       <li><b>The verdict.</b> Your Small amounts setting judges the fructose load in a serving. A sugar with no
         measured amount means Avoid.</li>
     </ol>
-  </details>
+  </section>
 
   <details class="card section about">
     <summary>Data sources and research</summary>
@@ -455,6 +463,7 @@
         can make mistakes.</li>
     </ul>
   </details>
+  </div>
 
   <footer>
     Always read the label, and check with your doctor or dietitian before relying on a result.
@@ -659,25 +668,31 @@ for (const kind of Object.keys(LISTS)) {
   });
 }
 
-// ---- views: #settings or the checker
-function route(navigated = true) {
-  const settings = location.hash === "#settings";
-  $("#view-check").hidden = settings;
-  $("#view-settings").hidden = !settings;
-  if (settings) stopScan();
+// ---- views: #settings, #about or the checker
+let aboutFrom = "#"; // Done on #about goes back to the view that opened it
+function route(navigated = true, from = "") {
+  const view = ["#settings", "#about"].includes(location.hash) ? location.hash : "#";
+  if (view === "#about" && navigated) aboutFrom = from === "#settings" ? from : "#";
+  $("#view-check").hidden = view !== "#";
+  $("#view-settings").hidden = view !== "#settings";
+  $("#view-about").hidden = view !== "#about";
+  if (view !== "#") stopScan();
+  $("#help").hidden = view === "#about";
   const nav = $("#nav");
   const n = lists.allow.length + lists.avoid.length;
-  nav.innerHTML = settings ? "Done" : `Settings${n ? ` <span class="count">· ${n}</span>` : ""}`;
-  nav.href = settings ? "#" : "#settings";
-  nav.setAttribute("aria-label", settings ? "Done, back to checker" : `Settings, ${n} saved food${n === 1 ? "" : "s"}`);
+  const back = view === "#about" ? aboutFrom : "#";
+  nav.innerHTML = view !== "#" ? "Done" : `Settings${n ? ` <span class="count">· ${n}</span>` : ""}`;
+  nav.href = view !== "#" ? back : "#settings";
+  nav.setAttribute("aria-label", view !== "#" ? `Done, back to ${back === "#settings" ? "settings" : "checker"}`
+    : `Settings, ${n} saved food${n === 1 ? "" : "s"}`);
   if (!navigated) return;
   window.scrollTo(0, 0);
-  if (!settings && prefsChanged && lastRun) {
+  if (view === "#" && prefsChanged && lastRun) {
     prefsChanged = false;
     lastRun();
   }
 }
-addEventListener("hashchange", () => route());
+addEventListener("hashchange", (e) => route(true, new URL(e.oldURL).hash));
 
 // ---- tabs
 for (const tab of document.querySelectorAll('[role="tab"]')) {
