@@ -103,7 +103,7 @@ def test_parse_bounds_each_ingredients_share_of_the_product():
         "POPCORN": (1.0, "the first ingredient"),
         "SUNFLOWER OIL": (0.5, "listed 2nd"),
         "SEA SALT": (0.333, "listed 3rd"),
-        "PAPRIKA": (0.02, "listed under 2% or less"),
+        "PAPRIKA": (0.02, ""),
         "tomatoes 45%": (0.45, "as declared"),
     }
 
@@ -150,7 +150,7 @@ def test_measured_ingredient_counts_at_its_share():
     assert (item.status, item.basis) == ("not_tolerated", "ciqual")
     assert item.grams == pytest.approx((6.71 + 0.81 / 2) * 0.02)
     assert item.reason == (
-        "6.7 g fructose and 0.81 g sucrose per 100 g. At most 2% of the product (listed under 2% or less), "
+        "6.7 g fructose and 0.81 g sucrose per 100 g. At most 2% of the product, "
         "so it adds up to 0.14 g fructose load per 100 g of the product."
     )  # the matched food's name only when it differs from the ingredient's
     salt = analyze._measured_item(ingredients.Ingredient("salt"), food("Salt, table, non-iodised"))

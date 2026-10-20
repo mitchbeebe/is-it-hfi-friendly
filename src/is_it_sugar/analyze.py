@@ -130,7 +130,7 @@ def _share_text(i: ing.Ingredient, load: float, serving: Serving | None) -> str:
     if i.share >= 1:
         # The whole product, so per 100 g it's the food's own amounts, already given.
         return f" It adds {amount} {per}." if serving else ""
-    share = f"{_pct(i.share)} of the {i.whole} ({i.why})"
+    share = f"{_pct(i.share)} of the {i.whole}" + (f" ({i.why})" if i.why else "")
     return f" {share if i.exact else 'At most ' + share}, so it adds {amount} {per}."
 
 

@@ -24,7 +24,7 @@ _DECLARED = re.compile(r"^(?:.*\s)?\(?(\d+(?:\.\d+)?)\s*%\)?$")
 class Ingredient:
     name: str
     share: float = 1.0  # the most this ingredient can be of the product, from 0 to 1
-    why: str = ""  # how `share` is known, e.g. "listed 3rd"
+    why: str = ""  # how `share` is known, e.g. "listed 3rd"; empty when a section's heading says it
     exact: bool = False  # `share` is the ingredient's own, as declared or in a recipe, not a bound
     whole: str = "product"  # what it's a share of: "product", or "dish" for a recipe
     heading: str = ""  # a section of the label that starts here: "Contains 2% or less of", "Filling"
@@ -101,7 +101,7 @@ def parse(text: str) -> list[Ingredient]:
         n = len(found) + 1
         share, why = 1 / n, "the first ingredient" if n == 1 else f"listed {_ordinal(n)}"
         if at_most is not None and at_most / 100 < share:
-            share, why = at_most / 100, f"listed under {at_most:g}% or less"
+            share, why = at_most / 100, ""  # the section's heading already says why
         base, inner = split(name)
         declared = _DECLARED.match(base) or (len(inner) == 1 and _DECLARED.match(f"({inner[0]})"))
         if declared:
