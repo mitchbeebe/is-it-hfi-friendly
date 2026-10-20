@@ -4,7 +4,7 @@ primary_region = "ewr"
 [env]
   # Fly's proxy sets this to the real client address; X-Forwarded-For can be forged.
   CLIENT_IP_HEADER = "Fly-Client-IP"
-  IS_IT_SUGAR_CACHE = "/data/cache.sqlite3"
+  IS_IT_HFI_FRIENDLY_CACHE = "/data/cache.sqlite3"
 
 [http_service]
   internal_port = 8080

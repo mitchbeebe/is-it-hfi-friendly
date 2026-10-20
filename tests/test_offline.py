@@ -5,8 +5,8 @@ import io
 import pytest
 from PIL import Image
 
-from is_it_sugar import analyze, foods, images, ingredients, off, prefs, sugars
-from is_it_sugar.models import Food, Item, Serving
+from is_it_hfi_friendly import analyze, foods, images, ingredients, off, prefs, sugars
+from is_it_hfi_friendly.models import Food, Item, Serving
 
 
 def test_parse_strips_lead_ins_and_allergens():
@@ -462,7 +462,7 @@ def test_avoid_and_sugars_headline_names_sugars():
 
 
 def test_rate_limiter_windows(monkeypatch):
-    from is_it_sugar import ratelimit
+    from is_it_hfi_friendly import ratelimit
 
     now = [1000.0]
     monkeypatch.setattr(ratelimit.time, "monotonic", lambda: now[0])
@@ -480,7 +480,7 @@ def test_rate_limiter_windows(monkeypatch):
 
 
 def test_cache_roundtrip_and_expiry(tmp_path, monkeypatch):
-    from is_it_sugar import cache as cache_mod
+    from is_it_hfi_friendly import cache as cache_mod
 
     c = cache_mod.Cache(tmp_path / "c.sqlite3")
     c.set("ns", "k", {"a": 1})
@@ -495,7 +495,7 @@ def test_cache_roundtrip_and_expiry(tmp_path, monkeypatch):
 
 
 def au(name):
-    from is_it_sugar import afcd
+    from is_it_hfi_friendly import afcd
 
     return next(f for f in afcd.foods() if f.name == name)
 
@@ -506,7 +506,7 @@ def local(name):
 
 
 def test_afcd_data_is_whole_foods_without_borrowed_rows():
-    from is_it_sugar import afcd
+    from is_it_hfi_friendly import afcd
 
     data = afcd.foods()
     assert len(data) > 800
@@ -549,7 +549,7 @@ def test_measured_sugars_from_ciqual():
 
 
 def test_prefs_keeps_measured_match():
-    from is_it_sugar.models import MeasuredMatch
+    from is_it_hfi_friendly.models import MeasuredMatch
 
     match = MeasuredMatch(source="afcd", id="afcd:F1", name="Broccoli, fresh, raw", note="Analysed", kinds=1)
     items = [
@@ -581,7 +581,7 @@ def test_unidentified_sugars_skipped_when_explained_or_zero():
 
 
 def test_varieties_differ_only_in_variety():
-    from is_it_sugar import afcd
+    from is_it_hfi_friendly import afcd
 
     apples = afcd.varieties(au("Apple, fuji, unpeeled, raw"))
     assert all(a.form == "unpeeled, raw" for a in apples) and len(apples) >= 9
@@ -713,7 +713,7 @@ def test_portions_from_usda_household_measures():
 
 
 def test_whole_food_judged_per_picked_portion():
-    from is_it_sugar.models import Portion
+    from is_it_hfi_friendly.models import Portion
 
     items, _ = analyze.measured_sugars({}, local("Chives, raw"))
     portions = [Portion(label="1 tbsp chopped (3 g)", grams=3.0), Portion(label="1 cup (48 g)", grams=48.0)]
@@ -818,7 +818,7 @@ def test_avoid_list_beats_trace_rule():
 
 
 def test_cache_drops_old_result_versions(tmp_path):
-    from is_it_sugar.cache import Cache
+    from is_it_hfi_friendly.cache import Cache
 
     c = Cache(tmp_path / "c.sqlite3")
     for ns in ("text", "text:old", "text:new", "image:old", "ingredient"):
@@ -895,7 +895,7 @@ def test_off_product_serving():
 
 
 def test_prefs_avoid_matches_off_product_name():
-    from is_it_sugar.models import OffMatch
+    from is_it_hfi_friendly.models import OffMatch
 
     match = OffMatch(code="5000137001968", name="Twiglets", brand="Jacob's", countries=["United Kingdom"], url="u")
     r = analyze.summarize([item("tolerated")], off_product=match, ingredients_text="wholewheat flour")

@@ -500,16 +500,27 @@ let lastRun = null; // re-runs the last check after Settings change
 let lastCheck = null; // the text check on screen, so picking an amount can re-run it
 let runId = 0; // bumped by each check and by Clear, so a late answer can't land after a reset
 
+// Moves storage saved under the app's old name, "is-it-sugar.*", so lists and settings survive the rename.
+// The unused per-100 g "is-it-sugar.trace" is dropped.
+try {
+  for (const old of Object.keys(localStorage).filter((k) => k.startsWith("is-it-sugar."))) {
+    const name = old.slice("is-it-sugar.".length), key = `is-it-hfi-friendly.${name}`;
+    const keep = ["allow", "avoid", "ok-serving", "trace-serving", "recent"].includes(name);
+    if (keep && localStorage.getItem(key) === null) localStorage.setItem(key, localStorage.getItem(old));
+    localStorage.removeItem(old);
+  }
+} catch {}
+
 // ---- your lists: foods you tolerate (allow) and ingredients you avoid. Kept in this browser only.
 const LISTS = {
   allow: {
-    storage: "is-it-sugar.allow",
+    storage: "is-it-hfi-friendly.allow",
     label: "your tolerated foods",
     suggestions: ["Onion", "Garlic", "Broccoli", "Spinach", "Lettuce", "Celery",
       "Potato", "Natural flavor", "Spice", "Sucralose", "Glucose syrup"],
   },
   avoid: {
-    storage: "is-it-sugar.avoid",
+    storage: "is-it-hfi-friendly.avoid",
     label: "your avoid list",
     suggestions: ["Natural flavor", "Artificial flavor", "Spice", "Caramel color", "Fruit pectin", "Vegetable juice",
       "Yeast extract", "Malt"],
@@ -539,7 +550,7 @@ const lists = { allow: loadList("allow"), avoid: loadList("avoid") };
 
 // Fructose load (g per serving): under okLimit is OK, from traceLimit up is Avoid, and between is Caution.
 // TRACE_KEY is a new key, since the old one was per 100 g.
-const TRACE_KEY = "is-it-sugar.trace-serving", OK_KEY = "is-it-sugar.ok-serving";
+const TRACE_KEY = "is-it-hfi-friendly.trace-serving", OK_KEY = "is-it-hfi-friendly.ok-serving";
 const TIER_MAX = 3;
 function loadLimit(key, fallback) {
   try {
@@ -1105,7 +1116,7 @@ document.addEventListener("visibilitychange", () => document.hidden && stopScan(
 
 // ---- recent checks: the last few food names and barcodes, kept in this browser only.
 // Tapping one re-runs it, which the server's cache answers quickly, with the current Settings.
-const RECENT_KEY = "is-it-sugar.recent";
+const RECENT_KEY = "is-it-hfi-friendly.recent";
 const RECENT_MAX = 10;
 let recent = [];
 try {

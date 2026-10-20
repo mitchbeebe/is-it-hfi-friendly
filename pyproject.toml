@@ -1,8 +1,10 @@
 [project]
-name = "is-it-sugar"
+name = "is-it-hfi-friendly"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "mitchbeebe", email = "beebe.mitch@gmail.com" }
 ]
@@ -15,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-is-it-sugar = "is_it_sugar:main"
+is-it-hfi-friendly = "is_it_hfi_friendly:main"
 
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]
@@ -32,4 +34,4 @@ dev = [
 line-length = 120
 
 [tool.fastapi]
-entrypoint = "is_it_sugar.app:app"
+entrypoint = "is_it_hfi_friendly.app:app"

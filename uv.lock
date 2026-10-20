@@ -514,7 +514,7 @@ wheels = [
 ]
 
 [[package]]
-name = "is-it-sugar"
+name = "is-it-hfi-friendly"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

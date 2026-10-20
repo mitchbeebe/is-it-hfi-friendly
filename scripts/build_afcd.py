@@ -1,4 +1,4 @@
-"""Build src/is_it_sugar/data/afcd.json from the Australian Food Composition Database (AFCD).
+"""Build src/is_it_hfi_friendly/data/afcd.json from the Australian Food Composition Database (AFCD).
 
     uv run python scripts/build_afcd.py
 
@@ -22,7 +22,7 @@ from openpyxl import load_workbook
 
 URL = "https://www.foodstandards.gov.au/sites/default/files/2025-12/AFCD%20Release%203%20-%20Nutrient%20profiles.xlsx"
 RELEASE = "AFCD Release 3 (December 2025)"
-OUT = Path(__file__).resolve().parents[1] / "src/is_it_sugar/data/afcd.json"
+OUT = Path(__file__).resolve().parents[1] / "src/is_it_hfi_friendly/data/afcd.json"
 
 # 3-digit AFCD food groups that are whole or minimally processed foods.
 WHOLE_GROUPS = {

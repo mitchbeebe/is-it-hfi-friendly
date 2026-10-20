@@ -43,9 +43,9 @@ lists are stored in the browser (localStorage) and sent with each check; `prefs.
 
 ```sh
 uv sync
-uv run is-it-sugar            # http://localhost:8000
+uv run is-it-hfi-friendly            # http://localhost:8000
 # or, with auto-reload:
-uv run fastapi dev src/is_it_sugar/app.py
+uv run fastapi dev src/is_it_hfi_friendly/app.py
 ```
 
 `.env` must define `TYPESAFE_API_KEY` and `FOODDATA_CENTRAL_API_KEY`. `uv run fastapi dev` also works (with auto-reload),
@@ -53,7 +53,7 @@ via `[tool.fastapi]` in `pyproject.toml`.
 
 **Cost controls**
 
-- Results are cached for 7 days in SQLite (`.cache.sqlite3`, or set `IS_IT_SUGAR_CACHE`), keyed by the normalized text or
+- Results are cached for 7 days in SQLite (`.cache.sqlite3`, or set `IS_IT_HFI_FRIENDLY_CACHE`), keyed by the normalized text or
   the photo's hash. Jev's rating for each ingredient is cached for 90 days, so new products reuse ratings for "salt",
   "sugar", "natural flavors" and so on. Your lists are applied after the cache, so changing them never re-runs a check.
 - Photo checks skip sugars BU rates simply "Tolerated", since they can't change the verdict (108 questions per photo).
@@ -189,13 +189,13 @@ browser has none, such as iPhone Safari. The server looks the code up in USDA's 
 the same time. USDA wins when it has the ingredient list, since manufacturers supply it; otherwise Open Food Facts'
 list is used, and failing both, an estimate from the product name. Typing 8–14 digits does the same lookup.
 
-The AFCD data ships with the app as `src/is_it_sugar/data/afcd.json`, built by `uv run python scripts/build_afcd.py`
+The AFCD data ships with the app as `src/is_it_hfi_friendly/data/afcd.json`, built by `uv run python scripts/build_afcd.py`
 (re-run it for a new release). It keeps only whole and minimally processed foods: processed foods follow regional
 recipes (Australian ketchup uses sucrose, US ketchup uses HFCS), so USDA stays the source for those. Rows FSANZ borrowed
 from other countries' tables are left out, since the licence doesn't cover them. AFCD data: Food Standards Australia New
 Zealand, AFCD Release 3, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
-`src/is_it_sugar/data/foods.json` is built by `uv run python scripts/build_foods.py`: every AFCD, CIQUAL and USDA SR
+`src/is_it_hfi_friendly/data/foods.json` is built by `uv run python scripts/build_foods.py`: every AFCD, CIQUAL and USDA SR
 Legacy or Foundation food with fructose and sucrose measured (or total sugars of 0), about 6,900 in all, with each
 table's food group (USDA's category comes from its search endpoint, since the list endpoint leaves it out). Open Food
 Facts' ingredient taxonomy (pinned to a commit) adds the English names and synonyms it links to CIQUAL and USDA foods,
@@ -228,7 +228,7 @@ the client address from `Fly-Client-IP` (set by `CLIENT_IP_HEADER`), since `X-Fo
 ## Layout
 
 ```
-src/is_it_sugar/
+src/is_it_hfi_friendly/
   app.py          FastAPI routes: GET /, POST /api/check/text, POST /api/check/image, GET /api/sugars
   prefs.py        applies the Settings lists (tolerate / avoid) to a result
   afcd.py         Australian Food Composition Database variety ranges
@@ -255,3 +255,11 @@ tests/            offline tests: uv run pytest
   dish is judged by USDA's typical recipe and a plain food partly by estimate. Recipes and packaged versions vary.
 - HFI tolerance depends on the amount. When USDA reports under 1 g per 100 g, the app says so but still reports the
   sugar as present.
+
+## License
+
+The code is under the [MIT License](LICENSE). The data files keep their sources' licences: `src/is_it_hfi_friendly/data/foods.json`
+includes names from Open Food Facts' ingredient taxonomy, so it is under the
+[Open Database License](https://opendatacommons.org/licenses/odbl/1-0/), and its AFCD, CIQUAL and USDA rows also keep
+the terms above (CC BY 4.0, Licence Ouverte, public domain). `src/is_it_hfi_friendly/data/afcd.json` is AFCD data under CC BY
+4.0. Results are not medical advice; check with your doctor or dietitian.

@@ -49,7 +49,7 @@ LIMITS = [(30, 60), (300, 86400)]
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.cache = Cache(os.environ.get("IS_IT_SUGAR_CACHE", ".cache.sqlite3"))
+    app.state.cache = Cache(os.environ.get("IS_IT_HFI_FRIENDLY_CACHE", ".cache.sqlite3"))
     app.state.cache.drop_other_versions(("text", "image"), RESULT_VERSION)
     app.state.cache.drop_other_versions(("ingredient",), analyze.INGREDIENT_VERSION)
     app.state.limiter = RateLimiter(LIMITS)

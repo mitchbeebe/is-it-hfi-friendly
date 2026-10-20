@@ -12,4 +12,4 @@ RUN uv sync --frozen --no-dev
 
 ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8080
-CMD ["uvicorn", "is_it_sugar.app:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "is_it_hfi_friendly.app:app", "--host", "0.0.0.0", "--port", "8080"]

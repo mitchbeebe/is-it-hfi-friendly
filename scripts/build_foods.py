@@ -1,10 +1,10 @@
-"""Build src/is_it_sugar/data/foods.json: every food with measured sugars, for full-text search.
+"""Build src/is_it_hfi_friendly/data/foods.json: every food with measured sugars, for full-text search.
 
     uv run python scripts/build_foods.py [ciqual.xls] [ingredients.txt]
 
 Rows come from three food composition tables, keeping foods whose fructose and sucrose are both
 measured, or whose total sugars are 0:
-- AFCD, the Australian table: src/is_it_sugar/data/afcd.json (run scripts/build_afcd.py first).
+- AFCD, the Australian table: src/is_it_hfi_friendly/data/afcd.json (run scripts/build_afcd.py first).
 - CIQUAL, the French table: ANSES, Ciqual 2020, Licence Ouverte / Open Licence (Etalab).
 - USDA FoodData Central, SR Legacy and Foundation foods (public domain). Needs FOODDATA_CENTRAL_API_KEY
   (read from .env).
@@ -27,8 +27,8 @@ import xlrd
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "src/is_it_sugar/data/foods.json"
-AFCD = ROOT / "src/is_it_sugar/data/afcd.json"
+OUT = ROOT / "src/is_it_hfi_friendly/data/foods.json"
+AFCD = ROOT / "src/is_it_hfi_friendly/data/afcd.json"
 CIQUAL_URL = "https://ciqual.anses.fr/cms/sites/default/files/inline-files/Table%20Ciqual%202020_ENG_2020%2007%2007.xls"
 # Pinned so a rebuild gives the same names.
 TAXONOMY_COMMIT = "e521216912b7b999039709d2196aa8c4bcb7f0f9"
