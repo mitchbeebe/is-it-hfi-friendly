@@ -23,6 +23,7 @@ class Item(BaseModel):
     grams: float | None = None  # measured amount per 100 g (top of the range), for the trace rule
     # On a label without declared shares: the most this ingredient can be of the product, from its position.
     share: float | None = None
+    heading: str | None = None  # a section of the label that starts at this ingredient: "Contains 2% or less of"
     url: str | None = None  # the source's page for the food the amounts come from
     trace: bool = False  # measured, but under the person's fructose-load limit
 

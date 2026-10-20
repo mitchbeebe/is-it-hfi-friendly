@@ -5,7 +5,9 @@ from dataclasses import dataclass
 
 # Section labels that introduce more ingredients, e.g. "contains 2% or less of:".
 _LEAD_IN = re.compile(
-    r"^(?:[a-z0-9% ]{1,40}\bof\b|[a-z ]{1,30}):\s*|^(?:ingredients?|contains \d+% or less of)\s+", re.IGNORECASE
+    r"^(?:[a-z0-9% ]{1,40}\bof\b(?: the following)?|[a-z ]{1,30}):\s*"
+    r"|^(?:ingredients?|(?:contains )?(?:\d+% or less|less than \d+%) of(?: the following)?)\s+",
+    re.IGNORECASE,
 )
 # Allergen statements and similar trailers aren't ingredients.
 _TRAILER = re.compile(
@@ -25,6 +27,7 @@ class Ingredient:
     why: str = ""  # how `share` is known, e.g. "listed 3rd"
     exact: bool = False  # `share` is the ingredient's own, as declared or in a recipe, not a bound
     whole: str = "product"  # what it's a share of: "product", or "dish" for a recipe
+    heading: str = ""  # a section of the label that starts here: "Contains 2% or less of", "Filling"
 
 
 def _ordinal(n: int) -> str:
@@ -65,11 +68,18 @@ def _balance(text: str) -> str:
 
 
 def _clean(name: str) -> str:
+    return _lead_in(name)[1]
+
+
+def _lead_in(name: str) -> tuple[str, str]:
+    """ "Contains 2% or less of: paprika" -> ("Contains 2% or less of", "paprika"). "Ingredients" isn't a heading."""
     name = re.sub(r"\s+", " ", name).strip(" .*:†‡-")
     name = re.sub(r"^(and/or|and|or)\s+", "", name, flags=re.IGNORECASE)
+    heading = ""
     while (m := _LEAD_IN.match(name)) and m.end() < len(name):
+        heading = "" if re.fullmatch(r"ingredients?", m.group().strip(" :"), re.IGNORECASE) else m.group().strip(" :")
         name = name[m.end() :]
-    return name.strip(" .*:")
+    return heading, name.strip(" .*:")
 
 
 def parse(text: str) -> list[Ingredient]:
@@ -85,7 +95,7 @@ def parse(text: str) -> list[Ingredient]:
     for part in _split_top(text):
         if m := _AT_MOST.search(part):
             at_most = float(m.group(1) or m.group(2))
-        name = _clean(part)
+        heading, name = _lead_in(part)
         if not name or name in found:
             continue
         n = len(found) + 1
@@ -96,7 +106,7 @@ def parse(text: str) -> list[Ingredient]:
         declared = _DECLARED.match(base) or (len(inner) == 1 and _DECLARED.match(f"({inner[0]})"))
         if declared:
             share, why = float(declared.group(1)) / 100, "as declared"
-        found[name] = Ingredient(name, min(share, 1.0), why, exact=bool(declared))
+        found[name] = Ingredient(name, min(share, 1.0), why, exact=bool(declared), heading=heading)
     return list(found.values())
 
 

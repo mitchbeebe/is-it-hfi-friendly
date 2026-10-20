@@ -122,6 +122,11 @@
   .items { list-style: none; margin: 0; padding: 0; }
   .items li { display: grid; grid-template-columns: 12px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
   .items li:first-child { border-top: 0; padding-top: 2px; }
+  .items li.divider {
+    display: block; padding: 14px 0 2px; color: var(--muted); font-size: .75rem; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+  }
+  .items li.divider + li { border-top: 0; }
   .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; }
   .s-not_tolerated .dot { background: var(--avoid); }
   .s-caution .dot { background: var(--caution); }
@@ -794,7 +799,8 @@ function render(r) {
       <div class="card section">
         <h3>What we found</h3>
         <ul class="items">
-          ${r.items.map((i) => `
+          ${r.items.map((i) => `${i.heading ? `
+            <li class="divider">${esc(i.heading)}</li>` : ""}
             <li class="s-${i.avoided_by ? "avoided" : i.allowed_by ? "allowed" : i.status}">
               <span class="dot" aria-hidden="true"></span>
               <div>

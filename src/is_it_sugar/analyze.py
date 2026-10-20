@@ -303,10 +303,15 @@ async def classify_ingredients(
             items[int(k[1:])] = _answer_item(part, answer, serving)
             if cache:
                 cache.set(INGREDIENT_NS, sugars.norm(part.name), answer)
-    if weighed or any(p.exact for p in parsed):
+    if weighed:
         return [i for i in items if i is not None]
     # Where each is on the label bounds them all together (prefs.most_load); declared shares don't fit that.
-    return [i.model_copy(update={"share": p.share}) for p, i in zip(parsed, items) if i is not None]
+    exact = any(p.exact for p in parsed)
+    return [
+        i.model_copy(update={"share": None if exact else p.share, "heading": p.heading or None})
+        for p, i in zip(parsed, items)
+        if i is not None
+    ]
 
 
 # ---------------------------------------------------------------- food names (FoodData Central)

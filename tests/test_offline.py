@@ -981,3 +981,15 @@ def test_ingredients_arent_matched_to_prepared_foods():
     assert roll.prepared and not food("Maize/corn starch").prepared
     assert roll not in foods.candidates("potato starch")
     assert roll in foods.search("potato starch")  # a food name typed in still finds dishes
+
+
+def test_label_sections_become_headings():
+    text = "ORGANIC CHICKEN**. CONTAINS LESS THAN 2% OF THE FOLLOWING: SEA SALT, ORGANIC VINEGAR"
+    parsed = ingredients.parse(text)
+    assert [(i.name, i.share, i.heading) for i in parsed] == [
+        ("ORGANIC CHICKEN", 1.0, ""),
+        ("SEA SALT", 0.02, "CONTAINS LESS THAN 2% OF THE FOLLOWING"),
+        ("ORGANIC VINEGAR", 0.02, ""),
+    ]
+    assert ingredients.parse("Ingredients: water, salt")[0].heading == ""
+    assert [i.heading for i in ingredients.parse("CRUST: FLOUR, WATER. FILLING: CHEESE")] == ["CRUST", "", "FILLING"]
